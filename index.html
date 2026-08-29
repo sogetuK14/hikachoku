@@ -5,22 +5,6 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>EORZEA Archive</title>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <meta content="0.1.0-la-split" name="eorzea-archive-build"/><link href="assets/css/app.css" rel="stylesheet"/></head>
 <body>
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -28,7 +12,7 @@
 <aside class="sidebar" id="sidebar">
 <div class="brand">
 <h1>EORZEA Archive</h1>
-<div class="sub">v0.2.1 “Lodestone接続修正版”<br/>エオルゼアの記録を、ひとつの場所に。</div>
+<div class="sub">v0.2.2 “操作復旧版”<br/>エオルゼアの記録を、ひとつの場所に。</div>
 </div>
 <nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><button class="tab" data-view="weapons">武器制作</button><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
 </aside>
@@ -39,10 +23,6 @@
 </header>
 <main>
 <div class="storage-warning" id="localStorageWarning"><b>⚠ ローカル保存モード</b><div>Life Archive の記録は、ブラウザ上ではこのHTMLファイルの場所に結び付いて保存されます。GitHub Pagesでは、更新版を同じリポジトリの <b>index.html</b> に上書きして、同じ公開URLから使い続けてください。</div><div class="small storage-path" id="localStoragePath"></div></div>
-
-
-
-
 <section class="view" id="records">
 <section class="panel">
 <div class="card" style="border-color:var(--gold)">
@@ -70,8 +50,6 @@
 <hr style="border:0;border-top:1px solid var(--line);margin:22px 0"/>
 </section>
 <section class="panel"><div class="card" id="adventureRecordNotice" style="display:none;border-color:var(--gold)"><b>🌿 エオルゼア冒険記録</b><div class="small" id="adventureRecordCount"></div></div><div class="row"><h2>📚 記録庫</h2><div class="wrap"><select id="recordStatusFilter" style="width:auto"><option value="">全状態</option><option value="実施">実施</option><option value="完了">完了</option><option value="延期">延期</option><option value="中止">中止</option><option value="取消">取消</option></select><select id="recordFilter" style="width:auto"><option value="">すべて</option><option>FF14</option><option>TRPG</option><option>買い物</option><option>食事</option><option>体調</option><option>日常</option><option>予定</option><option>メモ</option></select></div></div><input id="recordSearch" placeholder="記録を検索"/><div id="recordList"></div></section></section>
-
-
 <section class="view" id="history">
 <div class="grid2">
 <section class="panel">
@@ -91,13 +69,11 @@
 </section>
 </div>
 </section>
-
-
 <section class="view active" id="ff14">
 <section class="panel" id="ffLodestonePanel">
 <div class="section-kicker">OFFICIAL PROFILE SYNC</div>
 <div class="row">
-<div><h2>🪪 Lodestoneプロフィール</h2><div class="small">Lodestone IDまたはキャラクターページURLを1度登録して、公開プロフィールをLife Archiveへ保存します。</div></div>
+<div><h2>🪪 Lodestoneプロフィール</h2><div class="small">Lodestone IDまたはキャラクターページURLを1度登録して、公開プロフィールをEORZEA Archiveへ保存します。</div></div>
 <div class="wrap"><button class="primary" id="ffProfileSync">公開プロフィールを同期</button><button class="secondary" id="ffProfileOpen">Lodestoneを開く</button></div>
 </div>
 <div class="inline2" style="margin-top:10px">
@@ -432,8 +408,6 @@
 <div class="row" style="margin-top:12px"><button class="secondary" id="levePrev" type="button">前へ</button><span class="small" id="levePageInfo"></span><button class="secondary" id="leveNext" type="button">次へ</button></div>
 </section>
 </section>
-
-
 <section class="view" id="weapons">
 <section class="panel">
 <h2>🗡 武器制作</h2>
@@ -705,18 +679,6 @@
 </div><label>メモ</label><textarea id="ffAcqMemo"></textarea><button class="primary" id="ffAcqAdd" style="width:100%;margin-top:8px">図鑑へ登録</button></div>
 <div class="inline3"><div><label>検索</label><input id="ffAcqSearch"/></div><div><label>入手方法</label><select id="ffAcqFilterMethod"><option value="">すべて</option><option>バイカラージェム</option><option>モブハント記章</option><option>詩学・トームストーン</option><option>友好部族通貨</option><option>ID</option><option>討滅戦</option><option>レイド</option><option>サブクエスト</option><option>FATE</option><option>特殊コンテンツ</option><option>NPC交換</option><option>その他</option></select></div><div><label>状態</label><select id="ffAcqFilterState"><option value="">すべて</option><option value="missing">未入手</option><option value="owned">入手済</option><option value="wanted">お気に入り</option></select></div></div>
 <div id="ffAcqList"></div></section></section>
-
-
-
-
-
-
-
-
-
-
-
-
 </main>
 </div>
 </div>
@@ -815,7 +777,6 @@
 <label>実施時間（分・任意）</label><input id="orgHistoryMinutes" min="0" type="number"/>
 </div>
 <label>分類</label><select id="orgType"><option>FF14</option><option>TRPG</option><option>買い物</option><option>食事</option><option>体調</option><option>日常</option><option>予定</option><option>メモ</option></select><label>状態</label><select id="orgStatus"><option value="実施">○ 実施</option><option value="完了">● 完了</option><option value="延期">／ 延期</option><option value="中止">× 中止</option><option value="取消">~~ 取消</option></select><label>タイトル</label><input id="orgTitle"/><label>本文</label><textarea id="orgText"></textarea><label>タグ（カンマ区切り）</label><input id="orgTags"/><button class="primary" id="confirmOrganize" style="width:100%;margin-top:12px" type="button">この内容で記録へ</button><div class="small" style="margin-top:8px">親子ページへ整理する場合は、子記録の永続保存を確認してから閉じます。別の子ページを選んだ場合は、既存の子記録を残したまま新しい子記録として追加します。</div></div></dialog>
-
 <div aria-live="assertive" id="pomodoroAlert" role="status"></div>
 <aside aria-label="ポモドーロタイマー" id="pomodoroMini">
 <div class="pomo-head">
@@ -864,7 +825,675 @@
 <details><summary class="small" style="cursor:pointer;margin-top:6px">最近の記録</summary><div class="activity-history" id="activityHistory"></div></details></div>
 </aside>
 <div aria-live="assertive" id="etAlarmAlert" role="status"></div>
-<script src="assets/js/extra-1.js"></script>
+<div hidden="" id="legacyLaCompat"><section class="view" id="home">
+<div class="hero"><h2>おかえりなさい、はいびす。</h2><p>冒険も、卓も、買い物も。今日を丸ごと置いていきましょう。</p></div>
+<div class="stats" style="margin-top:16px">
+<div class="stat">今日の記録<b id="sToday">0</b></div><div class="stat">未整理<b id="sInbox">0</b></div><div class="stat">FF14<b id="sFF14">0</b></div><div class="stat">TRPG<b id="sTRPG">0</b></div><div class="stat">生活記録<b id="sLife">0</b></div>
+</div>
+<div class="grid2" style="margin-top:16px">
+<section class="panel"><h2>すぐ置く</h2><p class="small">ここから入れた内容も、受信箱と同じ場所へ保存されます。</p><textarea id="quickText" placeholder="例：極エデンを3周。豚肉500gと猫砂を買った。"></textarea><div class="wrap" style="margin-top:10px"><button class="primary" id="quickSave" style="flex:1">受信箱へ</button><button class="secondary" id="quickDetailed">詳しく入力</button></div></section>
+<section class="panel"><h2>今日のページ</h2><div id="todayList"></div></section>
+</div>
+</section><section class="view" id="sakumeru">
+<div class="sakumeru-link-shell">
+<div class="sakumeru-link-bar">
+<strong>📖 SAKU+MERU</strong>
+<span class="small">LAを閉じずに卓管理を操作</span>
+<button class="primary" hidden="" id="sakumeruLastKp" title="最後に開いたKPバインダーへ移動" type="button">KPバインダーへ</button>
+<button class="secondary" id="sakumeruReload" title="キャッシュを使わずSAKU+MERUだけ読み込み直します" type="button">最新版を確認</button>
+<button class="secondary" id="sakumeruOpenExternal" type="button">別タブで開く</button>
+</div>
+<iframe class="sakumeru-link-frame" data-src="https://pp-hibithx.github.io/sakumeru/" id="sakumeruFrame" loading="lazy" title="SAKU+MERU"></iframe>
+</div>
+</section><section class="view" id="dateArchive">
+<section class="panel">
+<div class="row">
+<div><h2>📅 日付アーカイブ</h2><div class="small">Life Archive内の日付を持つ記録をまとめて振り返ります。アチーブ達成や途中チェックも自動でここに並びます。ここに別保存はしません。</div></div>
+<button class="secondary" id="dateArchiveToday" type="button">今日へ</button>
+</div>
+<div class="row" style="margin-top:12px">
+<button class="secondary" id="dateArchivePrev" type="button">← 前の日</button>
+<input id="dateArchivePicker" style="max-width:220px" type="date"/>
+<button class="secondary" id="dateArchiveNext" type="button">次の日 →</button>
+</div>
+<div id="dateArchiveHeading" style="margin-top:14px"></div>
+<div class="wrap" id="dateArchiveSummary" style="margin:10px 0"></div>
+<div id="dateArchiveList"></div>
+</section>
+</section><section class="view" id="inbox">
+<div class="grid2">
+<section class="panel"><div class="row"><h2>📥 受信箱へ送る</h2><span class="small" id="inboxDraftStatus">下書き未保存</span></div>
+<label>タイトル・最初の一行</label><input id="captureTitle" placeholder="例：零式3層挑戦"/>
+<label>本文</label><textarea id="captureText" placeholder="何でも、そのまま入力してください。"></textarea>
+<label>タグ（任意・カンマ区切り）</label><input id="captureTags" placeholder="例：固定, 零式, 事件屋"/>
+<details id="captureDetails">
+<summary style="cursor:pointer;font-weight:700;margin:12px 0">詳細を入力</summary>
+<div class="inline2"><div><label>日時</label><input id="captureTime" type="datetime-local"/></div><div><label>手動分類（任意）</label><select id="captureType"><option value="">自動判定</option><option>FF14</option><option>TRPG</option><option>買い物</option><option>食事</option><option>体調</option><option>日常</option><option>予定</option><option>メモ</option></select></div></div>
+<div class="inline2"><div><label>状態</label><select id="captureStatus"><option value="実施">○ 実施</option><option value="完了">● 完了</option><option value="延期">／ 延期</option><option value="中止">× 中止</option><option value="取消">~~ 取消</option></select></div><div><label>保存先の希望</label><div class="small">保存先を指定した場合は、その指定を最優先します。チェック項目の有無では保存先は変わりません。</div><select id="captureDestination">
+<option value="record">記録庫</option><option value="history">挑戦・実施履歴</option></select></div><div><label>記録のまとめ方</label><select id="captureRecordMode"><option value="single">単独記録</option><option value="grouped">親記録にまとめる</option></select></div></div>
+<label>URL・画像URL（任意）</label><input id="captureUrl" placeholder="https://..." type="url"/>
+<label style="margin-top:12px"><input id="captureHasChecklist" style="width:auto" type="checkbox"/> チェック項目を付ける</label><div class="small">チェック項目は、この記録の一部として保存されます。自由チェックメモには移動しません。</div>
+<div id="captureChecklistArea" style="display:none">
+<label>チェック項目（1行に1つ）</label><textarea id="captureChecklistItems" placeholder="前半安定
+塔ギミック
+後半練習"></textarea>
+</div>
+</details>
+<div class="inline2" style="margin-top:12px">
+<button class="primary" id="captureSave">受信箱へ保存</button>
+<button class="secondary" id="captureTaskSave">＋ タスク</button>
+</div></section>
+<section class="panel"><div class="row"><h2>未整理</h2><select id="inboxFilter" style="width:auto"><option value="pending">未整理</option><option value="all">すべて</option><option value="done">整理済み</option></select></div><div id="inboxList"></div></section>
+</div>
+</section><section class="view" id="stacks" style="display:none!important">
+<div class="grid2">
+<section class="panel">
+<h2>🧱 親記録を作る</h2>
+<p class="small">卓、零式、武器制作など、複数日にわたって積み重なる記録の入口です。</p>
+<label>親記録名</label><input id="stackParentName" placeholder="例：シリウスの篝火"/>
+<div class="inline2">
+<div><label>分類</label><select id="stackParentCategory"><option>TRPG</option><option>FF14</option><option>生活</option><option>制作</option><option>その他</option></select></div>
+<div><label>役割・種類</label><input id="stackParentRole" placeholder="例：PL、KP、零式、武器制作"/></div>
+</div>
+<label>タグ</label><input id="stackParentTags" placeholder="例：シナリオ, PL"/>
+<button class="primary" id="stackParentAdd" style="width:100%;margin-top:12px">親記録を作成</button>
+</section>
+<section class="panel">
+<div class="row"><h2>積み重ね一覧</h2><select id="stackCategoryFilter" style="width:auto"><option value="">すべて</option><option>TRPG</option><option>FF14</option><option>生活</option><option>制作</option><option>その他</option></select></div>
+<input id="stackSearch" placeholder="親記録名・タグを検索"/>
+<div id="stackList"></div>
+</section>
+</div>
+</section><section class="view" id="stackDetail" style="display:none!important">
+<section class="panel">
+<div class="row">
+<div>
+<button class="secondary" id="stackDetailBack">← 一覧へ戻る</button>
+<h2 id="stackDetailTitle" style="margin-top:14px">積み重ねる記録</h2>
+<div id="stackDetailMeta"></div>
+</div>
+<div class="wrap">
+<button class="primary" id="stackDetailAddDay">新しい日・段階</button>
+<button class="secondary" id="stackDetailComplete">完走・完了にする</button>
+<button class="secondary" id="stackDetailEditParent">親記録を編集</button>
+<button class="ghost" id="stackDetailEditParentDate">親ページ日付を変更</button>
+</div>
+</div>
+<div class="stats" id="stackDetailSummary" style="margin-top:14px"></div>
+<div class="card" id="stackDetailOverview"></div>
+<div id="stackDetailDays"></div>
+</section>
+</section><section class="view" id="shopping">
+<div class="grid2"><section class="panel"><h2>🛒 買い物リスト</h2><div class="inline2"><div><label>品名</label><input id="shopName"/></div><div><label>分類</label><select id="shopCategory"><option>食品</option><option>日用品</option><option>猫用品</option><option>薬・衛生</option><option>その他</option></select></div></div><label>数量・メモ</label><input id="shopMemo" placeholder="500g、400円など"/><button class="primary" id="shopAdd" style="width:100%;margin-top:10px">追加</button><div id="shopList"></div></section>
+<section class="panel"><div class="row"><h2>購入履歴</h2><select id="purchaseStatusFilter" style="width:auto"><option value="">すべて</option><option value="在庫あり">在庫あり</option><option value="使用中">使用中</option><option value="消費済み">消費済み</option></select></div><p class="small">購入後の状態と消費日まで記録できます。受信箱由来の曖昧なメモも、ここで編集・削除できます。</p><div id="purchaseList"></div></section></div>
+</section><section class="view" id="cooking">
+<section class="panel">
+<div class="section-kicker">KITCHEN CRAFTING</div>
+<h2>🍳 料理図鑑 × 食材在庫</h2>
+<p class="small">自分が実際に作る料理を登録して、冷蔵庫の在庫から「今作れる」「あと1品」「不足が少ない」を逆引きします。</p>
+<div class="grid2">
+<div class="card">
+<h3>🥬 食材在庫</h3>
+<div class="inline2"><div><label>食材名</label><input id="foodName" placeholder="豚こま"/></div><div><label>数量</label><input id="foodQty" min="0" step="0.1" type="number" value="1"/></div></div>
+<div class="inline2"><div><label>単位</label><input id="foodUnit" placeholder="g / 個 / 袋"/></div><div><label>期限（任意）</label><input id="foodExpiry" type="date"/></div></div>
+<label>保管場所</label>
+<select id="foodStorage">
+<option value="冷蔵">冷蔵</option>
+<option value="冷凍">冷凍</option>
+<option value="常温">常温</option>
+</select>
+<button class="primary" id="foodAdd" style="width:100%;margin-top:8px">在庫へ追加・更新</button>
+<div id="foodInventoryList"></div>
+</div>
+<div class="card">
+<h3 id="cookFormTitle">📖 レシピ登録</h3>
+<label>料理名</label><input id="cookName" placeholder="豚こまキャベツ炒め"/>
+<div class="inline2"><div><label>調理時間（分）</label><input id="cookMinutes" min="0" type="number"/></div><div><label>タグ</label><input id="cookTags" placeholder="レンジ, 洗い物少なめ"/></div></div>
+<label>必要食材</label><textarea id="cookIngredients" placeholder="豚こま | 100 | g
+キャベツ | 0.25 | 玉
+卵 | 1 | 個"></textarea>
+<div class="small">1行＝「食材名 | 数量 | 単位」。数量を空欄にすると「あるかどうか」だけ判定します。</div>
+<label>代替食材（任意）</label><textarea id="cookAlternatives" placeholder="キャベツ = もやし, 白菜
+豚こま = 豚バラ"></textarea>
+<div class="small">「元の食材 = 代替1, 代替2」。まずは在庫の有無で代替判定します。</div>
+<label>作り方・メモ</label><textarea id="cookMemo"></textarea>
+<div class="wrap"><button class="primary" id="cookSave">レシピを登録</button><button class="secondary" id="cookCancel" style="display:none">編集キャンセル</button></div>
+</div>
+</div>
+<div class="card" style="margin-top:14px;border-color:var(--gold)">
+<div class="row"><div><h3>✨ 今、何作れる？</h3><div class="small">在庫と登録レシピを比較します。</div></div><div class="wrap"><button class="primary cookMode" data-mode="now">今作れる</button><button class="secondary cookMode" data-mode="one">あと1品</button><button class="secondary cookMode" data-mode="near">不足が少ない</button></div></div>
+<div id="cookSuggest"></div>
+</div>
+<div class="inline2" style="margin-top:14px"><div><label>レシピ検索</label><input id="cookSearch" placeholder="料理名・タグ・食材"/></div><div><label>タグ</label><input id="cookTagFilter" placeholder="レンジ"/></div></div>
+<div id="cookRecipeList"></div>
+</section>
+</section><section class="view" id="eventsHome">
+<section class="panel">
+<div class="section-kicker">EVENT ARCHIVE</div>
+<h2>イベント</h2>
+<p class="small">コラボ・シーズナル・モグモグ★コレクションなど、期間イベントの進捗をまとめるエリアです。</p>
+<div class="grid3" style="margin-top:14px">
+<button class="card event-launch" data-target="yokai" style="text-align:left;cursor:pointer" type="button">
+<span class="badge">COLLABORATION</span><h3>妖怪ウォッチ</h3><div class="small">17妖怪・武器・メダル・報酬</div>
+</button>
+<div class="card"><span class="badge">COMING SOON</span><h3>モグモグ★コレクション</h3><div class="small">開催回・トークン・交換報酬・必要数を管理予定。</div></div>
+<div class="card"><span class="badge">ARCHIVE</span><h3>シーズナル</h3><div class="small">今後のイベント履歴をここへ追加できます。</div></div>
+</div>
+</section>
+</section><section class="view" id="yokai">
+<section class="panel">
+<h2>⌚ 妖怪ウォッチ エオルゼア大集合だニャン！</h2>
+<p class="small">ミニオン・妖怪レジェンドメダル・武器・マウント条件をイベント専用でまとめて管理します。</p>
+<div class="card" style="border-color:var(--blue)">
+<b>📦 妖怪ウォッチ・イベントデータ v0.9490</b>
+<div class="small">17妖怪と17武器を対応づけて管理。2026年再演で追加された3種の室内調度品もボーナス報酬として追跡できます。</div>
+</div>
+<div class="stats">
+<div class="stat">ミニオン<b id="yokaiMinionProgress">0 / 17</b></div>
+<div class="stat">武器<b id="yokaiWeaponProgress">0 / 17</b></div>
+<div class="stat">メダル入力済み<b id="yokaiMedalProgress">0 / 17</b></div>
+<div class="stat">総達成率<b id="yokaiRate">0%</b></div>
+</div>
+<div class="card" style="border-color:var(--gold);margin-top:14px">
+<b>🏆 自動判定される報酬</b>
+<div id="yokaiMilestones" style="margin-top:8px"></div>
+</div>
+<div class="row" style="margin-top:14px">
+<div><label>検索</label><input id="yokaiSearch" placeholder="妖怪名・ジョブ・武器名"/></div>
+<div><label>表示</label><select id="yokaiStatus"><option value="">すべて</option><option value="todo">未完了を含む</option><option value="done">ミニオン＋武器完了</option></select></div>
+</div>
+<div id="yokaiList"></div>
+<div class="card" style="border-color:var(--blue);margin-top:16px">
+<b>🎁 追加・ボーナス報酬</b>
+<div class="small">ポートレート教材と、2026年再演で追加された室内調度品3種を個別チェックできます。</div>
+<div id="yokaiBonusRewards" style="margin-top:8px"></div>
+</div>
+</section>
+</section><section class="view" id="trpg"><section class="panel">
+<div class="card" style="border-color:var(--purple);margin-bottom:12px">
+<div class="row"><div><b>🧰 TRPGツール</b><div class="small">卓準備・ログ解析・KP補助はこちら。</div></div>
+<div class="wrap">
+<button class="secondary trpgToolJump" data-view-target="diceTool">🎲 ダイスログ抽出</button>
+<button class="secondary trpgToolJump" data-view-target="kpTools">🗝 KP補助</button>
+<button class="secondary trpgToolJump" data-view-target="trpgAssets">🎨 素材庫</button>
+</div></div>
+</div><h2>🎲 PL履歴</h2><p class="small">親ページを卓ごとの履歴として、最終セッション日の新しい順に表示します。開くと各セッション日と子記録を時系列で確認できます。単独記録は下部に別枠で表示します。</p><div id="trpgList"></div></section></section><section class="view" id="trpg_kp"><section class="panel"><h2>🎭 KP履歴</h2><p class="small">KPタグ（またはキーパー表記）の親ページを、最終セッション日の新しい順に表示します。開くと各セッション日と子記録を時系列で確認できます。単独記録は下部に別枠で表示します。</p><div id="trpgKpList"></div></section></section><section class="view" id="peopleCodex">
+<section class="panel">
+<div class="section-kicker">SOCIAL ARCHIVE</div>
+<h2>👥 人物・PC図鑑</h2>
+<p class="small">現実の「一緒に遊んだ人」と、物語の中の「PC」を分けて登録し、卓の親ページと紐付けます。</p>
+<div class="stats">
+<div class="stat">人物<b id="peopleCount">0</b></div>
+<div class="stat">PC<b id="characterCount">0</b></div>
+<div class="stat">関係<b id="relationCount">0</b></div>
+<div class="stat">卓リンク<b id="participantLinkCount">0</b></div>
+</div>
+<div class="grid2" style="margin-top:14px">
+<div class="card">
+<h3>＋ 人物を登録</h3>
+<label>名前</label><input id="personName" placeholder="呼び名"/>
+<label>別名・Discord名（カンマ区切り）</label><input id="personAliases" placeholder="Discord名, 別名"/>
+<label>所属・関係タグ（カンマ区切り）</label><input id="personGroups" placeholder="TRPG, FF14固定, 作業通話"/>
+<label>メモ</label><textarea id="personMemo"></textarea>
+<button class="primary" id="personAdd" style="width:100%;margin-top:8px">人物図鑑へ登録</button>
+</div>
+<div class="card">
+<h3>＋ PCを登録</h3>
+<label>PC名</label><input id="characterName" placeholder="探索者・PC名"/>
+<label>PL / 所有者</label><select id="characterPerson"><option value="">未指定</option></select>
+<label>システムタグ（カンマ区切り）</label><input id="characterSystems" placeholder="CoC6版, エモクロア"/>
+<label>キャラクターシートURL</label><input id="characterSheetUrl" placeholder="https://..." type="url"/>
+<label>PC画像</label><input accept="image/*" id="characterImage" type="file"/>
+<div class="small">立ち絵・アイコンなど。画像はLife Archiveの保存データ内に保持します。</div>
+<label>メモ</label><textarea id="characterMemo"></textarea>
+<button class="primary" id="characterAdd" style="width:100%;margin-top:8px">PC図鑑へ登録</button>
+</div>
+</div>
+<div class="card" style="border-color:var(--gold);margin-top:14px">
+<h3>🔗 卓に参加者・PCを紐付け</h3>
+<p class="small">TRPGの親ページを選び、その卓に参加した人物とPCを登録します。ここから人物図鑑の初共卓日・シナリオ履歴を自動集計します。</p>
+<label>卓（親ページ）</label><select id="linkParent"><option value="">選択してください</option></select>
+<div id="linkParticipantRows"></div>
+<button class="secondary" id="linkParticipantAddRow" style="margin-top:8px">＋ 参加者行を追加</button>
+<button class="primary" id="linkParticipantsSave" style="margin-top:8px">この卓の参加者を保存</button>
+</div>
+<div class="inline2" style="margin-top:14px">
+<div><label>図鑑検索</label><input id="peopleSearch" placeholder="人物名・PC名・シナリオ名・タグ"/></div>
+<div><label>人物の並び</label><select id="peopleSort"><option value="recent">最近遊んだ順</option><option value="first">初共卓順</option><option value="count">共卓回数順</option><option value="name">名前順</option></select></div>
+</div>
+<div id="peopleCodexList"></div>
+<div class="card" style="border-color:var(--purple);margin-top:16px">
+<h3>🕸 PC関係データ</h3>
+<p class="small">相関図に使う関係だけ先に保存できます。図の自動描画は後の段階で試作します。</p>
+<div class="inline2">
+<div><label>PC A</label><select id="relationFrom"><option value="">選択</option></select></div>
+<div><label>PC B</label><select id="relationTo"><option value="">選択</option></select></div>
+</div>
+<div class="inline2">
+<div><label>関係</label><input id="relationLabel" placeholder="戦友 / 幼馴染 / 犬猿の仲"/></div>
+<div><label>関連シナリオ（親ページ・複数選択可）</label><select id="relationScenario" multiple="" size="5"></select><div class="small">Ctrl / Cmd を押しながら複数選択できます。保存後は各親ページの最初の子ページから「初回セッション日」を表示します。</div></div>
+</div>
+<label>補足</label><input id="relationMemo" placeholder="関係の経緯など"/>
+<div class="wrap" style="margin-top:8px">
+<button class="primary" id="relationAdd">関係を登録</button>
+<button class="secondary" id="relationCancelEdit" style="display:none">編集をキャンセル</button>
+<span class="small" id="relationEditStatus"></span>
+</div>
+<div id="relationList"></div>
+</div>
+</section>
+</section><section class="view" id="activityLog">
+<section class="panel">
+<div class="section-kicker">ACTIVITY HISTORY</div>
+<div class="row">
+<div><h2>⏱ 時間記録</h2><div class="small">ACTIVITY TIMERで保存した全ログを振り返ります。日付・カテゴリ・活動名で絞り込めます。</div></div>
+</div>
+<div class="inline3" style="margin-top:12px">
+<div><label>開始日</label><input id="activityLogFrom" type="date"/></div>
+<div><label>終了日</label><input id="activityLogTo" type="date"/></div>
+<div><label>カテゴリ</label><select id="activityLogCategory"><option value="">すべて</option><option>TRPG</option><option>FF14</option><option>制作</option><option>家事</option><option>健康</option><option>勉強</option><option>外出</option><option>その他</option></select></div>
+</div>
+<div class="inline2" style="margin-top:8px">
+<div><label>活動名・メモ検索</label><input id="activityLogSearch" placeholder="例：散歩、シリウス、Life Archive"/></div>
+<div><label>並び順</label><select id="activityLogSort"><option value="new">新しい順</option><option value="old">古い順</option><option value="long">長い順</option></select></div>
+</div>
+<div class="stats" id="activityLogSummary" style="margin-top:12px"></div>
+<div id="activityLogList" style="margin-top:12px"></div>
+</section>
+</section><section class="view" id="todayHub">
+<section class="panel">
+<div class="section-kicker">DAILY COMMAND CENTER</div>
+<h2>📅 今日</h2><p class="small">Life Archive全体から、その日に起きた記録をまとめて振り返ります。</p>
+<div class="inline2">
+<div><label>表示する日</label><input id="todayDate" type="date"/></div>
+<div class="card"><b id="todayHeadline">今日の記録</b><div class="small" id="todaySummary"></div></div>
+</div>
+<div class="card" style="margin-top:14px;border-color:var(--gold)">
+<div class="section-kicker">TO DO</div>
+<h3>☐ これからやること</h3>
+<div id="todayTodo"></div>
+</div>
+<div class="card" style="margin-top:14px">
+<div class="section-kicker">DONE TODAY</div>
+<h3>✓ 今日やったこと</h3>
+<div id="todayDone"></div>
+</div>
+<details style="margin-top:14px">
+<summary>カテゴリ別に見る</summary>
+<div class="grid2" style="margin-top:10px">
+<div class="card"><h3>📝 記録・メモ</h3><div id="todayNotes"></div></div>
+<div class="card"><h3>🎮 FF14</h3><div id="todayFF14"></div></div>
+<div class="card"><h3>🎲 TRPG</h3><div id="todayTRPG"></div></div>
+<div class="card"><h3>🛒 買い物</h3><div id="todayShopping"></div></div>
+<div class="card"><h3>📷 思い出</h3><div id="todayMemories"></div></div>
+<div class="card"><h3>⏱ 時間記録</h3><div id="todayActivity"></div></div>
+<div class="card"><h3>🏆 達成・収集</h3><div id="todayArchiveHighlights"></div></div>
+</div>
+</details>
+</section>
+</section><section class="view" id="scenarioLibrary">
+<section class="panel">
+<div class="section-kicker">TRPG ASSET ARCHIVE</div>
+<h2>📚 所持シナリオ図鑑</h2>
+<p class="small">シナリオ情報と「どの素材を持っているか」を管理します。PDF・画像・BGMなどの重いファイル本体は保存せず、保存先URLだけを記録します。</p>
+<div class="stats">
+<div class="stat">所持<b id="scenarioCount">0</b></div>
+<div class="stat">未通過<b id="scenarioUnreadCount">0</b></div>
+<div class="stat">KP済<b id="scenarioKpCount">0</b></div>
+<div class="stat">卓リンク<b id="scenarioTableLinkCount">0</b></div>
+<div class="stat">使用素材<b id="scenarioUsedAssetCount">0</b></div>
+</div>
+<div class="card" style="margin-top:14px">
+<h3 id="scenarioFormTitle">＋ シナリオを登録</h3>
+<div class="grid2">
+<div><label>シナリオ名</label><input id="scenarioTitle" placeholder="シナリオ名"/></div>
+<div><label>システムタグ</label><input id="scenarioSystems" placeholder="CoC6版, CoC7版, エモクロア"/></div>
+<div><label>作者・サークル</label><input id="scenarioAuthor"/></div>
+<div><label>購入・配布元URL</label><input id="scenarioSourceUrl" placeholder="https://..." type="url"/></div>
+<div><label>購入・入手日</label><input id="scenarioPurchasedAt" type="date"/></div>
+<div><label>PL人数</label><input id="scenarioPlayers" placeholder="2PL / 3～4人 など"/></div>
+<div><label>想定時間</label><input id="scenarioPlayTime" placeholder="4～6時間 など"/></div>
+<div><label>状態</label><select id="scenarioStatus"><option>未通過</option><option>PL通過済</option><option>KP可能</option><option>KP済</option><option>PL・KP済</option></select></div>
+</div>
+<label>タグ</label><input id="scenarioTags" placeholder="秘匿HO, 2PL, キャンペーン など"/>
+<div class="card" style="margin-top:10px">
+<b>所持素材</b>
+<div class="wrap" style="margin-top:8px">
+<label><input id="assetPdf" type="checkbox"/> シナリオPDF</label>
+<label><input id="assetRoom" type="checkbox"/> 部屋素材</label>
+<label><input id="assetNpc" type="checkbox"/> NPC立ち絵</label>
+<label><input id="assetBgm" type="checkbox"/> BGM</label>
+<label><input id="assetCcfolia" type="checkbox"/> ココフォリア部屋データ</label>
+<label><input id="assetOther" type="checkbox"/> その他</label>
+</div>
+</div>
+<label>素材保存先URL</label><input id="scenarioStorageUrl" placeholder="Google Drive等の保存先" type="url"/>
+<label>メモ</label><textarea id="scenarioMemo"></textarea>
+<div class="wrap" style="margin-top:8px"><button class="primary" id="scenarioSave">シナリオを登録</button><button class="secondary" id="scenarioCancel" style="display:none">編集をキャンセル</button></div>
+</div>
+<div class="card" style="border-color:var(--gold);margin-top:14px">
+<h3>🔗 実際に遊んだ卓と紐付け</h3>
+<p class="small">所持シナリオとTRPG親ページを結びます。同じシナリオをPL・KP・別メンバーで複数回遊んでも、卓ごとの初回セッション日で区別できます。</p>
+<div class="grid2">
+<div><label>所持シナリオ</label><select id="scenarioLinkLibrary"><option value="">選択</option></select></div>
+<div><label>TRPG親ページ</label><select id="scenarioLinkParent" multiple="" size="6"></select><div class="small">Ctrl / Cmdで複数選択</div></div>
+</div>
+<button class="primary" id="scenarioLinkSave" style="margin-top:8px">卓リンクを保存</button>
+</div>
+<div class="inline2" style="margin-top:14px">
+<div><label>検索</label><input id="scenarioSearch" placeholder="名前・作者・システム・タグ"/></div>
+<div><label>絞り込み</label><select id="scenarioFilter"><option value="">すべて</option><option>未通過</option><option>PL通過済</option><option>KP可能</option><option>KP済</option><option>PL・KP済</option></select></div>
+</div>
+<div id="scenarioLibraryList"></div>
+</section>
+</section><section class="view" id="diceTool">
+<div class="grid2">
+<section class="panel">
+<h2>🎲 ダイスログ解析</h2>
+<p class="small">ココフォリアのログ本文を貼り付けるか、HTML／テキストログを読み込んでください。技能判定・出目・結果・発言者を抽出します。</p>
+<div class="inline2">
+<div><label>キャンペーン名</label><input id="trpgCampaign" placeholder="例：シリウスの篝火"/></div>
+<div><label>区切り・章</label><input id="trpgScenario" placeholder="例：初日／Case2／第3話"/></div>
+</div>
+<div class="inline2">
+<div><label>抽出開始の目印（任意）</label><input id="trpgStartMarker" placeholder="例：◎七ヶ丘大学附属病院から再開"/></div>
+<div><label>抽出終了の目印（任意）</label><input id="trpgEndMarker" placeholder="例：次回は～から／Case3開始"/></div>
+</div>
+<p class="small">開始行は含め、終了の目印がある行は含めません。空欄ならログ全体を解析します。</p>
+<label>ログ本文</label>
+<textarea id="trpgLogText" placeholder="CCB&lt;=70 【目星】 (1D100&lt;=70) ＞ 34 ＞ 成功" style="min-height:260px"></textarea>
+<label>HTML／テキストログ</label>
+<input accept=".html,.htm,.txt,text/html,text/plain" id="trpgLogFile" type="file"/>
+<div class="wrap" style="margin-top:12px">
+<button class="primary" id="trpgAnalyze">解析する</button>
+<button class="secondary" id="trpgClear">入力を消す</button>
+</div>
+</section>
+<section class="panel">
+<h2>抽出条件</h2>
+<div class="inline2">
+<div><label>CoCルール</label><select id="trpgEdition"><option value="6">6版</option><option value="7">7版</option></select></div>
+<div><label>キャラクター</label><select id="trpgCharacterFilter"><option value="">全員</option></select></div>
+<div><label>結果</label><select id="trpgResultFilter">
+<option value="">すべて</option><option>決定的成功</option><option>スペシャル</option><option>成功</option><option>失敗</option><option>致命的失敗</option>
+</select></div>
+</div>
+<label>この卓の成長候補ルール</label>
+<div class="wrap" id="trpgGrowthRules">
+<label class="checkline"><input checked="" class="growthRule" type="checkbox" value="決定的成功"/> 決定的成功</label>
+<label class="checkline"><input checked="" class="growthRule" type="checkbox" value="スペシャル"/> スペシャル</label>
+<label class="checkline"><input checked="" class="growthRule" type="checkbox" value="成功"/> 成功</label>
+<label class="checkline"><input class="growthRule" type="checkbox" value="失敗"/> 失敗</label>
+<label class="checkline"><input checked="" class="growthRule" type="checkbox" value="致命的失敗"/> 致命的失敗</label>
+<label class="checkline"><input checked="" id="trpgInitialGrowth" type="checkbox"/> 🌱 初期値成功</label>
+</div>
+<p class="small">初期値成功は選択した版の技能表と照合します。DEX・EDUなど能力値で変わる技能は、KP補助の「卓用上書き」に値を入れると判定できます。</p>
+<p class="small">卓ごとにチェックを変えられます。解析後も各判定の「候補」を個別に変更できます。</p>
+<div class="card" style="margin:10px 0">
+<b>🚫 成長対象外</b>
+<label class="checkline"><input checked="" id="trpgExcludeAbilityGrowth" type="checkbox"/> STR / CON / POW / DEX / APP / SIZ / INT / EDU など能力値ロールを一括除外</label>
+<label>技能名で除外（改行区切り）</label>
+<textarea id="trpgGrowthExcludeSkills" placeholder="例：
+アイデア
+幸運
+知識"></textarea>
+<div class="small">ここで除外しても、実クリティカル／ファンブル集計には残ります。解析結果の各判定から個別に除外・復帰することもできます。</div>
+</div>
+<label class="checkline"><input id="trpgGrowthOnly" type="checkbox"/> 成長候補のみ</label>
+<label class="checkline"><input id="trpgMergeSkills" type="checkbox"/> 同じキャラクター・技能をまとめる</label>
+<div class="card" id="trpgAnalyzeSummary">まだ解析していません。</div>
+<div class="small">※ 成長候補はここで選んだハウスルールに従います。実際のクリティカル／ファンブル回数には影響しません。</div>
+<button class="success" disabled="" id="trpgSaveAnalysis" style="width:100%;margin-top:10px">解析結果を保存</button>
+</section>
+</div>
+<section class="panel" style="border-color:var(--gold)">
+<div class="row"><div><h2>🎯 実クリティカル／ファンブル集計</h2><div class="small">ハウスルールの成長候補とは別に、ログに実際に出たクリティカル／ファンブルだけを集計します。</div></div></div>
+<div class="grid2" style="margin-top:12px">
+<div class="card">
+<h3 style="margin-top:0">この章・範囲</h3>
+<div id="trpgRangeCritFumble"><div class="empty">解析後に表示します。</div></div>
+</div>
+<div class="card">
+<h3 style="margin-top:0">セッション全体</h3>
+<div id="trpgTotalCritFumble"><div class="empty">解析後に表示します。</div></div>
+</div>
+</div>
+</section>
+<section class="panel">
+<div class="row">
+<div><h2>抽出範囲の確認</h2><div class="small">解析に使った原文を行番号付きで表示します。金色は判定を抽出した行です。</div></div>
+<button class="ghost" disabled="" id="trpgJumpFirst">最初の判定へ</button>
+</div>
+<div class="card" id="trpgRangeSummary">まだ解析していません。</div>
+<div class="source-preview" id="trpgSourcePreview"><div class="empty">解析後、使用したログ範囲がここに表示されます。</div></div>
+</section>
+<section class="panel">
+<div class="row"><h2>解析結果</h2><button class="ghost" disabled="" id="trpgCopyResults">一覧をコピー</button></div>
+<div id="trpgResults"><div class="empty">ログを解析すると、ここに判定一覧が表示されます。</div></div>
+<div class="card" style="border-color:var(--purple);margin-top:12px">
+<div class="row"><div><b>📋 発言者別・技能だけ抽出</b><div class="small">成長処理したい発言者を複数選び、技能名だけをまとめてコピーできます。</div></div><button class="secondary" id="trpgSkillOnlyRefresh">発言者を更新</button></div>
+<div class="wrap" id="trpgSkillOnlySpeakers" style="margin-top:10px"></div>
+<div class="inline2" style="margin-top:8px">
+<label class="checkline"><input checked="" id="trpgSkillOnlyUnique" type="checkbox"/> 同じ技能を1つにまとめる</label>
+<div><label>並び</label><select id="trpgSkillOnlyOrder"><option value="speaker">発言者別</option><option value="appearance">出現順</option></select></div>
+</div>
+<button class="primary" id="trpgSkillOnlyMake" style="width:100%;margin-top:8px">選択した発言者の技能を抽出</button>
+<textarea id="trpgSkillOnlyOutput" placeholder="ここに技能だけ表示されます" readonly="" style="margin-top:8px"></textarea>
+<button class="secondary" id="trpgSkillOnlyCopy" style="width:100%;margin-top:8px">コピー</button>
+</div>
+</section>
+<section class="panel">
+<h2>保存済み解析</h2>
+<div id="trpgAnalysisList"></div>
+</section>
+</section><section class="view" id="trpgAssets">
+<section class="panel">
+<div class="section-kicker">TRPG MATERIAL LIBRARY</div>
+<div class="row"><div><h2>🎨 TRPG素材庫</h2><div class="small">立ち絵・背景・BGM・SE・マップ・ハンドアウトなどを一度登録し、複数シナリオから再利用します。</div></div><span class="badge gold" id="trpgAssetCount">0件</span></div>
+<div class="grid2" style="margin-top:12px">
+<div><label>素材名</label><input id="trpgAssetName" placeholder="例：病院・夜・廊下"/></div>
+<div><label>種類</label><select id="trpgAssetType"><option>背景</option><option>立ち絵</option><option>BGM</option><option>SE</option><option>マップ</option><option>ハンドアウト</option><option>トレーラー・動画</option><option>ココフォリア部屋素材</option><option>その他</option></select></div>
+<div><label>作者・配布元</label><input id="trpgAssetAuthor"/></div>
+<div><label>素材URL / 保存先</label><input id="trpgAssetUrl" placeholder="https://..." type="url"/></div>
+</div>
+<label>利用条件・クレジット</label><input id="trpgAssetTerms" placeholder="例：クレジット任意 / 卓内利用可"/>
+<label>タグ</label><input id="trpgAssetTags" placeholder="病院, ホラー, 夜"/>
+<label>メモ</label><textarea id="trpgAssetMemo"></textarea>
+<button class="primary" id="trpgAssetSave" style="width:100%;margin-top:8px">素材庫へ登録</button>
+<div class="inline2" style="margin-top:14px"><div><label>検索</label><input id="trpgAssetSearch" placeholder="素材名・作者・タグ・使用シナリオ"/></div><div><label>種類</label><select id="trpgAssetFilter"><option value="">すべて</option><option>背景</option><option>立ち絵</option><option>BGM</option><option>SE</option><option>マップ</option><option>ハンドアウト</option><option>トレーラー・動画</option><option>ココフォリア部屋素材</option><option>その他</option></select></div></div>
+<div id="trpgAssetList"></div>
+</section>
+<section class="panel">
+<h2>🔗 シナリオに使用素材を登録</h2>
+<p class="small">素材庫から選び、使用シーンと用途を記録します。同じ素材は別シナリオでも再利用できます。</p>
+<div class="grid2">
+<div><label>シナリオ</label><select id="trpgAssetScenario"><option value="">選択</option></select></div>
+<div><label>素材</label><select id="trpgAssetLinkAsset"><option value="">選択</option></select></div>
+<div><label>使用シーン</label><input id="trpgAssetScene" placeholder="例：Scene 03／病院2階"/></div>
+<div><label>用途・演出</label><input id="trpgAssetPurpose" placeholder="例：探索中の背景"/></div>
+</div>
+<button class="primary" id="trpgAssetLinkSave" style="margin-top:8px">このシナリオで使用</button>
+<div id="trpgAssetScenarioUsage"></div>
+</section>
+</section><section class="view" id="kpTools">
+<section class="panel">
+<div class="card" style="border-color:var(--purple)">
+<div class="row"><div><b>🎬 シナリオ素材</b><div class="small">卓中に使う背景・BGM・SE・ハンドアウトを進行順で確認します。</div></div><button class="secondary" id="kpOpenAssetLibrary">素材庫を開く</button></div>
+<label>シナリオ</label><select id="kpAssetScenario"><option value="">選択</option></select>
+<div id="kpAssetUsage"><div class="empty">シナリオを選択してください。</div></div>
+</div>
+<div class="row"><div><h2>🗝 KP補助コンソール</h2><div class="small">卓前の確認、技能初期値、卓中メモを一か所にまとめます。</div></div><span class="badge gold">CoC 6版 / 7版</span></div>
+<div class="inline2" style="margin-top:10px">
+<div><label>参照する版</label><select id="kpEdition"><option value="6">クトゥルフ神話TRPG 6版</option><option value="7">新クトゥルフ神話TRPG 7版</option></select></div>
+<div><label>技能検索</label><input id="kpSkillSearch" placeholder="例：目星、拳銃、心理学"/></div>
+</div>
+<div class="card"><b>🌱 初期値成功との連携</b><div class="small">ダイスログの技能名と目標値が初期値に一致し、判定が成功系なら「初期値成功」として成長候補にできます。能力値依存の技能は下の卓用上書きを使います。</div></div>
+<details style="margin-top:10px">
+<summary><b>📚 技能・初期値リストを開く</b></summary>
+<div id="kpSkillList" style="margin-top:10px"></div>
+</details>
+</section>
+<section class="panel">
+<h2>✏ 卓用上書き</h2>
+<p class="small">探索者やハウスルールによって初期値が変わる技能だけ登録できます。ダイス抽出ではこちらを最優先します。</p>
+<div class="grid3">
+<div><label>技能名</label><input id="kpOverrideSkill" placeholder="例：回避"/></div>
+<div><label>初期値</label><input id="kpOverrideValue" max="100" min="0" placeholder="例：35" type="number"/></div>
+<div><label>版</label><select id="kpOverrideEdition"><option value="6">6版</option><option value="7">7版</option></select></div>
+</div>
+<button class="primary" id="kpOverrideAdd" style="margin-top:10px">初期値を登録</button>
+<div id="kpOverrideList"></div>
+</section>
+<section class="panel">
+<h2>📋 卓中KPメモ</h2>
+<div class="inline2">
+<div><label>シナリオ／卓名</label><input id="kpSessionName" placeholder="例：シリウスの篝火"/></div>
+<div><label>現在地・章</label><input id="kpScene" placeholder="例：病院2階／Case3"/></div>
+</div>
+<label>確認事項（1行に1つ）</label><textarea id="kpChecklistInput" placeholder="NPC Aの情報開示
+SANチェック処理
+次のシーンへの条件"></textarea>
+<button class="primary" id="kpChecklistSave" style="width:100%;margin-top:8px">KPメモを保存</button>
+<div id="kpChecklistList"></div>
+</section>
+</section><section class="view" id="checklistTool">
+<section class="panel" id="checklistToolPanel">
+<h2>☑ 自由チェックメモ</h2>
+<p class="small">独立した一時メモ用です。ここへ作ったリストは記録庫や受信箱とは連動しません。</p>
+<label>リスト名</label><input id="toolChecklistName" placeholder="例：ファントムウェポン 記憶集め"/>
+<label>項目（1行に1つ）</label><textarea id="toolChecklistItems" placeholder="蒼天エリアFATE
+紅蓮エリアFATE
+レイド周回"></textarea>
+<button class="primary" id="toolChecklistAdd" style="width:100%;margin-top:10px">チェックリストを作成</button>
+<div id="toolChecklistList"></div>
+</section>
+</section><section class="view" id="settings">
+<section class="panel">
+<h2>📌 更新方法</h2>
+<div class="small">GitHub Pagesでは毎回 <b>index.html</b> を上書きしてください。</div>
+</section>
+<section class="panel">
+<h2>🧪 データ引き継ぎ確認</h2>
+<div class="small" id="persistTestStatus">確認中…</div>
+</section>
+<section class="panel">
+<h2>💾 データ保護</h2>
+<div class="small">更新前にバックアップしておくと安全です。</div>
+<div class="actions" style="margin-top:8px">
+<button class="primary" id="stableBackupDownload">バックアップ保存</button>
+<button id="stableBackupImport">バックアップ読込（共通）</button>
+<input accept=".json,application/json" id="stableBackupFile" style="display:none" type="file"/>
+</div>
+</section>
+<div class="grid2">
+<section class="panel"><h2>外部リンク設定</h2><label>攻略サイト検索URL</label><input id="guideUrl" placeholder="https://www.google.com/search?q=site%3Aexample.com+{query}"/><label>YouTube検索URL</label><input id="youtubeUrl"/><p class="small"><code>{query}</code> が検索語に置き換わります。</p><button class="primary" id="saveSettings">設定を保存</button></section>
+<section class="panel"><h2>分類ルール</h2><p>文章中の言葉から候補を出します。自動で確定せず、必ず受信箱で確認できます。</p><div id="ruleView"></div></section>
+</div></section><section class="view" id="backup">
+<section class="panel">
+<div class="section-kicker">SAVE POINT</div>
+<h2>バックアップ・復元</h2>
+<p class="small">普段はブラウザ保存＋IndexedDBの二重保存です。ただしサイトデータを削除すると両方消える可能性があります。大切な記録はJSONバックアップをPC側にも残してください。</p>
+<div class="stats">
+<div class="stat">現在の保存<b id="backupCurrentStamp">—</b></div>
+<div class="stat">最終バックアップ<b id="backupLastStamp">未実施</b></div>
+<div class="stat">バックアップ後の変更<b id="backupDirtyState">—</b></div>
+<div class="stat">保存方式<b>二重保存</b></div>
+</div>
+<div class="card" id="backupHealth" style="border-color:var(--gold);margin-top:14px">バックアップ状態を確認中です。</div>
+<div class="grid2" style="margin-top:14px">
+<section class="card">
+<h3>💾 バックアップを作成</h3>
+<p class="small">記録・親子ページ・チェック状況・設定など、Life Archiveの保存データ一式を書き出します。</p>
+<button class="primary" id="exportBtn" style="width:100%">Life Archive 全データをバックアップ</button>
+<div class="small" style="margin-top:8px">ファイル名には作成日時を入れます。定期的に別フォルダやクラウドへコピーしておくとさらに安全です。</div>
+</section>
+<section class="card">
+<h3>📂 バックアップから復元</h3>
+<p class="small">以前書き出したJSONからLife Archiveを復元します。復元前には現在データの退避ファイルも自動で作成します。</p>
+<label>復元ファイル</label>
+<input accept=".json,application/json" id="importFile" type="file"/>
+<button class="secondary" id="importBtn" style="width:100%;margin-top:10px">選択したバックアップを復元</button>
+</section>
+<section class="card">
+<h3>📤 今日をQUICKへ渡す</h3>
+<p class="small">今日の未完了タスクをスマホQUICK用JSONとして書き出します。</p>
+<button class="secondary" id="quickTodayExportBtn" style="width:100%">今日やることを書き出す</button>
+<div class="small" id="quickTodayExportStatus" style="margin-top:8px"></div>
+</section>
+<section class="card" id="quickImportCard">
+<h3>📱 QUICK受信箱を取り込む</h3>
+<p class="small">Life Archive QUICKから書き出したJSONを、現在の受信箱へ追加します。既存データは消しません。</p>
+<label>QUICK転送ファイル</label>
+<input accept=".json,application/json" id="quickImportFile" type="file"/>
+<button class="secondary" id="quickImportBtn" style="width:100%;margin-top:10px">QUICK受信箱を追加</button>
+<div class="small" id="quickImportStatus" style="margin-top:8px"></div>
+</section>
+</div>
+<div class="card" id="backupMsg">まだ操作していません。</div>
+<details class="card">
+<summary><b>保存について</b></summary>
+<div class="small" style="margin-top:8px">
+<p>・通常保存：localStorage と IndexedDB の両方へ同じ最新データを保存します。</p>
+<p>・JSONバックアップ：ブラウザの外へ保存するため、ブラウザ履歴・サイトデータ削除への備えになります。</p>
+<p>・復元：バックアップ内容を現在の正式データとして両方の保存領域へ同期します。</p>
+<p>・旧版データは自動削除しません。</p>
+</div>
+</details>
+</section>
+</section><section class="view" id="householdBudget"><div class="pagehead"><div><h2>💰 家計簿</h2><div class="small">収支・固定費・予算をLife Archiveでまとめて管理。</div></div></div>
+<div class="grid3"><div class="card"><div class="small">今月の収入</div><div class="big" id="budgetIncome">¥0</div></div><div class="card"><div class="small">今月の支出記録</div><div class="big" id="budgetExpense">¥0</div></div><div class="card"><div class="small">今月の収支</div><div class="big" id="budgetBalance">¥0</div></div></div>
+<div class="card" style="margin-top:12px"><h3>今月の予算</h3><div class="grid3"><div><label>月予算</label><input class="budgetNumericInput" id="budgetMonthlyLimit" inputmode="text" lang="ja" type="text"/></div><div><label>固定費・予算枠差引後</label><div class="big" id="budgetAfterFixed">—</div></div><div><label>残り予算</label><div class="big" id="budgetRemaining">—</div></div><div><label>今日から1日あたり</label><div class="big" id="budgetPerDay">—</div></div></div></div>
+<div class="grid2" style="margin-top:12px"><div class="card"><h3>収支を追加</h3><div class="grid2"><div><label>日付</label><input id="budgetDate" type="date"/></div><div style="grid-column:1/-1"><label>記録の種類</label><div class="wrap" id="budgetModeButtons">
+<button class="secondary budgetMode active" data-type="expense" type="button">💸 支出</button>
+<button class="secondary budgetMode" data-type="income" type="button">💰 収入</button>
+<button class="secondary budgetMode" data-type="transfer" type="button">↔ 振替</button>
+</div><select id="budgetType" style="display:none"><option value="expense">支出</option><option value="income">収入</option><option value="transfer">振替</option></select></div><div><label>金額</label><input class="budgetNumericInput" id="budgetAmount" placeholder="金額を入力" type="text"/></div><div><label>カテゴリ</label><select id="budgetCategory"><option>食費</option><option>日用品</option><option>固定費</option><option>趣味</option><option>ゲーム</option><option>交通</option><option>医療</option><option>猫</option><option>衣類</option><option>収入</option><option>その他</option></select></div><div id="budgetPaymentWrap"><label>支払い方法</label><select id="budgetPayment"><option>現金</option><option>PayPay</option><option>ワンバンク</option><option>バンドル</option><option>銀行</option><option>その他</option></select></div>
+<div id="budgetIncomeDestWrap" style="display:none"><label>入金先</label><select id="budgetIncomeDest"><option>銀行</option><option>現金</option><option>PayPay</option><option>ワンバンク</option><option>その他</option></select></div>
+<div id="budgetTransferFromWrap" style="display:none"><label>移動元</label><select id="budgetTransferFrom"><option>現金</option><option>銀行</option><option>PayPay</option><option>ワンバンク</option><option>バンドル</option><option>その他</option></select></div>
+<div id="budgetTransferToWrap" style="display:none"><label>移動先</label><select id="budgetTransferTo"><option>PayPay</option><option>ワンバンク</option><option>現金</option><option>銀行</option><option>バンドル</option><option>その他</option></select></div>
+<div><label id="budgetTitleLabel">店・用途</label><input autocomplete="off" class="budgetJapaneseInput" id="budgetTitle" placeholder="品名・店名を入力"/></div><div><label>メモ</label><input id="budgetMemo"/></div></div>
+<div class="card" id="budgetPurchaseDetails" style="margin-top:8px">
+<div class="row"><div><b>🧾 買い物の内訳</b><div class="small">家計簿には合計を1件だけ記録。在庫にしたい品だけチェックできます。</div></div><button class="secondary" id="budgetItemAdd">＋ 内訳を追加</button></div>
+<div id="budgetItems" style="display:flex;flex-direction:column;gap:8px"></div>
+<div class="small" id="budgetItemsTotal" style="margin-top:6px"></div>
+</div>
+<div class="wrap" style="margin-top:8px"><button class="primary" id="budgetAdd" style="flex:1">記録する</button><button class="secondary" id="budgetEditCancel" style="display:none">編集キャンセル</button></div></div>
+<div class="card" style="margin-top:12px">
+<div class="row"><div><h3>🛟 あと払い生活費 脱出メーター</h3><div class="small">生活費の「あと払い依存」を少しずつ自前資金へ置き換えるための記録。あと払い利用額は収入には加算しません。</div></div><div><span class="small">依存率</span> <b id="postpayRate">—</b></div></div>
+<div class="grid3" style="margin-top:8px">
+<div><label>生活費目標</label><input id="postpayLivingTarget" min="0" placeholder="50000" type="number"/></div>
+<div><label>今月使うあと払い</label><input id="postpayAmount" min="0" placeholder="50000" type="number"/></div>
+<div><label>サービス</label><select id="postpayService"><option>ワンバンク</option><option>バンドル</option><option>その他</option></select></div>
+<div><label>返済期限</label><input id="postpayDue" type="date"/></div>
+<div><label>自前資金の置き場所</label><select id="postpayReservePlace"><option>PayPay</option><option>ワンバンク</option><option>現金</option><option>銀行</option><option>その他</option></select></div>
+<div><label>メモ</label><input id="postpayMemo" placeholder="任意"/></div>
+</div>
+<div class="grid3" style="margin-top:10px">
+<div><div class="small">自前で確保する額</div><div class="big" id="postpayOwn">¥0</div></div>
+<div><div class="small">翌月返済予定</div><div class="big" id="postpayRepay">¥0</div></div>
+<div><div class="small">あと払い削減額</div><div class="big" id="postpayReduced">¥0</div></div>
+</div>
+<div style="margin-top:10px"><div class="small">あと払い依存</div><div style="height:14px;border-radius:999px;background:var(--line);overflow:hidden"><div id="postpayBar" style="height:100%;width:0%;background:currentColor;opacity:.7"></div></div></div>
+<div class="wrap" style="margin-top:10px"><button class="primary" id="postpaySave">今月の計画を保存</button><button class="secondary" id="postpayPaid">返済済みにする</button></div>
+<div class="small" id="postpayStatus" style="margin-top:8px"></div>
+<div style="margin-top:12px"><b>履歴</b><div id="postpayHistory" style="margin-top:6px"></div></div>
+</div>
+<div class="card">
+<div class="row"><div><h3>⚡ 変動固定費の予算枠</h3><div class="small">電気・ガス・水道など、毎月必要だけど金額が変わる支出。</div></div><div><span class="small">予算合計</span> <b id="variableBudgetTotal">¥0</b></div></div>
+<div class="grid2"><div><label>項目</label><input id="variableBudgetName" placeholder="例：電気"/></div><div><label>予算</label><input id="variableBudgetAmount" min="0" type="number"/></div></div>
+<button class="secondary" id="variableBudgetAdd" style="width:100%;margin-top:8px">予算枠を登録</button>
+<div id="variableBudgetList" style="margin-top:8px"></div>
+</div>
+<div class="card"><div class="row"><h3>固定費</h3><div><span class="small">合計</span> <b id="fixedTotal">¥0</b></div></div><div class="grid2"><div><label>項目</label><input id="fixedName"/></div><div><label>金額</label><input id="fixedAmount" min="0" type="number"/></div></div><button class="secondary" id="fixedAdd" style="width:100%;margin-top:8px">固定費を登録</button><div id="fixedList" style="margin-top:8px"></div></div></div>
+<div class="card" style="margin-top:12px">
+<div class="row"><div><h3>💳 支払い方法・資金置き場</h3><div class="small">家計簿の支払い方法・入金先・振替元/先で共通利用します。既存の記録は、ここから項目を削除しても残ります。</div></div></div>
+<div class="grid2"><div><label>名称</label><input id="budgetPaymentMethodName" placeholder="例：Suica / 楽天Pay / ○○銀行"/></div><div style="display:flex;align-items:end"><button class="secondary" id="budgetPaymentMethodAdd" style="width:100%">＋ 登録</button></div></div>
+<div id="budgetPaymentMethodList" style="margin-top:8px"></div>
+</div>
+<div class="card" style="margin-top:12px">
+<div class="row"><div><h3>🥚 食材・日用品在庫</h3><div class="small">家計簿の内訳から追加した購入品を確認。保管場所・タグはあとから自由に付け替えできます。</div></div><select id="inventoryFilter" style="max-width:150px"><option value="">すべて</option><option>冷蔵</option><option>冷凍</option><option>常温</option><option>日用品</option><option>その他</option></select></div>
+<div class="small" id="inventorySummary" style="margin:8px 0"></div><div id="inventoryList"></div></div>
+<div class="card" style="margin-top:12px"><div class="row"><h3>月の記録</h3><input id="budgetMonth" style="max-width:180px" type="month"/></div><div class="small" id="budgetCategorySummary" style="margin:8px 0"></div><div class="small" id="budgetPaymentSummary" style="margin:8px 0"></div><div id="budgetList"></div></div></section></div><script src="assets/js/extra-1.js"></script>
 <script src="assets/js/extra-2.js"></script>
 <script src="assets/js/extra-3.js"></script>
 <script src="assets/js/extra-4.js"></script>

@@ -5944,6 +5944,15 @@ document.querySelectorAll(".nav-group").forEach(g=>{
  g.open=!!ui.groups?.[key];
  g.addEventListener("toggle",()=>{const state=loadUI(),groups={...(state.groups||{}),[key]:g.open};saveUI({groups})});
 });
+// EORZEA critical controls: bind before inherited legacy controls.
+if($("ffProfileSync"))$("ffProfileSync").onclick=syncLodestoneProfile;
+if($("ffProfileOpen"))$("ffProfileOpen").onclick=()=>{
+ const d=load(),p=ffProfileData(d),id=normalizeLodestoneId($("ffLodestoneId")?.value)||p.lodestoneId;
+ if(!id)return alert("Lodestone IDを入力してください");
+ window.open(lodestoneUrls(id).profile,"_blank","noopener");
+};
+if($("ffProfileHtmlImport"))$("ffProfileHtmlImport").onclick=importLodestoneHtmlFiles;
+
 $("menuToggle").onclick=()=>{$("sidebar").classList.toggle("open");$("sidebarOverlay").classList.toggle("open")};
 $("sidebarOverlay").onclick=closeSidebar;
 $("quickSave").onclick=()=>{
