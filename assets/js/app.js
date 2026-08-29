@@ -2521,7 +2521,7 @@ function renderAchievementDataPackInfo(){
  const doneCount=Object.values(d.achievementProgress||{}).filter(v=>v&&v.done).length;
  el.innerHTML=`${ACHIEVEMENT_DATA_META.label} ／ データ日 ${ACHIEVEMENT_DATA_META.version}<br>
  実データ <b>${total.toLocaleString("ja-JP")}件</b> ／ 分類 ${categoryCount} ／ 最大ID ${maxId}<br>
- はいびすの登録進捗 ${progressCount}件（取得済み ${doneCount}件）<br>
+ 登録進捗 ${progressCount}件（取得済み ${doneCount}件）<br>
  <span class="muted">アチーブメント本体と取得状況は別保存です。レガシーは通常表示から除外していますが、データ自体は保持しています。今後データパックを更新しても、同じIDの取得状況はそのまま引き継ぎます。</span>`;
 }
 function renderAchievements(){
