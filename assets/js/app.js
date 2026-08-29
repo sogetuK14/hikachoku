@@ -4900,6 +4900,24 @@ function lodestoneUrls(id){
  const base=`https://jp.finalfantasyxiv.com/lodestone/character/${id}/`;
  return {profile:base,jobs:base+"class_job/"};
 }
+const EORZEA_LODESTONE_PROXY_KEY="eorzea_lodestone_proxy_v1";
+function lodestoneProxyUrl(){
+ return String(localStorage.getItem(EORZEA_LODESTONE_PROXY_KEY)||"").trim().replace(/\/+$/,"");
+}
+function saveLodestoneProxyUrl(value){
+ const v=String(value||"").trim().replace(/\/+$/,"");
+ if(v)localStorage.setItem(EORZEA_LODESTONE_PROXY_KEY,v);
+ else localStorage.removeItem(EORZEA_LODESTONE_PROXY_KEY);
+ return v;
+}
+function buildLodestoneProxyRequest(url){
+ const proxy=lodestoneProxyUrl();
+ if(!proxy)return "";
+ const m=String(url||"").match(/\/lodestone\/character\/(\d+)\/(class_job\/)?/i);
+ if(!m)return "";
+ const id=m[1],page=m[2]?"class_job":"profile";
+ return `${proxy}?id=${encodeURIComponent(id)}&page=${encodeURIComponent(page)}`;
+}
 function looksLikeLodestoneHtml(text){
  const s=String(text||"");
  return s.length>1000 && (
@@ -4909,24 +4927,17 @@ function looksLikeLodestoneHtml(text){
  );
 }
 async function fetchTextWithFallback(url){
- const enc=encodeURIComponent(url);
+ const proxyRequest=buildLodestoneProxyRequest(url);
  const attempts=[
-  {name:"direct",url},
-  {name:"allorigins-raw",url:`https://api.allorigins.win/raw?url=${enc}`},
-  {name:"allorigins-json",url:`https://api.allorigins.win/get?url=${enc}`,json:true}
+  ...(proxyRequest?[{name:"eorzea-worker",url:proxyRequest}]:[]),
+  {name:"direct",url}
  ];
  let lastErr=null;
  for(const a of attempts){
   try{
-   const r=await fetch(a.url,{cache:"no-store",headers:{Accept:a.json?"application/json,text/plain,*/*":"text/html,text/plain,*/*"}});
+   const r=await fetch(a.url,{cache:"no-store",headers:{Accept:"text/html,text/plain,*/*"}});
    if(!r.ok)throw new Error(`${a.name}: HTTP ${r.status}`);
-   let txt="";
-   if(a.json){
-    const body=await r.json();
-    txt=String(body?.contents||"");
-   }else{
-    txt=await r.text();
-   }
+   const txt=await r.text();
    if(looksLikeLodestoneHtml(txt))return {text:txt,source:a.name};
    throw new Error(`${a.name}: Lodestone HTML not found`);
   }catch(e){
@@ -4934,6 +4945,7 @@ async function fetchTextWithFallback(url){
    console.warn("Lodestone fetch failed:",a.name,e);
   }
  }
+ if(!proxyRequest)throw new Error("Lodestone proxy is not configured");
  throw lastErr||new Error("fetch failed");
 }
 function textAfterLabel(body,label){
@@ -4991,26 +5003,54 @@ function parseLodestoneProfileHtml(html,id,url){
 }
 function parseLodestoneJobsHtml(html){
  const doc=new DOMParser().parseFromString(html,"text/html"),out=[];
- // Lodestone selectors used by current/older layouts
- const blocks=[...doc.querySelectorAll(".character__job, .character__job__list li, .character__class__list li")];
+ const knownJobs=[
+  "ナイト","戦士","暗黒騎士","ガンブレイカー",
+  "白魔道士","学者","占星術師","賢者",
+  "モンク","竜騎士","忍者","侍","リーパー","ヴァイパー","魔獣使い",
+  "吟遊詩人","機工士","踊り子",
+  "黒魔道士","召喚士","赤魔道士","ピクトマンサー","青魔道士",
+  "木工師","鍛冶師","甲冑師","彫金師","革細工師","裁縫師","錬金術師","調理師",
+  "採掘師","園芸師","漁師"
+ ];
+ const seen=new Set();
+ const add=(name,level)=>{
+  name=String(name||"").trim();level=Number(level||0);
+  if(!knownJobs.includes(name)||!Number.isFinite(level)||level<1||level>100||seen.has(name))return;
+  seen.add(name);out.push({name,level});
+ };
+
+ const blocks=[...doc.querySelectorAll(".character__job, .character__job__list li, .character__class__list li, .character__job__list__item")];
  for(const b of blocks){
-  const name=(b.querySelector(".character__job__name,.character__job__name--meister,.character__class__name")?.textContent||"").trim();
-  const lv=(b.querySelector(".character__job__level,.character__class__level")?.textContent||"").match(/\d+/);
-  if(name&&lv)out.push({name,level:Number(lv[0])});
+  const t=(b.textContent||"").replace(/\s+/g," ").trim();
+  const name=knownJobs.find(n=>t.includes(n));
+  if(!name)continue;
+  const explicit=(b.querySelector(".character__job__level,.character__class__level,[class*='level']")?.textContent||"").match(/\d{1,3}/);
+  let level=explicit?Number(explicit[0]):0;
+  if(!level){
+   const before=t.slice(0,t.indexOf(name));
+   const nums=[...before.matchAll(/(?:^|\s)(\d{1,3})(?=\s|$)/g)].map(m=>Number(m[1])).filter(n=>n>=1&&n<=100);
+   level=nums.length?nums[nums.length-1]:0;
+  }
+  add(name,level);
  }
- if(out.length)return [...new Map(out.map(x=>[x.name,x])).values()];
- // text fallback
+ if(out.length>=10)return out;
+
+ // Current Lodestone text order is "level -> job name -> EXP".
  const body=(doc.body?.innerText||"").replace(/\r/g,"");
  const lines=body.split(/\n+/).map(x=>x.trim()).filter(Boolean);
  for(let i=0;i<lines.length;i++){
-  const m=lines[i].match(/^(.+?)\s+(?:LEVEL|Lv\.?)\s*(\d+)$/i);
-  if(m)out.push({name:m[1].trim(),level:Number(m[2])});
-  else if(/^(LEVEL|Lv\.?)\s*\d+$/i.test(lines[i])&&i>0){
-   const lv=Number(lines[i].match(/\d+/)?.[0]||0),name=lines[i-1];
-   if(name&&lv)out.push({name,level:lv});
+  if(!knownJobs.includes(lines[i]))continue;
+  let level=0;
+  for(let j=i-1;j>=Math.max(0,i-4);j--){
+   if(/^\d{1,3}$/.test(lines[j])){
+    const n=Number(lines[j]);
+    if(n>=1&&n<=100){level=n;break}
+   }
+   if(knownJobs.includes(lines[j]))break;
   }
+  add(lines[i],level);
  }
- return [...new Map(out.map(x=>[x.name,x])).values()];
+ return out;
 }
 function parseLegacyXivapiCharacter(j,id,url){
  const c=j?.Character||j?.character||j;
@@ -5090,7 +5130,7 @@ async function syncLodestoneProfile(){
   const parsed=parseLodestoneProfileHtml(p.text,id,urls.profile);
   if(!parsed?.name)throw new Error("profile parse failed");
   character=parsed;
-  source=p.source==="direct"?"Lodestone direct":"Lodestone via AllOrigins";
+  source=p.source==="eorzea-worker"?"EORZEA Lodestone Worker":p.source==="direct"?"Lodestone direct":p.source;
   try{
    const j=await fetchTextWithFallback(urls.jobs);
    jobs=parseLodestoneJobsHtml(j.text);
@@ -5104,7 +5144,7 @@ async function syncLodestoneProfile(){
  }
  if(!character){
   const d=load(),old=ffProfileData(d);
-  if(status)status.innerHTML=`<b>⚠ Lodestoneへ接続できませんでした。</b><div class="small">前回保存したプロフィールは保持しています。時間をおいて再試行するか、下の「HTMLからプロフィールを取り込む」を利用してください。</div>`;
+  if(status)status.innerHTML=`<b>⚠ Lodestoneへ接続できませんでした。</b><div class="small">${lodestoneProxyUrl()?"Worker経由でも取得できませんでした。":"EORZEA用Worker URLが未設定です。"} 前回保存したプロフィールは保持しています。</div>`;
   if(old.character)renderFFProfile();
   return;
  }
@@ -5945,6 +5985,20 @@ document.querySelectorAll(".nav-group").forEach(g=>{
  g.addEventListener("toggle",()=>{const state=loadUI(),groups={...(state.groups||{}),[key]:g.open};saveUI({groups})});
 });
 // EORZEA critical controls: bind before inherited legacy controls.
+if($("ffLodestoneProxy")){
+ $("ffLodestoneProxy").value=lodestoneProxyUrl();
+ $("ffLodestoneProxy").onchange=()=>{
+  const v=saveLodestoneProxyUrl($("ffLodestoneProxy").value);
+  const st=$("ffLodestoneProxyStatus");
+  if(st)st.textContent=v?"Worker URLを保存しました。":"Worker URLを未設定に戻しました。";
+ };
+}
+if($("ffLodestoneProxySave"))$("ffLodestoneProxySave").onclick=()=>{
+ const v=saveLodestoneProxyUrl($("ffLodestoneProxy")?.value);
+ const st=$("ffLodestoneProxyStatus");
+ if(st)st.textContent=v?"Worker URLを保存しました。":"Worker URLを入力してください。";
+};
+
 if($("ffProfileSync"))$("ffProfileSync").onclick=syncLodestoneProfile;
 if($("ffProfileOpen"))$("ffProfileOpen").onclick=()=>{
  const d=load(),p=ffProfileData(d),id=normalizeLodestoneId($("ffLodestoneId")?.value)||p.lodestoneId;
