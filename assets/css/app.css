@@ -384,3 +384,149 @@ button{font-size:.86rem!important}
 .hub-need strong{font-size:17px}
 .hub-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
 @media(max-width:640px){.hub-material-row{grid-template-columns:1fr}.hub-stock{max-width:140px}}
+
+
+/* =========================================================
+   HIKACHOKU visual preview v0.3.1
+   Bright sky + notebook palette / comic headings / readable data
+   ========================================================= */
+:root{
+  --bg:#f4f9fc;
+  --panel:#ffffff;
+  --text:#20313d;
+  --muted:#657782;
+  --line:#cbdce5;
+  --gold:#287fa6;
+  --accent:#287fa6;
+}
+body.hikachoku-theme{
+  background:
+    radial-gradient(circle at 92% 2%, rgba(255,184,77,.15), transparent 24rem),
+    linear-gradient(180deg,#eaf7fc 0,#f8fbfd 230px,#f4f9fc 100%);
+  color:#20313d;
+  font-family:"Yu Gothic UI","Yu Gothic","Meiryo",sans-serif;
+}
+.hikachoku-theme header,
+.hikachoku-theme .topbar{
+  background:rgba(255,255,255,.94);
+  border-bottom:1px solid #bcd7e4;
+  box-shadow:0 3px 14px rgba(48,91,111,.08);
+}
+.hikachoku-theme h1,
+.hikachoku-theme h2,
+.hikachoku-theme h3,
+.hikachoku-theme .brand,
+.hikachoku-theme .pagehead b{
+  font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
+  font-weight:800;
+  letter-spacing:.035em;
+}
+.hikachoku-theme h1,
+.hikachoku-theme .brand{
+  color:#176e96;
+  text-shadow:0 2px 0 #fff;
+}
+.hikachoku-tagline{
+  margin-top:2px;
+  color:#607783;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.06em;
+}
+.hikachoku-theme .panel,
+.hikachoku-theme .card,
+.hikachoku-theme .listitem,
+.hikachoku-theme .stat{
+  background:#fff;
+  border-color:#cbdce5;
+  box-shadow:0 2px 8px rgba(48,91,111,.055);
+}
+.hikachoku-theme .card{
+  border-radius:14px;
+}
+.hikachoku-theme button,
+.hikachoku-theme .tab{
+  border-radius:999px;
+  font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
+  font-weight:700;
+}
+.hikachoku-theme button.primary,
+.hikachoku-theme .primary{
+  background:#247fa8;
+  border-color:#247fa8;
+  color:#fff;
+  box-shadow:0 2px 0 #17617f;
+}
+.hikachoku-theme button.primary:hover,
+.hikachoku-theme .primary:hover{
+  background:#1d7197;
+}
+.hikachoku-theme button.secondary,
+.hikachoku-theme .secondary{
+  background:#fff;
+  border-color:#9ec9db;
+  color:#276d8b;
+}
+.hikachoku-theme .tab.active,
+.hikachoku-theme .hubAxis.active{
+  background:#dff3fb;
+  border-color:#4b9fbe;
+  color:#145f80;
+}
+.hikachoku-theme .badge{
+  background:#e5f4f9;
+  border-color:#b7dce9;
+  color:#28677f;
+  border-radius:999px;
+}
+.hikachoku-theme .hub-need strong{
+  color:#df791f;
+}
+.hikachoku-theme input,
+.hikachoku-theme select,
+.hikachoku-theme textarea{
+  background:#fff;
+  color:#20313d;
+  border-color:#b8d0dc;
+  border-radius:9px;
+}
+.hikachoku-theme input:focus,
+.hikachoku-theme select:focus,
+.hikachoku-theme textarea:focus{
+  outline:3px solid rgba(46,145,187,.17);
+  border-color:#2e91bb;
+}
+.hikachoku-theme .stat b{
+  color:#176e96;
+}
+.hikachoku-theme .hub-material-row{
+  border-bottom-color:#d9e6ec;
+}
+.hikachoku-theme .empty{
+  background:#f6fafc;
+  border-color:#d5e4eb;
+}
+.hikachoku-theme .muted,
+.hikachoku-theme .small{
+  color:#657782;
+}
+
+/* progress semantics: decoration follows meaning */
+.hikachoku-theme .is-complete,
+.hikachoku-theme .complete,
+.hikachoku-theme [data-status="done"]{
+  --status-color:#27845c;
+}
+.hikachoku-theme .is-warning,
+.hikachoku-theme [data-status="remaining"]{
+  --status-color:#d97b25;
+}
+.hikachoku-theme .is-shortage,
+.hikachoku-theme [data-status="shortage"]{
+  --status-color:#c94d4d;
+}
+
+@media(max-width:640px){
+  .hikachoku-theme h1{font-size:22px}
+  .hikachoku-tagline{font-size:11px}
+}
