@@ -12,7 +12,7 @@
 <aside class="sidebar" id="sidebar">
 <div class="brand">
 <h1>EORZEA Archive</h1>
-<div class="sub">v0.2.4 “Lodestone診断強化”<br/>エオルゼアの記録を、ひとつの場所に。</div>
+<div class="sub">v0.2.5 “Workerテスト独立化”<br/>エオルゼアの記録を、ひとつの場所に。</div>
 </div>
 <nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><button class="tab" data-view="weapons">武器制作</button><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
 </aside>
@@ -1502,7 +1502,8 @@ SANチェック処理
 <div class="card" style="margin-top:12px">
 <div class="row"><div><h3>🥚 食材・日用品在庫</h3><div class="small">家計簿の内訳から追加した購入品を確認。保管場所・タグはあとから自由に付け替えできます。</div></div><select id="inventoryFilter" style="max-width:150px"><option value="">すべて</option><option>冷蔵</option><option>冷凍</option><option>常温</option><option>日用品</option><option>その他</option></select></div>
 <div class="small" id="inventorySummary" style="margin:8px 0"></div><div id="inventoryList"></div></div>
-<div class="card" style="margin-top:12px"><div class="row"><h3>月の記録</h3><input id="budgetMonth" style="max-width:180px" type="month"/></div><div class="small" id="budgetCategorySummary" style="margin:8px 0"></div><div class="small" id="budgetPaymentSummary" style="margin:8px 0"></div><div id="budgetList"></div></div></section></div><script src="assets/js/extra-1.js"></script>
+<div class="card" style="margin-top:12px"><div class="row"><h3>月の記録</h3><input id="budgetMonth" style="max-width:180px" type="month"/></div><div class="small" id="budgetCategorySummary" style="margin:8px 0"></div><div class="small" id="budgetPaymentSummary" style="margin:8px 0"></div><div id="budgetList"></div></div></section></div><script src="assets/js/lodestone-bootstrap.js"></script>
+<script src="assets/js/extra-1.js"></script>
 <script src="assets/js/extra-2.js"></script>
 <script src="assets/js/extra-3.js"></script>
 <script src="assets/js/extra-4.js"></script>
