@@ -14,7 +14,7 @@
 <h1>EORZEA Archive</h1>
 <div class="sub">v0.2.5 “Workerテスト独立化”<br/>エオルゼアの記録を、ひとつの場所に。</div>
 </div>
-<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><button class="tab" data-view="weapons">武器制作</button><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
+<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="eorzeaHub">🧭 つながるEORZEA</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><button class="tab" data-view="weapons">武器制作</button><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
 </aside>
 <div class="content-wrap">
 <header class="content-header">
@@ -69,6 +69,69 @@
 </section>
 </div>
 </section>
+
+<section class="view" id="eorzeaHub">
+<section class="panel">
+<div class="pagehead"><div><h2>🧭 つながるEORZEA</h2><div class="small">目的・エリア・アイテムを同じ進捗データで横断します。終わったもの・持っているものは、どこから見ても同じ状態になります。</div></div></div>
+<div class="hub-axis-nav">
+<button class="secondary hubAxis active" data-axis="goal" type="button">🎯 目的から</button>
+<button class="secondary hubAxis" data-axis="area" type="button">🗺 エリアから</button>
+<button class="secondary hubAxis" data-axis="item" type="button">📦 アイテムから</button>
+</div>
+
+<div class="hub-axis-panel" data-axis="goal">
+<div class="card" style="border-color:var(--gold)">
+<b>⚒ 制作手帳コンプリート素材</b>
+<div class="small">1職のLv1～100を全部埋めるための素材を、同名アイテム1行に統合。制作済みレシピと所持数を差し引いて「あと何個」を出します。</div>
+<div class="inline2" style="margin-top:10px">
+<div><label>クラフター</label><select id="hubCraftJob"><option>木工</option><option>鍛冶</option><option>甲冑</option><option>彫金</option><option>革細工</option><option>裁縫</option><option>錬金</option><option>調理</option></select></div>
+<div style="display:flex;align-items:end"><button class="primary" id="hubCraftBuild" type="button" style="width:100%">Lv1～100を集計</button></div>
+</div>
+<div class="wrap" style="margin-top:8px">
+<label style="margin:0"><input id="hubCraftRemaining" type="checkbox" checked style="width:auto"> 制作済みレシピ分を除外</label>
+<label style="margin:0"><input id="hubCraftShowZero" type="checkbox" style="width:auto"> 残り0も表示</label>
+<input id="hubCraftSearch" placeholder="素材名・#タグで絞り込み" style="min-width:240px;flex:1">
+</div>
+<div class="stats" style="margin-top:10px">
+<div class="stat">対象レシピ<b id="hubCraftRecipeTotal">0</b></div>
+<div class="stat">制作済み<b id="hubCraftRecipeDone">0</b></div>
+<div class="stat">素材種類<b id="hubCraftMaterialKinds">0</b></div>
+<div class="stat">残り素材総数<b id="hubCraftMaterialTotal">0</b></div>
+</div>
+<div class="small" id="hubCraftStatus" style="margin:8px 0">「Lv1～100を集計」で制作手帳の素材索引を読み込みます。</div>
+<div id="hubCraftMaterials"></div>
+</div>
+</div>
+
+<div class="hub-axis-panel" data-axis="area" hidden>
+<div class="card">
+<b>🗺 エリアでまとめて探す</b>
+<div class="small">同じ場所で片付けられることをまとめます。現在は既存の釣り・ギルドリーヴ・入手交換データを接続しています。</div>
+<div class="wrap" style="margin-top:10px"><input id="hubAreaSearch" placeholder="例：クガネ" style="flex:1"><button class="primary" id="hubAreaRun" type="button">このエリアを見る</button></div>
+<div id="hubAreaResults" style="margin-top:10px"></div>
+</div>
+</div>
+
+<div class="hub-axis-panel" data-axis="item" hidden>
+<div class="card">
+<b>📦 アイテムから横断する</b>
+<div class="small">同じ名前を用途ごとに重複させず、制作・交換・ミニオン・マウントなど接続済みデータをまとめて探します。</div>
+<div class="wrap" style="margin-top:10px"><input id="hubItemSearch" placeholder="アイテム名を入力" style="flex:1"><button class="primary" id="hubItemRun" type="button">用途・入手先を探す</button></div>
+<div id="hubItemResults" style="margin-top:10px"></div>
+</div>
+</div>
+
+<div class="card" style="margin-top:14px">
+<b>🔗 接続状況</b>
+<div class="grid3" style="margin-top:8px">
+<div class="listitem"><b>制作手帳</b><div class="small">✓ Lv1～100総素材・制作済み・所持数</div></div>
+<div class="listitem"><b>エリア</b><div class="small">◐ 釣り／リーヴ／交換品を先行接続</div></div>
+<div class="listitem"><b>収集・攻略</b><div class="small">→ 探検手帳／サブクエ／ID・討滅戦を次に統合</div></div>
+</div>
+</div>
+</section>
+</section>
+
 <section class="view active" id="ff14">
 <section class="panel" id="ffLodestonePanel">
 <div class="section-kicker">OFFICIAL PROFILE SYNC</div>
@@ -835,7 +898,7 @@
 </aside>
 <div aria-live="assertive" id="etAlarmAlert" role="status"></div>
 <div hidden="" id="legacyLaCompat"><section class="view" id="home">
-<div class="hero"><h2>おかえりなさい、はいびす。</h2><p>冒険も、卓も、買い物も。今日を丸ごと置いていきましょう。</p></div>
+<div class="hero"><h2>おかえりなさい、。</h2><p>冒険も、卓も、買い物も。今日を丸ごと置いていきましょう。</p></div>
 <div class="stats" style="margin-top:16px">
 <div class="stat">今日の記録<b id="sToday">0</b></div><div class="stat">未整理<b id="sInbox">0</b></div><div class="stat">FF14<b id="sFF14">0</b></div><div class="stat">TRPG<b id="sTRPG">0</b></div><div class="stat">生活記録<b id="sLife">0</b></div>
 </div>
@@ -1507,5 +1570,5 @@ SANチェック処理
 <script src="assets/js/extra-2.js"></script>
 <script src="assets/js/extra-3.js"></script>
 <script src="assets/js/extra-4.js"></script>
-<script src="assets/js/data/achievement_db.js"></script><script src="assets/js/data/fish_data.js"></script><script src="assets/js/data/craft_recipe_data.js"></script><script src="assets/js/data/minion_data.js"></script><script src="assets/js/data/mount_data.js"></script><script src="assets/js/data/ff_hunt_acq_preset.js"></script><script src="assets/js/data/fc_ja_description_sheets.js"></script><script src="assets/js/data/triple_triad_data.js"></script><script src="assets/js/data/yokai_event_data.js"></script><script src="assets/js/data/relic_series.js"></script><script src="assets/js/app.js"></script></body>
+<script src="assets/js/data/achievement_db.js"></script><script src="assets/js/data/fish_data.js"></script><script src="assets/js/data/craft_recipe_data.js"></script><script src="assets/js/data/minion_data.js"></script><script src="assets/js/data/mount_data.js"></script><script src="assets/js/data/ff_hunt_acq_preset.js"></script><script src="assets/js/data/fc_ja_description_sheets.js"></script><script src="assets/js/data/triple_triad_data.js"></script><script src="assets/js/data/yokai_event_data.js"></script><script src="assets/js/data/relic_series.js"></script><script src="assets/js/app.js"></script><script src="assets/js/eorzea-hub.js"></script></body>
 </html>

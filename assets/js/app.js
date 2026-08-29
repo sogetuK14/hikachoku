@@ -2521,7 +2521,7 @@ function renderAchievementDataPackInfo(){
  const doneCount=Object.values(d.achievementProgress||{}).filter(v=>v&&v.done).length;
  el.innerHTML=`${ACHIEVEMENT_DATA_META.label} ／ データ日 ${ACHIEVEMENT_DATA_META.version}<br>
  実データ <b>${total.toLocaleString("ja-JP")}件</b> ／ 分類 ${categoryCount} ／ 最大ID ${maxId}<br>
- はいびすの登録進捗 ${progressCount}件（取得済み ${doneCount}件）<br>
+ 登録進捗 ${progressCount}件（取得済み ${doneCount}件）<br>
  <span class="muted">アチーブメント本体と取得状況は別保存です。レガシーは通常表示から除外していますが、データ自体は保持しています。今後データパックを更新しても、同じIDの取得状況はそのまま引き継ぎます。</span>`;
 }
 function renderAchievements(){
@@ -4901,11 +4901,16 @@ function lodestoneUrls(id){
  return {profile:base,jobs:base+"class_job/"};
 }
 const EORZEA_LODESTONE_PROXY_KEY="eorzea_lodestone_proxy_v1";
+function normalizeWorkerUrl(value){
+ let v=String(value||"").trim();
+ if(v&&!/^https?:\/\//i.test(v))v="https://"+v;
+ return v.replace(/\/+$/,"");
+}
 function lodestoneProxyUrl(){
- return String(localStorage.getItem(EORZEA_LODESTONE_PROXY_KEY)||"").trim().replace(/\/+$/,"");
+ return normalizeWorkerUrl(localStorage.getItem(EORZEA_LODESTONE_PROXY_KEY)||"");
 }
 function saveLodestoneProxyUrl(value){
- const v=String(value||"").trim().replace(/\/+$/,"");
+ const v=normalizeWorkerUrl(value);
  if(v)localStorage.setItem(EORZEA_LODESTONE_PROXY_KEY,v);
  else localStorage.removeItem(EORZEA_LODESTONE_PROXY_KEY);
  return v;
@@ -4996,7 +5001,16 @@ function parseLodestoneProfileHtml(html,id,url){
  let fc="";
  const lines=body.split(/\n+/).map(x=>x.trim()).filter(Boolean),fci=lines.findIndex(x=>x==="フリーカンパニー");
  if(fci>=0)fc=lines.slice(fci+1,fci+5).find(x=>x&&!/^Image$/.test(x)&&!/^プロフィール$/.test(x))||"";
- const jm=body.match(/LEVEL\s*(\d+)\s*([^\n]+)/i);
+ const profileJobNames=[
+  "剣術士","格闘士","斧術士","槍術士","弓術士","双剣士","幻術士","呪術士","巴術士",
+  "ナイト","戦士","暗黒騎士","ガンブレイカー",
+  "白魔道士","学者","占星術師","賢者",
+  "モンク","竜騎士","忍者","侍","リーパー","ヴァイパー",
+  "吟遊詩人","機工士","踊り子",
+  "黒魔道士","召喚士","赤魔道士","ピクトマンサー","青魔道士","魔獣使い"
+ ];
+ const jobPattern=profileJobNames.map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|");
+ const jm=body.match(new RegExp(`LEVEL\\s*(\\d+)\\s*(${jobPattern})`,"i"));
  const currentJob=jm?{level:Number(jm[1]),name:jm[2].trim()}:{level:0,name:""};
  const intro=textAfterLabel(body,"自己紹介");
  return {id:String(id),url,name,world,dc,avatar,race,tribe,gender,birthday,guardian,city,gc,fc,currentJob,intro};

@@ -371,3 +371,16 @@ button{font-size:.86rem!important}
 
 .nav-standalone{display:block;margin:4px 0}
 .nav-standalone>button,.nav-standalone>a{width:100%;box-sizing:border-box}
+
+/* EORZEA v0.3.0 connected hub */
+.hub-axis-nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.hubAxis.active{outline:2px solid currentColor;outline-offset:1px}
+.hub-material-row{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.hub-material-row:last-child{border-bottom:0}
+.hub-material-main{min-width:0}
+.hub-stock label{font-size:11px}
+.hub-stock input{width:100%}
+.hub-need{font-size:12px;white-space:nowrap}
+.hub-need strong{font-size:17px}
+.hub-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+@media(max-width:640px){.hub-material-row{grid-template-columns:1fr}.hub-stock{max-width:140px}}

@@ -2,7 +2,7 @@
 (()=>{
   const $=id=>document.getElementById(id);
   const KEY="eorzea_lodestone_proxy_v1";
-  const clean=v=>String(v||"").trim().replace(/\/+$/,"");
+  const clean=v=>{let s=String(v||"").trim();if(s&&!/^https?:\/\//i.test(s))s="https://"+s;return s.replace(/\/+$/,"")};
   const normalizeId=v=>{
     const s=String(v||"").trim();
     const m=s.match(/\/lodestone\/character\/(\d+)/i);
