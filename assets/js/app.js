@@ -2521,7 +2521,7 @@ function renderAchievementDataPackInfo(){
  const doneCount=Object.values(d.achievementProgress||{}).filter(v=>v&&v.done).length;
  el.innerHTML=`${ACHIEVEMENT_DATA_META.label} ／ データ日 ${ACHIEVEMENT_DATA_META.version}<br>
  実データ <b>${total.toLocaleString("ja-JP")}件</b> ／ 分類 ${categoryCount} ／ 最大ID ${maxId}<br>
- 登録進捗 ${progressCount}件（取得済み ${doneCount}件）<br>
+ はいびすの登録進捗 ${progressCount}件（取得済み ${doneCount}件）<br>
  <span class="muted">アチーブメント本体と取得状況は別保存です。レガシーは通常表示から除外していますが、データ自体は保持しています。今後データパックを更新しても、同じIDの取得状況はそのまま引き継ぎます。</span>`;
 }
 function renderAchievements(){
@@ -4900,19 +4900,39 @@ function lodestoneUrls(id){
  const base=`https://jp.finalfantasyxiv.com/lodestone/character/${id}/`;
  return {profile:base,jobs:base+"class_job/"};
 }
+function looksLikeLodestoneHtml(text){
+ const s=String(text||"");
+ return s.length>1000 && (
+  /finalfantasyxiv\.com\/lodestone/i.test(s) ||
+  /class=["'][^"']*(?:character|frame__chara)/i.test(s) ||
+  /キャラクター|種族\/部族\/性別|クラス・ジョブ/i.test(s)
+ );
+}
 async function fetchTextWithFallback(url){
+ const enc=encodeURIComponent(url);
  const attempts=[
-  {name:"direct",url}
+  {name:"direct",url},
+  {name:"allorigins-raw",url:`https://api.allorigins.win/raw?url=${enc}`},
+  {name:"allorigins-json",url:`https://api.allorigins.win/get?url=${enc}`,json:true}
  ];
  let lastErr=null;
  for(const a of attempts){
   try{
-   const r=await fetch(a.url,{cache:"no-store"});
-   if(!r.ok)throw new Error(`HTTP ${r.status}`);
-   const txt=await r.text();
-   if(txt&&txt.length>1000)return {text:txt,source:a.name};
-   throw new Error("empty response");
-  }catch(e){lastErr=e}
+   const r=await fetch(a.url,{cache:"no-store",headers:{Accept:a.json?"application/json,text/plain,*/*":"text/html,text/plain,*/*"}});
+   if(!r.ok)throw new Error(`${a.name}: HTTP ${r.status}`);
+   let txt="";
+   if(a.json){
+    const body=await r.json();
+    txt=String(body?.contents||"");
+   }else{
+    txt=await r.text();
+   }
+   if(looksLikeLodestoneHtml(txt))return {text:txt,source:a.name};
+   throw new Error(`${a.name}: Lodestone HTML not found`);
+  }catch(e){
+   lastErr=e;
+   console.warn("Lodestone fetch failed:",a.name,e);
+  }
  }
  throw lastErr||new Error("fetch failed");
 }
@@ -5063,36 +5083,42 @@ async function syncLodestoneProfile(){
  const input=$("ffLodestoneId"),status=$("ffProfileSyncStatus"),id=normalizeLodestoneId(input?.value);
  if(!id){alert("Lodestone IDかキャラクターページURLを入力してください");return}
  const urls=lodestoneUrls(id);
- if(status)status.innerHTML="<b>同期中…</b><div class='small'>公開プロフィールを取得しています。</div>";
+ if(status)status.innerHTML="<b>同期中…</b><div class='small'>Lodestoneの公開プロフィールを取得しています。</div>";
  let character=null,jobs=[],source="",errors=[];
- // Legacy-compatible public API first when available.
  try{
-  const r=await fetch(`https://cafemaker.wakingsands.com/character/${id}?extended=1`,{cache:"no-store"});
-  if(r.ok){
-   const parsed=parseLegacyXivapiCharacter(await r.json(),id,urls.profile);
-   if(parsed?.character?.name){character=parsed.character;jobs=parsed.jobs||[];source="Lodestone parser API"}
-  }
- }catch(e){errors.push("API")}
- if(!character){
+  const p=await fetchTextWithFallback(urls.profile);
+  const parsed=parseLodestoneProfileHtml(p.text,id,urls.profile);
+  if(!parsed?.name)throw new Error("profile parse failed");
+  character=parsed;
+  source=p.source==="direct"?"Lodestone direct":"Lodestone via AllOrigins";
   try{
-   const p=await fetchTextWithFallback(urls.profile),parsed=parseLodestoneProfileHtml(p.text,id,urls.profile);
-   if(!parsed.name)throw new Error("profile parse failed");
-   character=parsed;source=p.source==="direct"?"Lodestone direct":"Lodestone via AllOrigins";
-   try{
-    const j=await fetchTextWithFallback(urls.jobs);jobs=parseLodestoneJobsHtml(j.text);
-   }catch(e){errors.push("jobs")}
-  }catch(e){errors.push("profile")}
+   const j=await fetchTextWithFallback(urls.jobs);
+   jobs=parseLodestoneJobsHtml(j.text);
+  }catch(e){
+   errors.push("jobs");
+   console.warn("Lodestone jobs sync failed",e);
+  }
+ }catch(e){
+  errors.push("profile");
+  console.error("Lodestone profile sync failed",e);
  }
  if(!character){
   const d=load(),old=ffProfileData(d);
-  if(status)status.innerHTML=`<b>⚠ ブラウザからの自動取得はできませんでした。</b><div class="small">GitHub PagesではLodestone側のCORS制限により失敗することがあります。前回プロフィールは保持しています。下の「Lodestone HTMLを読み込む」を使えば公開情報をまとめて取り込めます。</div>`;
+  if(status)status.innerHTML=`<b>⚠ Lodestoneへ接続できませんでした。</b><div class="small">前回保存したプロフィールは保持しています。時間をおいて再試行するか、下の「HTMLからプロフィールを取り込む」を利用してください。</div>`;
   if(old.character)renderFFProfile();
   return;
  }
  const d=load(),p=ffProfileData(d);
- p.lodestoneId=id;p.profileUrl=urls.profile;p.character=character;p.jobs=jobs;p.lastFetchedAt=Date.now();p.source=source;save(d);
+ p.lodestoneId=id;
+ p.profileUrl=urls.profile;
+ p.character=character;
+ if(jobs.length)p.jobs=jobs;
+ p.lastFetchedAt=Date.now();
+ p.source=source+(jobs.length?"":"（ジョブ情報は前回値を保持）");
+ save(d);
  if(input)input.value=id;
  renderFFProfile();renderFF14();
+ if(status)status.innerHTML=`<b>✓ Lodestone同期完了</b><div class="small">${esc(source)}${jobs.length?` ／ ジョブ ${jobs.length}件`:" ／ ジョブ情報は取得できなかったため前回値を保持"}</div>`;
 }
 function renderFFProfile(){
  const box=$("ffProfileCard"),status=$("ffProfileSyncStatus");if(!box)return;
