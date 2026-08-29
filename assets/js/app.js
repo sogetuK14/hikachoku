@@ -5119,6 +5119,28 @@ async function importLodestoneHtmlFiles(){
   if(st)st.innerHTML="<b>⚠ HTMLを解析できませんでした。</b> LodestoneのプロフィールページをHTML形式で保存して、もう一度選択してください。";
  }
 }
+async function testLodestoneWorker(){
+ const status=$("ffLodestoneProxyStatus"),proxy=lodestoneProxyUrl();
+ const d=load(),p=ffProfileData(d);
+ const id=normalizeLodestoneId($("ffLodestoneId")?.value)||p.lodestoneId;
+ if(!proxy){if(status)status.innerHTML="<b>⚠ Worker URLが未設定です。</b>";return}
+ if(!id){if(status)status.innerHTML="<b>⚠ Lodestone IDを入力してください。</b>";return}
+ if(status)status.innerHTML="<b>接続テスト中…</b>";
+ try{
+  const url=`${proxy}?id=${encodeURIComponent(id)}&page=profile`;
+  const r=await fetch(url,{cache:"no-store",headers:{Accept:"text/html,text/plain,*/*"}});
+  const txt=await r.text();
+  if(!r.ok)throw new Error(`Worker HTTP ${r.status}${txt?` / ${txt.slice(0,120).replace(/\s+/g," ")}`:""}`);
+  if(!looksLikeLodestoneHtml(txt))throw new Error(`Workerは応答しましたがLodestone HTMLではありません（${txt.length}文字）`);
+  const parsed=parseLodestoneProfileHtml(txt,id,lodestoneUrls(id).profile);
+  if(!parsed?.name)throw new Error("Lodestone HTMLは取得できましたがプロフィール解析に失敗しました");
+  if(status)status.innerHTML=`<b>✓ Worker接続OK</b><div class="small">${esc(parsed.name)} の公開プロフィールを取得できました（${txt.length.toLocaleString("ja-JP")}文字）。</div>`;
+ }catch(e){
+  console.error("Worker connection test failed",e);
+  if(status)status.innerHTML=`<b>⚠ Worker接続テスト失敗</b><div class="small">${esc(e?.message||String(e))}</div>`;
+ }
+}
+
 async function syncLodestoneProfile(){
  const input=$("ffLodestoneId"),status=$("ffProfileSyncStatus"),id=normalizeLodestoneId(input?.value);
  if(!id){alert("Lodestone IDかキャラクターページURLを入力してください");return}
@@ -5140,12 +5162,15 @@ async function syncLodestoneProfile(){
   }
  }catch(e){
   errors.push("profile");
+  window.__eorzeaLastLodestoneError=e;
   console.error("Lodestone profile sync failed",e);
  }
  if(!character){
   const d=load(),old=ffProfileData(d);
-  if(status)status.innerHTML=`<b>⚠ Lodestoneへ接続できませんでした。</b><div class="small">${lodestoneProxyUrl()?"Worker経由でも取得できませんでした。":"EORZEA用Worker URLが未設定です。"} 前回保存したプロフィールは保持しています。</div>`;
-  if(old.character)renderFFProfile();
+  const err=window.__eorzeaLastLodestoneError;
+  const reason=err?.message?String(err.message):"取得または解析に失敗しました";
+  if(status)status.innerHTML=`<b>⚠ 同期失敗</b><div class="small">${lodestoneProxyUrl()?"Worker URLは設定済みです。":"EORZEA用Worker URLが未設定です。"}<br>理由：${esc(reason)}<br>前回の保存データ（最終同期 ${old.lastFetchedAt?fmt(old.lastFetchedAt):"—"}）はそのまま保持しています。</div>`;
+  if(old.character)renderFFProfile({preserveStatus:true});
   return;
  }
  const d=load(),p=ffProfileData(d);
@@ -5160,15 +5185,16 @@ async function syncLodestoneProfile(){
  renderFFProfile();renderFF14();
  if(status)status.innerHTML=`<b>✓ Lodestone同期完了</b><div class="small">${esc(source)}${jobs.length?` ／ ジョブ ${jobs.length}件`:" ／ ジョブ情報は取得できなかったため前回値を保持"}</div>`;
 }
-function renderFFProfile(){
+function renderFFProfile(options={}){
  const box=$("ffProfileCard"),status=$("ffProfileSyncStatus");if(!box)return;
+ const preserveStatus=!!options.preserveStatus;
  const d=load(),p=ffProfileData(d),c=p.character;
  if($("ffLodestoneId")&&!$("ffLodestoneId").value)$("ffLodestoneId").value=p.lodestoneId||"";
  if(!c){
   box.innerHTML='<div class="empty">Lodestone IDを登録すると、公開プロフィールをここへ保存できます。</div>';
-  if(status)status.textContent=p.lodestoneId?"未同期":"未登録";return;
+  if(status&&!preserveStatus)status.textContent=p.lodestoneId?"未同期":"未登録";return;
  }
- if(status)status.innerHTML=`<b>✓ 保存済み</b><div class="small">最終同期：${p.lastFetchedAt?fmt(p.lastFetchedAt):"—"} ／ ${esc(p.source||"公開プロフィール")}</div>`;
+ if(status&&!preserveStatus)status.innerHTML=`<b>✓ 保存済み</b><div class="small">最終同期：${p.lastFetchedAt?fmt(p.lastFetchedAt):"—"} ／ ${esc(p.source||"公開プロフィール")}</div>`;
  const identity=[c.race,c.tribe,c.gender].filter(Boolean).join(" / ");
  const jobs=(p.jobs||[]).slice().sort((a,b)=>b.level-a.level||a.name.localeCompare(b.name,"ja"));
  box.innerHTML=`<div class="ff-profile-card">
@@ -5998,6 +6024,7 @@ if($("ffLodestoneProxySave"))$("ffLodestoneProxySave").onclick=()=>{
  const st=$("ffLodestoneProxyStatus");
  if(st)st.textContent=v?"Worker URLを保存しました。":"Worker URLを入力してください。";
 };
+if($("ffLodestoneProxyTest"))$("ffLodestoneProxyTest").onclick=testLodestoneWorker;
 
 if($("ffProfileSync"))$("ffProfileSync").onclick=syncLodestoneProfile;
 if($("ffProfileOpen"))$("ffProfileOpen").onclick=()=>{
