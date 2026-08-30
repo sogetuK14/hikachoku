@@ -530,3 +530,201 @@ body.hikachoku-theme{
   .hikachoku-theme h1{font-size:22px}
   .hikachoku-tagline{font-size:11px}
 }
+
+/* =========================================================
+   HIKACHOKU eye-comfort sky theme v0.3.2
+   Calm adventurer-sky palette: low glare / low saturation / clear hierarchy.
+   This final layer intentionally neutralizes the older neon/dark overrides.
+   ========================================================= */
+body.hikachoku-theme{
+  --bg:#eaf1f4;
+  --panel:#f7fafb;
+  --panel2:#eef4f6;
+  --text:#2b3c46;
+  --muted:#647782;
+  --line:#c6d5dc;
+  --gold:#397f9d;
+  --green:#3f7f65;
+  --red:#a85a60;
+  --blue:#4b86a0;
+  --purple:#756f91;
+  --sn-cyan:#4b86a0;
+  --sn-magenta:#8b7289;
+  --sn-violet:#756f91;
+  --sn-glow:rgba(75,134,160,.08);
+  background:
+    radial-gradient(circle at 85% 0,rgba(220,169,103,.10),transparent 24rem),
+    linear-gradient(180deg,#dcebf1 0,#e9f2f5 180px,#eaf1f4 100%);
+  color:var(--text);
+  text-shadow:none;
+}
+
+/* Shell: keep the feeling of a sky-facing field notebook, not a glowing terminal. */
+.hikachoku-theme .sidebar{
+  background:#e3edf1;
+  border-right:1px solid #bdcfd7;
+  box-shadow:none;
+  backdrop-filter:none;
+}
+.hikachoku-theme .brand{
+  border-bottom-color:#bdcfd7;
+  color:#315f73;
+  text-shadow:none;
+}
+.hikachoku-theme .brand .sub,
+.hikachoku-theme .hikachoku-tagline{color:#637985}
+.hikachoku-theme .content-header{
+  background:rgba(238,245,247,.96);
+  border-bottom-color:#c4d4db;
+  box-shadow:0 2px 8px rgba(47,78,92,.05);
+  backdrop-filter:blur(6px);
+}
+.hikachoku-theme .menu-toggle{background:#dce8ed;color:#355b6d;border:1px solid #bdd0d8}
+
+/* Navigation: one calm accent, no neon/glow. */
+.hikachoku-theme .tab,
+.hikachoku-theme .nav-anchor,
+.hikachoku-theme .nav-group summary{
+  color:#405560;
+  border-color:transparent;
+  background:transparent;
+  box-shadow:none;
+  text-shadow:none;
+}
+.hikachoku-theme .tab:hover,
+.hikachoku-theme .nav-anchor:hover,
+.hikachoku-theme .nav-group summary:hover{
+  background:#d8e7ed;
+  border-color:#bfd2da;
+}
+.hikachoku-theme .tab.active,
+.hikachoku-theme .hubAxis.active{
+  background:#cfe2e9;
+  border-color:#9fbfcd;
+  color:#284f61;
+  box-shadow:none;
+  outline:none;
+}
+.hikachoku-theme .nav-group[open]{background:#dce8ed;border-color:#c3d5dc}
+.hikachoku-theme .nav-group summary::before{color:#6b838e}
+
+/* Surfaces: reduce white glare and box noise. */
+.hikachoku-theme .panel,
+.hikachoku-theme .card,
+.hikachoku-theme .listitem,
+.hikachoku-theme .stat,
+.hikachoku-theme dialog{
+  background:#f7fafb;
+  border-color:#c8d7dd;
+  box-shadow:0 1px 4px rgba(45,72,84,.045);
+  color:var(--text);
+}
+.hikachoku-theme .card,
+.hikachoku-theme .listitem,
+.hikachoku-theme .stat{background:#eef4f6}
+.hikachoku-theme .hero{
+  background:linear-gradient(135deg,#edf5f7,#e2edf1);
+  border-color:#c3d5dc;
+  box-shadow:none;
+}
+.hikachoku-theme .empty{background:#edf3f5;border-color:#c8d7dd;color:var(--muted)}
+
+/* Typography: headings are stronger through weight/spacing, not bright color. */
+.hikachoku-theme h1,
+.hikachoku-theme h2,
+.hikachoku-theme h3,
+.hikachoku-theme .pagehead b{color:#304f5e;text-shadow:none}
+.hikachoku-theme .section-kicker{
+  color:#6b818c!important;
+  text-shadow:none!important;
+  letter-spacing:.12em;
+}
+.hikachoku-theme .muted,
+.hikachoku-theme .small,
+.hikachoku-theme label,
+.hikachoku-theme .time{color:#647782}
+.hikachoku-theme .link{color:#376f89}
+
+/* Form controls: off-white instead of pure white; soft focus ring. */
+.hikachoku-theme input,
+.hikachoku-theme select,
+.hikachoku-theme textarea,
+.hikachoku-theme .dice-mode,
+.hikachoku-theme .range-preview,
+.hikachoku-theme .source-preview{
+  background:#f8faf9;
+  color:#2b3c46;
+  border-color:#bdcfd7;
+  box-shadow:none;
+}
+.hikachoku-theme input:focus,
+.hikachoku-theme select:focus,
+.hikachoku-theme textarea:focus{
+  outline:2px solid rgba(64,119,143,.18);
+  border-color:#739eaf;
+  box-shadow:none;
+}
+.hikachoku-theme input::placeholder,
+.hikachoku-theme textarea::placeholder{color:#83939b}
+
+/* Buttons: no luminous gradients or hard drop shadows. */
+.hikachoku-theme button,
+.hikachoku-theme .tab,
+.hikachoku-theme .nav-anchor{box-shadow:none!important;text-shadow:none!important}
+.hikachoku-theme button.primary,
+.hikachoku-theme .primary{
+  background:#4f8196!important;
+  border:1px solid #4f8196!important;
+  color:#f8fbfc!important;
+  box-shadow:none!important;
+}
+.hikachoku-theme button.primary:hover,
+.hikachoku-theme .primary:hover{background:#456f82!important;border-color:#456f82!important}
+.hikachoku-theme button.secondary,
+.hikachoku-theme .secondary{
+  background:#e5eef1!important;
+  border:1px solid #b8ccd4!important;
+  color:#365b6b!important;
+}
+.hikachoku-theme button.secondary:hover,
+.hikachoku-theme .secondary:hover{background:#dbe8ec!important}
+.hikachoku-theme .ghost{background:transparent!important;border-color:#b9cbd3!important;color:#4d626c!important}
+.hikachoku-theme .danger{background:#f4e9e9!important;border-color:#cda7aa!important;color:#8f4d52!important}
+.hikachoku-theme .success{background:#e4efe9!important;border-color:#afcdbd!important;color:#3f705b!important}
+
+/* Status badges: semantic but deliberately desaturated. */
+.hikachoku-theme .badge{background:#e1ecef;border-color:#bdd1d8;color:#41616e}
+.hikachoku-theme .badge.gold{background:#eee8d9;border-color:#d2c39d;color:#726036}
+.hikachoku-theme .badge.green{background:#e2eee8;border-color:#b8d0c3;color:#456c59}
+.hikachoku-theme .badge.purple{background:#e9e6ef;border-color:#c8c0d4;color:#625b76}
+.hikachoku-theme .stat b,
+.hikachoku-theme .hub-need strong{color:#426f83}
+
+/* Remove legacy neon/grid decoration from dense FF14 widgets. */
+.hikachoku-theme [class*="neon"],
+.hikachoku-theme [class*="glow"]{text-shadow:none!important;box-shadow:none!important}
+.hikachoku-theme .pcPortrait{border-color:#b9cdd5;background:#e9f0f2}
+.hikachoku-theme .et-alarm-time,
+.hikachoku-theme .activity-clock,
+.hikachoku-theme .activity-history-time{color:#4d778a!important;text-shadow:none!important}
+.hikachoku-theme #etAlarmAlert{
+  background:#edf5f7!important;
+  color:#304650!important;
+  border-color:#9fbfc9!important;
+  box-shadow:0 8px 24px rgba(45,72,84,.16)!important;
+}
+.hikachoku-theme .fc-journal summary,
+.hikachoku-theme .ach-progress-event{color:#4c6671}
+
+/* Dark inline leftovers used by older components. */
+.hikachoku-theme [style*="background:#0"],
+.hikachoku-theme [style*="background: #0"]{color:var(--text)}
+
+/* Mobile overlay can stay dark enough to communicate modality, but not pitch black. */
+@media(max-width:900px){.hikachoku-theme .sidebar-overlay.open{background:rgba(43,60,70,.45)}}
+
+@media(prefers-reduced-motion:reduce){
+  .hikachoku-theme *,
+  .hikachoku-theme *::before,
+  .hikachoku-theme *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
