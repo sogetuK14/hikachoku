@@ -14,7 +14,20 @@
 <h1>ヒカチョク</h1><div class="hikachoku-tagline">ヒカセン、進捗どうですか？</div>
 <div class="sub">v0.3.2 “Eye-comfort sky”<br/>エオルゼアの記録を、ひとつの場所に。</div>
 </div>
-<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="eorzeaHub">🧭 つながるヒカチョク</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><button class="tab" data-view="weapons">武器制作</button><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
+  <!-- 左カラムのリンク -->
+<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button>
+  <button class="tab" data-view="eorzeaHub">🧭 つながるヒカチョク</button>
+  <button class="tab" data-view="achievements">アチーブメント</button>
+  <button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button>
+  <button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button>
+  <button class="tab" data-view="guildleves">ギルドリーヴ</button>
+  <button class="tab" data-view="crafting">制作手帳</button>
+  <button class="tab" data-view="weapons">武器制作</button>
+  <button class="tab" data-view="fishing">釣り手帳</button>
+  <button class="tab" data-view="ffcollect">収集図鑑</button>
+  <button class="tab" data-view="bicolor">バイカラージェム</button>
+  <button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button>
+  <button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
 </aside>
 <div class="content-wrap">
 <header class="content-header">
@@ -327,7 +340,13 @@
 </section>
 <section class="view" id="achievements">
 <section class="panel" id="achievementArchive">
-<div class="row"><div><h2>🏆 アチーブメント記録庫</h2><div class="small">日本語アチーブメント実データを内蔵。データ本体と取得状況を分離して保存します。</div></div><button class="secondary" id="achOfficialTop">公式一覧</button></div>
+<div class="row">
+  <div>
+    <h2>🏆 アチーブメント記録庫</h2>
+    <div class="small">アチーブメント一覧。データ本体と取得状況を保存します。</div>
+  </div>
+  <button class="secondary" id="achOfficialTop">公式一覧</button>
+</div>
 <div class="card" id="achDataPackInfo" style="border-color:var(--blue)">
 <b>📦 アチーブメント・データパック</b>
 <div class="small" id="achDataPackMeta">内蔵データを確認中…</div>
@@ -351,8 +370,17 @@
 <div><label>タグ検索</label><input id="achTagSearch" placeholder="例：事件屋、黄金、優先"/></div>
 <div><label>入力状況</label><select id="achInputStatus"><option value="">すべて</option><option value="noDate">達成日なし</option><option value="noNote">メモなし</option><option value="hasChecklist">チェックリストあり</option><option value="checklistIncomplete">チェックリスト未完了</option><option value="hasTag">タグあり</option></select></div>
 </div>
+  
 <div class="inline2">
-<div><label>報酬</label><select id="achReward"><option value="">すべて</option><option value="title">称号あり</option><option value="item">アイテムあり</option></select></div>
+<div>
+  <label>報酬</label>
+  <select id="achReward">
+    <option value="">すべて</option>
+    <option value="title">称号あり</option>
+    <option value="item">アイテムあり</option>
+  </select>
+</div>
+  
 <div><label>並び順</label><select id="achSort"><option value="id">ゲーム内順</option><option value="name">名前順</option><option value="dateDesc">達成日が新しい順</option><option value="dateAsc">達成日が古い順</option></select></div>
 </div>
 <div class="wrap" style="margin:10px 0">
@@ -576,7 +604,11 @@
 <div class="grid3" style="margin-top:10px">
 <div class="listitem"><b>🐾 ミニオン</b><div class="small" id="fcHubMinions">未取得</div></div>
 <div class="listitem"><b>🐎 マウント</b><div class="small" id="fcHubMounts">未取得</div></div>
-<div class="listitem"><div class="row"><b>🏆 アチーブメント</b><button class="secondary fcHomeLink" data-view-target="achievements" type="button">専用ページへ</button></div><div class="small" id="fcHubAchievements">未取得</div><div class="small">達成日・タグ・進捗管理はアチーブメントページに集約します。</div></div>
+<div class="listitem"><div class="row"><b>🏆 アチーブメント</b>
+  <button class="secondary fcHomeLink" data-view-target="achievements" type="button">専用ページへ</button>
+</div>
+  <div class="small" id="fcHubAchievements">未取得</div>
+  <div class="small">達成日・タグ・進捗管理はアチーブメントページに集約します。</div></div>
 <div class="listitem"><b>💇 ヘアカタログ</b><div class="small" id="fcHubHairstyles">未取得</div></div>
 <div class="listitem"><b>🙌 エモート</b><div class="small" id="fcHubEmotes">未取得</div></div>
 <div class="listitem"><b>🎵 オーケストリオン</b><div class="small" id="fcHubOrchestrions">未取得</div></div>
