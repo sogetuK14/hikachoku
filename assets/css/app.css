@@ -20,7 +20,29 @@ main{max-width:1400px;margin:0 auto;padding:20px 24px 50px}.sidebar-overlay{disp
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}@media(min-width:850px){.stats{grid-template-columns:repeat(5,1fr)}}.stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px}.stat b{display:block;font-size:1.5rem;color:var(--gold)}
 textarea,input,select{width:100%;padding:11px;border-radius:9px;border:1px solid var(--line);background:#101a27;color:var(--text);font:inherit}textarea{min-height:120px;resize:vertical}label{display:block;margin:11px 0 6px}
 button{padding:9px 13px;border-radius:9px;border:0;font-weight:700;cursor:pointer}.primary{background:var(--gold);color:#251f11}.secondary{background:#3a4a60;color:var(--text)}.danger{background:transparent;border:1px solid var(--red);color:#ffc0c0}.success{background:#28523a;color:#dcffe6}.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
-.row{display:flex;gap:10px;align-items:center;justify-content:space-between}.wrap{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.inline2{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:650px){.inline2{grid-template-columns:1fr}}
+
+.row{
+ display:flex;
+ gap:10px;
+ align-items:center;
+ justify-content:space-between
+}
+
+.wrap{
+ display:flex;
+ gap:8px;
+ flex-wrap:wrap;
+ align-items:center
+}
+
+.inline2{
+ display:grid;
+ grid-template-columns:2fr 2fr;
+ gap:10px
+}
+
+@media(max-width:650px){
+ .inline2{grid-template-columns:1fr}}
 .badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#30465e;border:1px solid #47637f;font-size:.83rem;margin:2px}.badge.gold{background:#5d4d22;border-color:#8d742f;color:#fff1bc}.badge.green{background:#224835;border-color:#397357;color:#d6ffe2}.badge.purple{background:#44385e;border-color:#685590;color:#eee1ff}
 .listitem{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px;margin:9px 0}.empty{padding:20px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
 .link{color:#a9d2ff;overflow-wrap:anywhere}.candidate{border-left:5px solid var(--gold)}.archived{border-left:5px solid var(--green)}.status-cancelled{text-decoration:line-through;opacity:.68}.status-postponed{border-left:5px solid var(--gold)}.status-stopped{border-left:5px solid var(--red)}.time{font-size:.82rem;color:var(--muted)}
