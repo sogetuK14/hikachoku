@@ -305,7 +305,8 @@
 </div>
 <div id="dmgOpenerTimeline"></div>
 <div id="dmgRows"></div>
-<div class="grid3" style="margin-top:10px"><div><label>アクション</label><select id="dmgActionSelect"><option data-cdh="false" value="240">ヘヴィスウィング（240）</option>
+<div class="grid3" style="margin-top:10px"><div>
+<label>アクション</label><select id="dmgActionSelect"><option data-cdh="false" value="240">ヘヴィスウィング（240）</option>
 <option data-cdh="false" value="340">メイム（コンボ）（340）</option>
 <option data-cdh="false" value="500">シュトルムヴィント（コンボ）（500）</option>
 <option data-cdh="false" value="500">シュトルムブレハ（コンボ）（500）</option>
@@ -770,11 +771,25 @@
 <label>ページ内の記録種類</label><select id="stackAddEntryType">
 <option>記録・メモ</option><option>画像・SS</option><option>チェックリスト</option><option>リンク・資料</option><option>ログ・データ</option><option>感想</option><option>結果・まとめ</option><option>その他</option>
 </select>
-<label>タイトル</label><input id="stackAddTitle" placeholder="任意"/>
-<label>本文</label><textarea id="stackAddText" placeholder="感想、ログ、進捗など"></textarea>
+<label>タイトル</label>
+  <input id="stackAddTitle" placeholder="任意"/>
+<label>本文</label>
+  <textarea id="stackAddText" placeholder="感想、ログ、進捗など"></textarea>
 <div class="inline2">
-<div><label>日時</label><input id="stackAddTime" type="datetime-local"/></div>
-<div><label>状態</label><select id="stackAddStatus"><option value="実施">○ 実施</option><option value="完了">● 完了</option><option value="延期">／ 延期</option><option value="中止">× 中止</option><option value="取消">~~ 取消</option></select></div>
+<div>
+  <label>日時</label>
+  <input id="stackAddTime" type="datetime-local"/>
+</div>
+<div>
+  <label>状態</label>
+  <select id="stackAddStatus">
+    <option value="実施">○ 実施</option>
+    <option value="完了">● 完了</option>
+    <option value="延期">／ 延期</option>
+    <option value="中止">× 中止</option>
+    <option value="取消">~~ 取消</option>
+  </select>
+</div>
 </div>
 <div class="inline2">
 <div><label>実施時間（分・任意）</label><input id="stackAddMinutes" min="0" type="number"/></div>
