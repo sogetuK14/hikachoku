@@ -241,7 +241,7 @@ input,select,textarea{font-size:.92rem!important}
 button{font-size:.86rem!important}
 .listitem{font-size:.92rem}
 .badge{font-size:.72rem!important}
-@media(max-width:900px){html{font-size:16px}}
+@media(max-width:700px){html{font-size:16px}}
 
 
 
