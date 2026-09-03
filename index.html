@@ -14,20 +14,7 @@
 <h1>ヒカチョク</h1><div class="hikachoku-tagline">ヒカセン、進捗どうですか？</div>
 <div class="sub">v0.3.2 “Eye-comfort sky”<br/>エオルゼアの記録を、ひとつの場所に。</div>
 </div>
-  <!-- 左カラムのリンク -->
-<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button>
-  <button class="tab" data-view="eorzeaHub">🧭 つながるヒカチョク</button>
-  <button class="tab" data-view="achievements">アチーブメント</button>
-  <button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button>
-  <button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button>
-  <button class="tab" data-view="guildleves">ギルドリーヴ</button>
-  <button class="tab" data-view="crafting">制作手帳</button>
-  <button class="tab" data-view="weapons">武器制作</button>
-  <button class="tab" data-view="fishing">釣り手帳</button>
-  <button class="tab" data-view="ffcollect">収集図鑑</button>
-  <button class="tab" data-view="bicolor">バイカラージェム</button>
-  <button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button>
-  <button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
+<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="eorzeaHub">🧭 つながるヒカチョク</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><button class="tab" data-view="weapons">武器制作</button><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
 </aside>
 <div class="content-wrap">
 <header class="content-header">
@@ -318,8 +305,7 @@
 </div>
 <div id="dmgOpenerTimeline"></div>
 <div id="dmgRows"></div>
-<div class="grid3" style="margin-top:10px"><div>
-<label>アクション</label><select id="dmgActionSelect"><option data-cdh="false" value="240">ヘヴィスウィング（240）</option>
+<div class="grid3" style="margin-top:10px"><div><label>アクション</label><select id="dmgActionSelect"><option data-cdh="false" value="240">ヘヴィスウィング（240）</option>
 <option data-cdh="false" value="340">メイム（コンボ）（340）</option>
 <option data-cdh="false" value="500">シュトルムヴィント（コンボ）（500）</option>
 <option data-cdh="false" value="500">シュトルムブレハ（コンボ）（500）</option>
@@ -338,16 +324,9 @@
 <div class="small" style="margin-top:8px">※ レイド利用を想定し、飯・薬はHQを初期値にしています。NQへ切替・手動上書きも可能です。実戦DPSではなく、スキル回し・装備変更前後を比較するための理論値です。</div>
 </section>
 </section>
-  
 <section class="view" id="achievements">
 <section class="panel" id="achievementArchive">
-<div class="row">
-  <div>
-    <h2>🏆 アチーブメント記録庫</h2>
-    <div class="small">アチーブメント一覧。データ本体と取得状況を保存します。</div>
-  </div>
-  <button class="secondary" id="achOfficialTop">公式一覧</button>
-</div>
+<div class="row"><div><h2>🏆 アチーブメント記録庫</h2><div class="small">日本語アチーブメント実データを内蔵。データ本体と取得状況を分離して保存します。</div></div><button class="secondary" id="achOfficialTop">公式一覧</button></div>
 <div class="card" id="achDataPackInfo" style="border-color:var(--blue)">
 <b>📦 アチーブメント・データパック</b>
 <div class="small" id="achDataPackMeta">内蔵データを確認中…</div>
@@ -359,11 +338,8 @@
 <div class="stat">表示中<b id="achShown">0</b></div>
 <div class="stat">達成率<b id="achRate">0%</b></div>
 </div>
-<div class="inline2" style="margin-top:10px">
-<div>
-  <label>名前・条件を検索</label>
-  <input id="achSearch" placeholder="例：漁師、FATE、ファントムウェポン"/>
-</div>
+<div class="inline2" style="margin-top:14px">
+<div><label>名前・条件を検索</label><input id="achSearch" placeholder="例：漁師、FATE、ファントムウェポン"/></div>
 <div><label>大分類</label><select id="achKind"><option value="">すべて</option><option value="PvP">PvP</option><option value="その他">その他</option><option value="アイテム">アイテム</option><option value="キャラクター">キャラクター</option><option value="クエスト">クエスト</option><option value="グランドカンパニー">グランドカンパニー</option><option value="バトル">バトル</option><option value="探検">探検</option><option value="製作・採集">製作・採集</option></select></div>
 </div>
 <div class="inline2">
@@ -374,17 +350,8 @@
 <div><label>タグ検索</label><input id="achTagSearch" placeholder="例：事件屋、黄金、優先"/></div>
 <div><label>入力状況</label><select id="achInputStatus"><option value="">すべて</option><option value="noDate">達成日なし</option><option value="noNote">メモなし</option><option value="hasChecklist">チェックリストあり</option><option value="checklistIncomplete">チェックリスト未完了</option><option value="hasTag">タグあり</option></select></div>
 </div>
-  
 <div class="inline2">
-<div>
-  <label>報酬</label>
-  <select id="achReward">
-    <option value="">すべて</option>
-    <option value="title">称号あり</option>
-    <option value="item">アイテムあり</option>
-  </select>
-</div>
-  
+<div><label>報酬</label><select id="achReward"><option value="">すべて</option><option value="title">称号あり</option><option value="item">アイテムあり</option></select></div>
 <div><label>並び順</label><select id="achSort"><option value="id">ゲーム内順</option><option value="name">名前順</option><option value="dateDesc">達成日が新しい順</option><option value="dateAsc">達成日が古い順</option></select></div>
 </div>
 <div class="wrap" style="margin:10px 0">
@@ -440,6 +407,10 @@
 <div><label>表示件数</label><select id="craftPageSize">
 <option value="100">100件</option><option value="200">200件</option><option value="500">500件</option>
 </select></div>
+</div>
+<div class="craft-filter-strip" aria-label="制作手帳の追加絞り込み">
+<div><label>分類</label><select id="craftClassification"><option value="">すべて</option><option value="normal">通常</option><option value="secret">秘伝書</option><option value="cosmo">コスモ</option></select></div>
+<div><label>関連</label><select id="craftRelated"><option value="">すべて</option><option value="leve">リーヴあり</option><option value="leveTodo">リーヴ未完了</option></select></div>
 </div>
 <div id="craftingSummary"></div>
 <div class="card" id="craftInventoryPanel" style="border-color:var(--blue);margin:14px 0">
@@ -608,11 +579,7 @@
 <div class="grid3" style="margin-top:10px">
 <div class="listitem"><b>🐾 ミニオン</b><div class="small" id="fcHubMinions">未取得</div></div>
 <div class="listitem"><b>🐎 マウント</b><div class="small" id="fcHubMounts">未取得</div></div>
-<div class="listitem"><div class="row"><b>🏆 アチーブメント</b>
-  <button class="secondary fcHomeLink" data-view-target="achievements" type="button">専用ページへ</button>
-</div>
-  <div class="small" id="fcHubAchievements">未取得</div>
-  <div class="small">達成日・タグ・進捗管理はアチーブメントページに集約します。</div></div>
+<div class="listitem"><div class="row"><b>🏆 アチーブメント</b><button class="secondary fcHomeLink" data-view-target="achievements" type="button">専用ページへ</button></div><div class="small" id="fcHubAchievements">未取得</div><div class="small">達成日・タグ・進捗管理はアチーブメントページに集約します。</div></div>
 <div class="listitem"><b>💇 ヘアカタログ</b><div class="small" id="fcHubHairstyles">未取得</div></div>
 <div class="listitem"><b>🙌 エモート</b><div class="small" id="fcHubEmotes">未取得</div></div>
 <div class="listitem"><b>🎵 オーケストリオン</b><div class="small" id="fcHubOrchestrions">未取得</div></div>
@@ -807,25 +774,11 @@
 <label>ページ内の記録種類</label><select id="stackAddEntryType">
 <option>記録・メモ</option><option>画像・SS</option><option>チェックリスト</option><option>リンク・資料</option><option>ログ・データ</option><option>感想</option><option>結果・まとめ</option><option>その他</option>
 </select>
-<label>タイトル</label>
-  <input id="stackAddTitle" placeholder="任意"/>
-<label>本文</label>
-  <textarea id="stackAddText" placeholder="感想、ログ、進捗など"></textarea>
+<label>タイトル</label><input id="stackAddTitle" placeholder="任意"/>
+<label>本文</label><textarea id="stackAddText" placeholder="感想、ログ、進捗など"></textarea>
 <div class="inline2">
-<div>
-  <label>日時</label>
-  <input id="stackAddTime" type="datetime-local"/>
-</div>
-<div>
-  <label>状態</label>
-  <select id="stackAddStatus">
-    <option value="実施">○ 実施</option>
-    <option value="完了">● 完了</option>
-    <option value="延期">／ 延期</option>
-    <option value="中止">× 中止</option>
-    <option value="取消">~~ 取消</option>
-  </select>
-</div>
+<div><label>日時</label><input id="stackAddTime" type="datetime-local"/></div>
+<div><label>状態</label><select id="stackAddStatus"><option value="実施">○ 実施</option><option value="完了">● 完了</option><option value="延期">／ 延期</option><option value="中止">× 中止</option><option value="取消">~~ 取消</option></select></div>
 </div>
 <div class="inline2">
 <div><label>実施時間（分・任意）</label><input id="stackAddMinutes" min="0" type="number"/></div>
@@ -1621,5 +1574,5 @@ SANチェック処理
 <script src="assets/js/extra-2.js"></script>
 <script src="assets/js/extra-3.js"></script>
 <script src="assets/js/extra-4.js"></script>
-<script src="assets/js/data/achievement_db.js"></script><script src="assets/js/data/fish_data.js"></script><script src="assets/js/data/craft_recipe_data.js"></script><script src="assets/js/data/minion_data.js"></script><script src="assets/js/data/mount_data.js"></script><script src="assets/js/data/ff_hunt_acq_preset.js"></script><script src="assets/js/data/fc_ja_description_sheets.js"></script><script src="assets/js/data/triple_triad_data.js"></script><script src="assets/js/data/yokai_event_data.js"></script><script src="assets/js/data/relic_series.js"></script><script src="assets/js/app.js"></script><script src="assets/js/eorzea-hub.js"></script></body>
+<script src="assets/js/data/achievement_db.js"></script><script src="assets/js/data/fish_data.js"></script><script src="assets/js/data/craft_recipe_data.js"></script><script src="assets/js/data/craft_recipe_meta_data.js"></script><script src="assets/js/data/craft_item_meta_data.js"></script><script src="assets/js/data/minion_data.js"></script><script src="assets/js/data/mount_data.js"></script><script src="assets/js/data/ff_hunt_acq_preset.js"></script><script src="assets/js/data/fc_ja_description_sheets.js"></script><script src="assets/js/data/triple_triad_data.js"></script><script src="assets/js/data/yokai_event_data.js"></script><script src="assets/js/data/relic_series.js"></script><script src="assets/js/app.js"></script><script src="assets/js/eorzea-hub.js"></script></body>
 </html>

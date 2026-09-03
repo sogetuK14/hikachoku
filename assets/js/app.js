@@ -2686,6 +2686,29 @@ function craftPatchLabel(n){
  return `${major}.${minor}${sub?sub:""}`;
 }
 function craftRecipeState(d,id){return d.craftingProgress?.[id]||{done:false,note:""};}
+function craftRecipeMeta(recipe){
+ const row=(typeof CRAFT_RECIPE_META_DATA!=="undefined"&&CRAFT_RECIPE_META_DATA[recipe.id])||[0,0];
+ return {notebookId:Number(row[0])||0,statusRequiredId:Number(row[1])||0};
+}
+function craftItemMeta(itemId){
+ const row=typeof CRAFT_ITEM_META_DATA!=="undefined"?CRAFT_ITEM_META_DATA[itemId]:null;
+ return row?{levelEquip:Number(row[0])||0,classJobCategoryId:Number(row[1])||0,classJobs:row[2]||"",equipSlotCategoryId:Number(row[3])||0,itemUiCategoryId:Number(row[4])||0,itemUiCategory:row[5]||""}:null;
+}
+function craftIsCosmo(recipe){
+ const id=craftRecipeMeta(recipe).notebookId;
+ return id>0&&typeof CRAFT_COSMO_NOTEBOOK_IDS!=="undefined"&&CRAFT_COSMO_NOTEBOOK_IDS.includes(id);
+}
+function craftSecretName(recipe){return recipe.secret>0&&typeof CRAFT_SECRET_BOOK_NAMES!=="undefined"?(CRAFT_SECRET_BOOK_NAMES[recipe.secret]||""):""}
+function craftDisplayTags(recipe,linked){
+ const tags=[],secretName=craftSecretName(recipe),meta=craftRecipeMeta(recipe);
+ if(secretName)tags.push(`<span class="badge gold">${esc(secretName)}</span>`);
+ if(craftIsCosmo(recipe))tags.push('<span class="badge purple">コスモ</span>');
+ if(recipe.expert)tags.push('<span class="badge craft-expert">高難易度</span>');
+ if(recipe.specialist)tags.push('<span class="badge craft-specialist">マイスター</span>');
+ if(meta.statusRequiredId)tags.push('<span class="badge craft-facility">製作施設条件</span>');
+ if(linked.length)tags.push(`<span class="badge green">リーヴ${linked.length>1?`×${linked.length}`:""}</span>`);
+ return tags.join("");
+}
 function craftLeveIndex(){
  const map=new Map();
  for(const leve of guildleveData){
@@ -2702,7 +2725,7 @@ function craftLinkedLeves(recipe,index){return index.get(`${CRAFT_JOB_LABEL[reci
 function filteredCraftRecipes(index=craftLeveIndex()){
  const d=load();
  const q=($("craftSearch")?.value||"").trim().toLowerCase();
- const job=$("craftJob")?.value||"",band=$("craftLevelBand")?.value||"",status=$("craftStatus")?.value||"",special=$("craftSpecial")?.value||"";
+ const job=$("craftJob")?.value||"",band=$("craftLevelBand")?.value||"",status=$("craftStatus")?.value||"",special=$("craftSpecial")?.value||"",classification=$("craftClassification")?.value||"",related=$("craftRelated")?.value||"";
  let min=0,max=999;
  if(band){const p=band.split("-").map(Number);min=p[0];max=p[1];}
  return CRAFT_RECIPE_DATA.filter(r=>{
@@ -2714,12 +2737,20 @@ function filteredCraftRecipes(index=craftLeveIndex()){
    ||(special==="expert"&&r.expert)
    ||(special==="noquick"&&!r.quick);
   const linked=craftLinkedLeves(r,index);
+  const isSecret=Number(r.secret)>0,isCosmo=craftIsCosmo(r);
+  const classificationOk=!classification
+   ||(classification==="normal"&&!isSecret&&!isCosmo)
+   ||(classification==="secret"&&isSecret)
+   ||(classification==="cosmo"&&isCosmo);
+  const relatedOk=!related
+   ||(related==="leve"&&linked.length>0)
+   ||(related==="leveTodo"&&linked.some(x=>!leveState(d,x.leve.id).done));
   const leveHay=linked.flatMap(x=>[x.leve.name,x.leve.acceptPlace,x.leve.acceptNpc,x.leve.deliveryPlace,x.leve.clientName]).join(" ").toLowerCase();
   return (!q||r.name.toLowerCase().includes(q)||leveHay.includes(q))
    &&(!job||r.craft===job)
    &&(!band||(r.level>=min&&r.level<=max))
    &&(!status||(status==="done"?st.done:!st.done))
-   &&specialOk;
+   &&specialOk&&classificationOk&&relatedOk;
  });
 }
 function craftBandLabel(level){const n=Number(level)||0;if(n<10)return "Lv.1～9";const from=Math.floor(n/10)*10;return n>=100?`Lv.${from}～`:`Lv.${from}～${from+9}`}
@@ -2730,6 +2761,7 @@ function craftLeveDetailHtml(pair,d){
 function renderCrafting(){
  if(!$("craftRecipeList"))return;
  const d=load(),leveIndex=craftLeveIndex(),arr=filteredCraftRecipes(leveIndex),size=Number($("craftPageSize")?.value||100);
+ const filterActive=!!(($("craftSearch")?.value||"").trim()||$("craftJob")?.value||$("craftLevelBand")?.value||$("craftStatus")?.value||$("craftSpecial")?.value||$("craftClassification")?.value||$("craftRelated")?.value);
  const done=CRAFT_RECIPE_DATA.filter(r=>craftRecipeState(d,r.id).done).length;
  $("craftRecipeTotal").textContent=CRAFT_RECIPE_DATA.length.toLocaleString("ja-JP");
  $("craftRecipeDone").textContent=done.toLocaleString("ja-JP");
@@ -2739,14 +2771,14 @@ function renderCrafting(){
  const groups=new Map();for(const r of arr){const job=CRAFT_JOB_LABEL[r.craft]||r.craft,band=craftBandLabel(r.level);if(!groups.has(job))groups.set(job,new Map());const bands=groups.get(job);if(!bands.has(band))bands.set(band,[]);bands.get(band).push(r)}
  $("craftPageInfo").textContent=`開いたレベル帯ごと最大${size}制作物`;
  $("craftPrev").disabled=true;$("craftNext").disabled=true;
- $("craftRecipeList").innerHTML=arr.length?[...groups].map(([job,bands])=>{const jo=craftOpenJobs.has(job);return `<details class="craft-tree-job" data-craft-job="${esc(job)}" ${jo?"open":""}><summary><b>${esc(job)}</b><span>${[...bands.values()].flat().length.toLocaleString("ja-JP")}件</span></summary>${jo?`<div class="craft-tree-bands">${[...bands].map(([band,recipes])=>{const bk=`${job}\u001f${band}`,bo=craftOpenBands.has(bk);return `<details class="craft-tree-band" data-craft-band="${esc(bk)}" ${bo?"open":""}><summary><b>${esc(band)}</b><span>${recipes.length.toLocaleString("ja-JP")}件</span></summary>${bo?`<div class="craft-tree-products">${recipes.slice(0,size).map(r=>{const st=craftRecipeState(d,r.id),linked=craftLinkedLeves(r,leveIndex),pk=String(r.id),po=craftOpenProducts.has(pk),mo=craftOpenMaterials.has(pk),lo=craftOpenLeveGroups.has(pk),tag=linked.length?`<span class="badge green">リーヴ${linked.length>1?`×${linked.length}`:""}</span>`:"";return `<details class="craft-tree-product ${st.done?"is-done":""}" data-craft-product="${r.id}" ${po?"open":""}><summary><label aria-label="${esc(r.name)}を制作済みにする"><input type="checkbox" class="craftCheck" data-id="${r.id}" ${st.done?"checked":""}></label><b>${esc(r.name)}</b>${tag}</summary>${po?`<div class="craft-tree-body"><div class="wrap"><span class="badge">制作手帳</span><span>Lv.${r.level}</span><span>1回の制作：${Number(r.amount||1)}個</span>${r.stars?`<span>★${r.stars}</span>`:""}</div><input class="craftNote" data-id="${r.id}" value="${esc(st.note||"")}" placeholder="制作手帳の自分用メモ"><details class="craft-tree-materials" data-craft-tree-materials="${r.id}" ${mo?"open":""}><summary>必要素材</summary><div class="craft-tree-material-body"></div></details><div class="wrap craft-tree-actions"><label><input type="checkbox" class="craftPlanToggle" data-id="${r.id}" ${(d.craftingPlan?.items?.[r.id])?"checked":""}> 計画に追加</label><input type="number" min="1" step="1" class="craftPlanQty" data-id="${r.id}" value="${Number(d.craftingPlan?.items?.[r.id]||1)}" title="作りたい個数"><button type="button" class="secondary craftOfficial" data-name="${esc(r.name)}">公式DBで検索</button></div>${linked.length?`<details class="craft-tree-leves" data-craft-leve-group="${r.id}" ${lo?"open":""}><summary>ギルドリーヴ（${linked.length}件）</summary>${lo?linked.map(x=>craftLeveDetailHtml(x,d)).join(""):""}</details>`:""}</div>`:""}</details>`}).join("")}</div>`:""}</details>`}).join("")}</div>`:""}</details>`}).join(""):'<div class="empty">該当するレシピはありません。</div>';
+ $("craftRecipeList").innerHTML=arr.length?[...groups].map(([job,bands])=>{const jo=filterActive||craftOpenJobs.has(job);return `<details class="craft-tree-job" data-craft-job="${esc(job)}" ${jo?"open":""}><summary><b>${esc(job)}</b><span>${[...bands.values()].flat().length.toLocaleString("ja-JP")}件</span></summary>${jo?`<div class="craft-tree-bands">${[...bands].map(([band,recipes])=>{const bk=`${job}\u001f${band}`,bo=filterActive||craftOpenBands.has(bk);return `<details class="craft-tree-band" data-craft-band="${esc(bk)}" ${bo?"open":""}><summary><b>${esc(band)}</b><span>${recipes.length.toLocaleString("ja-JP")}件</span></summary>${bo?`<div class="craft-tree-products">${recipes.slice(0,size).map(r=>{const st=craftRecipeState(d,r.id),linked=craftLinkedLeves(r,leveIndex),pk=String(r.id),po=craftOpenProducts.has(pk),mo=craftOpenMaterials.has(pk),lo=craftOpenLeveGroups.has(pk),tags=craftDisplayTags(r,linked),itemMeta=craftItemMeta(r.itemId),equipment=itemMeta&&itemMeta.equipSlotCategoryId?`<div class="craft-equipment"><b>装備：</b>${esc(itemMeta.classJobs||"装備条件未取得")} Lv.${itemMeta.levelEquip}～${itemMeta.itemUiCategory?` <span class="small">（${esc(itemMeta.itemUiCategory)}）</span>`:""}</div>`:"";return `<details class="craft-tree-product ${st.done?"is-done":""}" data-craft-product="${r.id}" ${po?"open":""}><summary><label aria-label="${esc(r.name)}を制作済みにする"><input type="checkbox" class="craftCheck" data-id="${r.id}" ${st.done?"checked":""}></label><b>${esc(r.name)}</b><span class="craft-tag-list">${tags}</span></summary>${po?`<div class="craft-tree-body"><div class="craft-facts"><span><b>制作：</b>${esc(CRAFT_JOB_LABEL[r.craft]||r.craft)} Lv.${r.level}</span><span>1回の制作：${Number(r.amount||1)}個</span>${r.stars?`<span>★${r.stars}</span>`:""}</div>${equipment}${tags?`<div class="craft-detail-tags">${tags}</div>`:""}<input class="craftNote" data-id="${r.id}" value="${esc(st.note||"")}" placeholder="制作手帳の自分用メモ"><details class="craft-tree-materials" data-craft-tree-materials="${r.id}" ${mo?"open":""}><summary>必要素材</summary><div class="craft-tree-material-body"></div></details><div class="wrap craft-tree-actions"><label><input type="checkbox" class="craftPlanToggle" data-id="${r.id}" ${(d.craftingPlan?.items?.[r.id])?"checked":""}> 計画に追加</label><input type="number" min="1" step="1" class="craftPlanQty" data-id="${r.id}" value="${Number(d.craftingPlan?.items?.[r.id]||1)}" title="作りたい個数"><button type="button" class="secondary craftOfficial" data-name="${esc(r.name)}">公式DBで検索</button></div>${linked.length?`<details class="craft-tree-leves" data-craft-leve-group="${r.id}" ${lo?"open":""}><summary>ギルドリーヴ（${linked.length}件）</summary>${lo?linked.map(x=>craftLeveDetailHtml(x,d)).join(""):""}</details>`:""}</div>`:""}</details>`}).join("")}</div>`:""}</details>`}).join("")}</div>`:""}</details>`}).join(""):'<div class="empty">該当するレシピはありません。</div>';
 
  renderCraftPlan();
  renderCraftInventory();
  fillCraftIngredientCatalog();
  if($("craftIndexStatus"))$("craftIndexStatus").textContent=craftIndexReady()?`準備済み ${Object.keys(craftReverseIndex.recipes).length.toLocaleString("ja-JP")}レシピ`:"未準備";
- document.querySelectorAll("[data-craft-job]").forEach(x=>x.ontoggle=()=>{const k=x.dataset.craftJob;if(x.open&&!craftOpenJobs.has(k)){craftOpenJobs.add(k);renderCrafting()}else if(!x.open)craftOpenJobs.delete(k)});
- document.querySelectorAll("[data-craft-band]").forEach(x=>x.ontoggle=()=>{const k=x.dataset.craftBand;if(x.open&&!craftOpenBands.has(k)){craftOpenBands.add(k);renderCrafting()}else if(!x.open)craftOpenBands.delete(k)});
+ document.querySelectorAll("[data-craft-job]").forEach(x=>x.ontoggle=()=>{if(filterActive)return;const k=x.dataset.craftJob;if(x.open&&!craftOpenJobs.has(k)){craftOpenJobs.add(k);renderCrafting()}else if(!x.open)craftOpenJobs.delete(k)});
+ document.querySelectorAll("[data-craft-band]").forEach(x=>x.ontoggle=()=>{if(filterActive)return;const k=x.dataset.craftBand;if(x.open&&!craftOpenBands.has(k)){craftOpenBands.add(k);renderCrafting()}else if(!x.open)craftOpenBands.delete(k)});
  document.querySelectorAll("[data-craft-product]").forEach(x=>x.ontoggle=()=>{const k=String(x.dataset.craftProduct);if(x.open&&!craftOpenProducts.has(k)){craftOpenProducts.add(k);renderCrafting()}else if(!x.open)craftOpenProducts.delete(k)});
  document.querySelectorAll("[data-craft-leve]").forEach(x=>x.ontoggle=()=>{const k=String(x.dataset.craftLeve);if(x.open&&!craftOpenLeves.has(k)){craftOpenLeves.add(k);renderCrafting()}else if(!x.open)craftOpenLeves.delete(k)});
  document.querySelectorAll("[data-craft-leve-group]").forEach(x=>x.ontoggle=()=>{const k=String(x.dataset.craftLeveGroup);if(x.open&&!craftOpenLeveGroups.has(k)){craftOpenLeveGroups.add(k);renderCrafting()}else if(!x.open)craftOpenLeveGroups.delete(k)});
@@ -6424,7 +6456,7 @@ if($("quickImportBtn"))$("quickImportBtn").onclick=async()=>{
 ["fishSearch"].forEach(id=>{if($(id))$(id).oninput=()=>renderFishing()});["fishExpansion","fishStatus","fishKind"].forEach(id=>{if($(id))$(id).onchange=()=>renderFishing()});
 
 ["craftSearch"].forEach(id=>{if($(id))$(id).oninput=()=>{craftPage=1;renderCrafting()}});
-["craftJob","craftLevelBand","craftStatus","craftSpecial","craftPageSize"].forEach(id=>{if($(id))$(id).onchange=()=>{craftPage=1;renderCrafting()}});
+["craftJob","craftLevelBand","craftStatus","craftSpecial","craftClassification","craftRelated","craftPageSize"].forEach(id=>{if($(id))$(id).onchange=()=>{craftPage=1;renderCrafting()}});
 if($("craftPrev"))$("craftPrev").onclick=()=>{craftPage=Math.max(1,craftPage-1);renderCrafting()};
 if($("craftNext"))$("craftNext").onclick=()=>{craftPage++;renderCrafting()};
 
