@@ -59,9 +59,9 @@ const ACHIEVEMENT_DATA_META={
 };
 let achPage=1;
 const achievementOpenKinds=new Set();
-const achievementOpenDoneKinds=new Set();
-const achievementOpenDetails=new Set();
-let achievementKindsInitialized=false;
+const achievementOpenCategories=new Set();
+const achievementOpenCompleted=new Set();
+const achievementOpenExtras=new Set();
 function base(){return {inbox:[],records:[],stackParents:[],stackDays:[],stackEntries:[],historyItems:[],historyEvents:[],toolChecklists:[],trpgAnalyses:[],people:[],characters:[],characterRelations:[],scenarioLibrary:[],quickCaptures:[],shopping:[],purchases:[],foodInventory:[],cookingRecipes:[],cookingHistory:[],achievements:[],achievementProgress:{},fishing:[],fishingProgress:{},craftingProgress:{},craftingPlan:{items:{},checks:{}},craftInventory:{},relicProgress:{},guildleveProgress:{},yokaiProgress:{},minionProgress:{},mountProgress:{},cardProgress:{},triadNpcProgress:{},weapons:[],ffProfile:{lodestoneId:"",profileUrl:"",lastFetchedAt:0,source:"",character:null,jobs:[],minionSync:{lastImportedAt:0,lodestoneTotal:0,matched:0,fileName:""},
 ffxivCollect:{lastCatalogSyncAt:0,catalogs:{},sources:{}}},backupMeta:{lastExportAt:0,lastImportAt:0,lastExportSavedAt:0},settings:{guideUrl:"https://www.google.com/search?q={query}+FF14+攻略",youtubeUrl:"https://www.youtube.com/results?search_query={query}+FF14"},migrated:false}}
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2)}
@@ -2510,6 +2510,7 @@ function filteredAchievements(){
 }
 function updateAchievementCategories(){
  const kind=$("achKind").value,current=$("achCategory").value;
+ const categoryLabel=$("achCategory").previousElementSibling;if(categoryLabel)categoryLabel.textContent="中分類";
  const cats=[...new Set(ACHIEVEMENT_DB.filter(a=>!kind||a.kind===kind).map(a=>a.category))].sort((a,b)=>a.localeCompare(b,"ja"));
  $("achCategory").innerHTML='<option value="">すべて</option>'+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
  if(cats.includes(current))$("achCategory").value=current;
@@ -2530,18 +2531,16 @@ function renderAchievementDataPackInfo(){
 }
 function achievementDisplayTags(a){
  const tags=[];
- if(a.category)tags.push(a.category);
  if(a.rewardTitle)tags.push("称号報酬");
  if(a.rewardItem)tags.push("アイテム報酬");
  if(a.hidden)tags.push("非表示・過去");
  return tags;
 }
-function achievementDetailHtml(a,st){
- return `<div class="achievement-toggle-detail">
- <div class="achievement-description"><b>達成条件</b><p>${nl(a.description)}</p></div>
- <div class="inline2"><div><label>取得日 <span class="small muted">（任意・手入力）</span></label><input class="achDate" data-id="${a.id}" type="date" value="${esc(st.date||"")}"></div><div><label>自分用メモ</label><input class="achNote" data-id="${a.id}" value="${esc(st.note||"")}" placeholder="進捗、思い出など"></div></div>
- <label>ユーザータグ（カンマ区切り）</label><input class="achTags" data-id="${a.id}" value="${esc((st.tags||[]).join(", "))}" placeholder="例：事件屋, 黄金, 優先">
- <label>攻略・参考URL（任意）</label><input class="achRefUrl" data-id="${a.id}" type="url" value="${esc(st.refUrl||"")}" placeholder="https://...">
+function achievementCategoryKey(kind,category){return `${kind}\u001f${category}`}
+function achievementExtraHtml(a,st){
+ return `<div class="achievement-extra-detail">
+  <label>ユーザータグ（カンマ区切り）</label><input class="achTags" data-id="${a.id}" value="${esc((st.tags||[]).join(", "))}" placeholder="例：事件屋, 黄金, 優先">
+  <label>攻略・参考URL（任意）</label><input class="achRefUrl" data-id="${a.id}" type="url" value="${esc(st.refUrl||"")}" placeholder="https://...">
  <div class="achievement-user-tags">${(st.tags||[]).map(t=>`<span class="badge">#${esc(t)}</span>`).join("")}</div>
  <div class="achievement-checklist-box">
    <div class="row"><b>任意チェックリスト</b><span class="small">${(st.checklist||[]).filter(i=>i.done).length}/${(st.checklist||[]).length}</span></div>
@@ -2551,21 +2550,20 @@ function achievementDetailHtml(a,st){
    <div class="wrap achievement-checklist-add"><input class="achSubInput" data-id="${a.id}" placeholder="例：ガンマ、サウガ、マヘス…"><button class="secondary achSubAdd" data-id="${a.id}">項目を追加</button></div>
  </div>
  <div class="wrap achievement-detail-actions"><button class="secondary achOfficial" data-name="${esc(a.name)}">公式で確認</button>${st.refUrl?`<button class="secondary achRefOpen" data-url="${esc(st.refUrl)}">参考URLを開く</button>`:""}<button class="ghost achSave" data-id="${a.id}">日付・メモ・URLを保存</button></div>
- </div>`;
+  </div>`;
 }
-function achievementRowHtml(a,st){
- const open=achievementOpenDetails.has(String(a.id));
+function achievementItemHtml(a,st){
+ const extraOpen=achievementOpenExtras.has(String(a.id));
  const tags=achievementDisplayTags(a);
- return `<details class="achievement-toggle-row ${st.done?"is-done":""}" data-ach-detail="${a.id}" ${open?"open":""}>
- <summary>
-  <label class="achievement-toggle-check"><input class="achCheck" data-id="${a.id}" type="checkbox" ${st.done?"checked":""}><span class="sr-only">完了</span></label>
-  <span class="achievement-toggle-main"><b>${esc(a.name)}</b><span class="achievement-toggle-class">${esc(a.kind)} ＞ ${esc(a.category)}</span></span>
-  <span class="achievement-toggle-points">${a.points}pt</span>
-  <span class="achievement-toggle-tags">${tags.map(t=>`<span class="badge">${esc(t)}</span>`).join("")}</span>
-  <span class="achievement-toggle-arrow" aria-hidden="true">›</span>
- </summary>
- ${open?achievementDetailHtml(a,st):""}
- </details>`;
+ return `<article class="achievement-item ${st.done?"is-done":""}" data-ach-item="${a.id}">
+  <div class="achievement-item-head"><label class="achievement-item-check"><input class="achCheck" data-id="${a.id}" type="checkbox" ${st.done?"checked":""}><span>${st.done?"達成済み":"未達成"}</span></label><h4>${esc(a.name)}</h4><span class="achievement-toggle-points">${a.points}pt</span>${tags.length?`<span class="achievement-toggle-tags">${tags.map(t=>`<span class="badge">${esc(t)}</span>`).join("")}</span>`:""}</div>
+  <div class="achievement-item-body">
+   <div class="achievement-description"><b>達成条件</b><p>${nl(a.description)}</p></div>
+   ${st.done?`<div class="achievement-date-field"><label>達成日</label><input class="achDate" data-id="${a.id}" type="date" value="${esc(st.date||"")}"></div>`:""}
+   <div class="achievement-note-field"><label>自分用メモ</label><div><input class="achNoteQuick" data-id="${a.id}" value="${esc(st.note||"")}" placeholder="進捗、思い出など"><button class="ghost achNoteSave" data-id="${a.id}">メモを保存</button></div></div>
+   <details class="achievement-extra" data-ach-extra="${a.id}" ${extraOpen?"open":""}><summary>その他の記録</summary>${extraOpen?achievementExtraHtml(a,st):""}</details>
+  </div>
+ </article>`;
 }
 function renderAchievements(){
  renderAchievementDataPackInfo();
@@ -2575,29 +2573,33 @@ function renderAchievements(){
  const visibleDone=visibleBase.filter(a=>achievementState(d,a.id).done).length;
  const arr=filteredAchievements();
  if(!$("achStatus").value)arr.sort((a,b)=>Number(achievementState(d,a.id).done)-Number(achievementState(d,b.id).done));
- const grouped=new Map();arr.forEach(a=>{if(!grouped.has(a.kind))grouped.set(a.kind,[]);grouped.get(a.kind).push(a)});
- const size=Number($("achPageSize").value||50),longest=Math.max(0,...[...grouped.values()].map(rows=>rows.length)),pages=Math.max(1,Math.ceil(longest/size));
+ const grouped=new Map();arr.forEach(a=>{if(!grouped.has(a.kind))grouped.set(a.kind,new Map());const cats=grouped.get(a.kind);if(!cats.has(a.category))cats.set(a.category,[]);cats.get(a.category).push(a)});
+ const categoryRows=[...grouped.values()].flatMap(cats=>[...cats.values()]);
+ const size=Number($("achPageSize").value||50),longest=Math.max(0,...categoryRows.map(rows=>rows.length)),pages=Math.max(1,Math.ceil(longest/size));
  achPage=Math.min(Math.max(1,achPage),pages);const start=(achPage-1)*size;
  $("achTotal").textContent=visibleBase.length;$("achDone").textContent=visibleDone;$("achPoints").textContent=points.toLocaleString("ja-JP");$("achShown").textContent=arr.length;$("achRate").textContent=(visibleBase.length?visibleDone/visibleBase.length*100:0).toFixed(1)+"%";
- if(!achievementKindsInitialized&&grouped.size){achievementOpenKinds.add(grouped.keys().next().value);achievementKindsInitialized=true}
- const forceKinds=!!($("achSearch").value.trim()||$("achKind").value||$("achCategory").value||$("achTagSearch").value.trim());
- $("achList").innerHTML=arr.length?[...grouped.entries()].map(([kind,allRows])=>{
-   const counts={todo:allRows.filter(a=>!achievementState(d,a.id).done).length,done:allRows.filter(a=>achievementState(d,a.id).done).length},open=forceKinds||achievementOpenKinds.has(kind);
-   const rows=open?allRows.slice(start,start+size):[];
-   const todo=rows.filter(a=>!achievementState(d,a.id).done);
-   const doneOpen=$("achStatus").value==="done"||achievementOpenDoneKinds.has(kind);
-   const done=doneOpen&&open?allRows.filter(a=>achievementState(d,a.id).done).slice(start,start+size):[];
-   return `<details class="achievement-kind" data-ach-kind="${esc(kind)}" ${open?"open":""}><summary><b>${esc(kind)}</b><span>未完了 ${counts.todo.toLocaleString("ja-JP")}</span><span class="achievement-kind-done-count">完了 ${counts.done.toLocaleString("ja-JP")}</span></summary><div class="achievement-toggle-table">${todo.map(a=>achievementRowHtml(a,achievementState(d,a.id))).join("")}${counts.done?`<details class="achievement-done-group" data-ach-done-kind="${esc(kind)}" ${doneOpen?"open":""}><summary>完了済み ${counts.done.toLocaleString("ja-JP")}件</summary><div>${done.map(a=>achievementRowHtml(a,achievementState(d,a.id))).join("")}</div></details>`:""}</div></details>`;
+ const forceOpen=!!($("achSearch").value.trim()||$("achKind").value||$("achCategory").value||$("achTagSearch").value.trim()||$("achStatus").value||$("achInputStatus").value||$("achReward").value);
+ $("achList").innerHTML=arr.length?[...grouped.entries()].map(([kind,categories])=>{
+   const kindRows=[...categories.values()].flat(),kindTodo=kindRows.filter(a=>!achievementState(d,a.id).done).length,kindDone=kindRows.length-kindTodo,kindOpen=forceOpen||achievementOpenKinds.has(kind);
+   const categoryHtml=kindOpen?[...categories.entries()].map(([category,allRows])=>{
+    const key=achievementCategoryKey(kind,category),todoRows=allRows.filter(a=>!achievementState(d,a.id).done),doneRows=allRows.filter(a=>achievementState(d,a.id).done),categoryOpen=forceOpen||achievementOpenCategories.has(key),completedOpen=$("achStatus").value==="done"||achievementOpenCompleted.has(key);
+    const todoPage=categoryOpen?todoRows.slice(start,start+size):[],donePage=categoryOpen&&completedOpen?doneRows.slice(start,start+size):[];
+    const statusLabel=todoRows.length?`未完了 ${todoRows.length.toLocaleString("ja-JP")}`:"✓ 完了";
+    return `<details class="achievement-category" data-ach-category="${esc(key)}" ${categoryOpen?"open":""}><summary><b>${esc(category)}</b><span>${statusLabel}</span><span class="achievement-category-done">完了 ${doneRows.length.toLocaleString("ja-JP")}</span></summary><div class="achievement-items">${todoPage.map(a=>achievementItemHtml(a,achievementState(d,a.id))).join("")}${doneRows.length?`<details class="achievement-done-group" data-ach-completed="${esc(key)}" ${completedOpen?"open":""}><summary>完了済み ${doneRows.length.toLocaleString("ja-JP")}件</summary><div>${donePage.map(a=>achievementItemHtml(a,achievementState(d,a.id))).join("")}</div></details>`:""}${categoryOpen&&(todoRows.length>size||doneRows.length>size)?`<div class="small achievement-page-note">この分類は${size}件単位で表示しています。</div>`:""}</div></details>`;
+   }).join(""):"";
+   const kindLabel=kindTodo?`未完了 ${kindTodo.toLocaleString("ja-JP")}`:"✓ 完了";
+   return `<details class="achievement-kind" data-ach-kind="${esc(kind)}" ${kindOpen?"open":""}><summary><b>${esc(kind)}</b><span>${kindLabel}</span><span class="achievement-kind-done-count">完了 ${kindDone.toLocaleString("ja-JP")}</span></summary><div class="achievement-categories">${categoryHtml}</div></details>`;
  }).join(""):'<div class="empty">条件に合うアチーブメントはありません。</div>';
- $("achPageInfo").textContent=`カテゴリごと最大${size}件 ／ 絞り込み結果 ${arr.length}件（${achPage}/${pages}ページ）`;
+ $("achPageInfo").textContent=`開いた中分類ごと最大${size}件 ／ 絞り込み結果 ${arr.length}件（${achPage}/${pages}ページ）`;
  $("achPrev").disabled=achPage<=1;$("achNext").disabled=achPage>=pages;
- document.querySelectorAll("[data-ach-kind]").forEach(x=>x.ontoggle=()=>{const kind=x.dataset.achKind;if(x.open&&!achievementOpenKinds.has(kind)){achievementOpenKinds.add(kind);if(!forceKinds)renderAchievements()}else if(!x.open)achievementOpenKinds.delete(kind)});
- document.querySelectorAll("[data-ach-done-kind]").forEach(x=>x.ontoggle=()=>{const kind=x.dataset.achDoneKind;if(x.open&&!achievementOpenDoneKinds.has(kind)){achievementOpenDoneKinds.add(kind);renderAchievements()}else if(!x.open)achievementOpenDoneKinds.delete(kind)});
- document.querySelectorAll("[data-ach-detail]").forEach(x=>x.ontoggle=()=>{const id=String(x.dataset.achDetail);if(x.open&&!achievementOpenDetails.has(id)){achievementOpenDetails.add(id);renderAchievements()}else if(!x.open)achievementOpenDetails.delete(id)});
- document.querySelectorAll(".achievement-toggle-check").forEach(x=>x.onclick=e=>e.stopPropagation());
+ document.querySelectorAll("[data-ach-kind]").forEach(x=>x.ontoggle=()=>{if(forceOpen)return;const kind=x.dataset.achKind;if(x.open&&!achievementOpenKinds.has(kind)){achievementOpenKinds.add(kind);renderAchievements()}else if(!x.open)achievementOpenKinds.delete(kind)});
+ document.querySelectorAll("[data-ach-category]").forEach(x=>x.ontoggle=()=>{if(forceOpen)return;const key=x.dataset.achCategory;if(x.open&&!achievementOpenCategories.has(key)){achievementOpenCategories.add(key);renderAchievements()}else if(!x.open)achievementOpenCategories.delete(key)});
+ document.querySelectorAll("[data-ach-completed]").forEach(x=>x.ontoggle=()=>{const key=x.dataset.achCompleted;if(x.open&&!achievementOpenCompleted.has(key)){achievementOpenCompleted.add(key);renderAchievements()}else if(!x.open)achievementOpenCompleted.delete(key)});
+ document.querySelectorAll("[data-ach-extra]").forEach(x=>x.ontoggle=()=>{const id=String(x.dataset.achExtra);if(x.open&&!achievementOpenExtras.has(id)){achievementOpenExtras.add(id);renderAchievements()}else if(!x.open)achievementOpenExtras.delete(id)});
  document.querySelectorAll(".achCheck").forEach(c=>c.onchange=()=>{const d=load(),id=c.dataset.id;d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]};const visibleDate=document.querySelector(`.achDate[data-id="${id}"]`)?.value||"";st.done=c.checked;if(c.checked){if(!st.doneAt)st.doneAt=Date.now();if(!visibleDate&&!st.date)st.date=localDateValue(Date.now())}else st.doneAt=0;if(visibleDate)st.date=visibleDate;d.achievementProgress[id]=st;save(d);renderAchievements();renderFFSummary();if(typeof renderDateArchive==="function")renderDateArchive()});
  document.querySelectorAll(".achDate").forEach(input=>input.onchange=()=>{const d=load(),id=input.dataset.id;d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]};st.date=input.value;d.achievementProgress[id]=st;save(d)});
- document.querySelectorAll(".achSave").forEach(b=>b.onclick=()=>{const d=load(),id=b.dataset.id;d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]};st.date=document.querySelector(`.achDate[data-id="${id}"]`).value;st.note=document.querySelector(`.achNote[data-id="${id}"]`).value;st.tags=document.querySelector(`.achTags[data-id="${id}"]`).value.split(/[,、]/).map(v=>v.trim()).filter(Boolean);st.refUrl=document.querySelector(`.achRefUrl[data-id="${id}"]`).value.trim();d.achievementProgress[id]=st;save(d);renderAchievements();setTimeout(()=>b.textContent="日付・メモを保存",900)});
+ document.querySelectorAll(".achNoteSave").forEach(b=>b.onclick=()=>{const d=load(),id=b.dataset.id,input=document.querySelector(`.achNoteQuick[data-id="${id}"]`);d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]};st.note=input?.value||"";d.achievementProgress[id]=st;save(d);b.textContent="保存しました";setTimeout(()=>b.textContent="メモを保存",900)});
+ document.querySelectorAll(".achSave").forEach(b=>b.onclick=()=>{const d=load(),id=b.dataset.id;d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]},dateInput=document.querySelector(`.achDate[data-id="${id}"]`),noteInput=document.querySelector(`.achNoteQuick[data-id="${id}"]`);if(dateInput)st.date=dateInput.value;if(noteInput)st.note=noteInput.value;st.tags=document.querySelector(`.achTags[data-id="${id}"]`).value.split(/[,、]/).map(v=>v.trim()).filter(Boolean);st.refUrl=document.querySelector(`.achRefUrl[data-id="${id}"]`).value.trim();d.achievementProgress[id]=st;save(d);renderAchievements()});
 
  document.querySelectorAll(".achSubAdd").forEach(b=>b.onclick=()=>{
    const id=b.dataset.id,input=document.querySelector(`.achSubInput[data-id="${id}"]`),name=input.value.trim();
