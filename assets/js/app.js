@@ -2678,6 +2678,8 @@ function renderFishing(){
 /* CRAFT_RECIPE_DATA moved to assets/js/data/craft_recipe_data.js */
 
 let craftPage=1;
+const craftOpenJobs=new Set(),craftOpenBands=new Set(),craftOpenProducts=new Set(),craftOpenLeves=new Set();
+const CRAFT_JOB_LABEL={"木工":"木工師","鍛冶":"鍛冶師","甲冑":"甲冑師","彫金":"彫金師","革細工":"革細工師","裁縫":"裁縫師","錬金":"錬金術師","調理":"調理師"};
 function craftPatchLabel(n){
  const v=Number(n||0);
  if(!v)return "";
@@ -2685,7 +2687,20 @@ function craftPatchLabel(n){
  return `${major}.${minor}${sub?sub:""}`;
 }
 function craftRecipeState(d,id){return d.craftingProgress?.[id]||{done:false,note:""};}
-function filteredCraftRecipes(){
+function craftLeveIndex(){
+ const map=new Map();
+ for(const leve of guildleveData){
+  if(!LEVE_CRAFTER_JOBS.has(leve.classJob))continue;
+  for(const delivery of leve.deliveryItems||[]){
+   const key=`${leve.classJob}\u001f${Number(delivery.itemId)}`;
+   if(!map.has(key))map.set(key,[]);
+   map.get(key).push({leve,delivery});
+  }
+ }
+ return map;
+}
+function craftLinkedLeves(recipe,index){return index.get(`${CRAFT_JOB_LABEL[recipe.craft]||recipe.craft}\u001f${Number(recipe.itemId)}`)||[]}
+function filteredCraftRecipes(index=craftLeveIndex()){
  const d=load();
  const q=($("craftSearch")?.value||"").trim().toLowerCase();
  const job=$("craftJob")?.value||"",band=$("craftLevelBand")?.value||"",status=$("craftStatus")?.value||"",special=$("craftSpecial")?.value||"";
@@ -2699,60 +2714,44 @@ function filteredCraftRecipes(){
    ||(special==="specialist"&&r.specialist)
    ||(special==="expert"&&r.expert)
    ||(special==="noquick"&&!r.quick);
-  return (!q||r.name.toLowerCase().includes(q))
+  const linked=craftLinkedLeves(r,index);
+  const leveHay=linked.flatMap(x=>[x.leve.name,x.leve.acceptPlace,x.leve.acceptNpc,x.leve.deliveryPlace,x.leve.clientName]).join(" ").toLowerCase();
+  return (!q||r.name.toLowerCase().includes(q)||leveHay.includes(q))
    &&(!job||r.craft===job)
    &&(!band||(r.level>=min&&r.level<=max))
    &&(!status||(status==="done"?st.done:!st.done))
    &&specialOk;
  });
 }
+function craftBandLabel(level){const n=Number(level)||0;if(n<10)return "Lv.1～9";const from=Math.floor(n/10)*10;return n>=100?`Lv.${from}～`:`Lv.${from}～${from+9}`}
+function craftLeveDetailHtml(pair,d){
+ const {leve,delivery}=pair,st=leveState(d,leve.id),open=craftOpenLeves.has(String(leve.id)),turns=(Number(leve.repeats)||0)+1,total=delivery.count*turns;
+ return `<details class="craft-linked-leve" data-craft-leve="${leve.id}" ${open?"open":""}><summary><label aria-label="${esc(leve.name)}を完了"><input type="checkbox" class="craftLeveCheck" data-id="${leve.id}" ${st.done?"checked":""}></label><b>${esc(leve.name)}</b><span>${st.done?"完了":"未完了"}</span></summary>${open?`<div class="craft-linked-body"><div><b>1回の納品：${delivery.count.toLocaleString("ja-JP")}個</b>${turns>1?`<div class="small">最大${turns}回納品可能 ／ 全回なら${total.toLocaleString("ja-JP")}個</div>`:""}</div><div class="small" style="margin-top:7px">📥 受注：${esc(leve.acceptPlace||"未取得")}${leve.acceptNpc?` ／ ${esc(leve.acceptNpc)}`:""}<br>📦 納品：${esc(leve.deliveryPlace||"未取得")}${leve.clientName?` ／ ${esc(leve.clientName)}`:""}</div>${leve.description?`<div class="small" style="margin-top:7px">${esc(leve.description)}</div>`:""}<label>リーヴ用メモ</label><input class="craftLeveNote" data-id="${leve.id}" value="${esc(st.note||"")}" placeholder="自分用メモ"></div>`:""}</details>`;
+}
 function renderCrafting(){
  if(!$("craftRecipeList"))return;
- const d=load(),arr=filteredCraftRecipes(),size=Number($("craftPageSize")?.value||100);
- const pages=Math.max(1,Math.ceil(arr.length/size));craftPage=Math.min(Math.max(1,craftPage),pages);
- const start=(craftPage-1)*size,items=arr.slice(start,start+size);
+ const d=load(),leveIndex=craftLeveIndex(),arr=filteredCraftRecipes(leveIndex),size=Number($("craftPageSize")?.value||100);
  const done=CRAFT_RECIPE_DATA.filter(r=>craftRecipeState(d,r.id).done).length;
  $("craftRecipeTotal").textContent=CRAFT_RECIPE_DATA.length.toLocaleString("ja-JP");
  $("craftRecipeDone").textContent=done.toLocaleString("ja-JP");
  $("craftRecipeTodo").textContent=(CRAFT_RECIPE_DATA.length-done).toLocaleString("ja-JP");
  $("craftRecipeShown").textContent=arr.length.toLocaleString("ja-JP");
  $("craftingSummary").innerHTML=`<div class="listitem">制作済みチェック：<b>${done.toLocaleString("ja-JP")} / ${CRAFT_RECIPE_DATA.length.toLocaleString("ja-JP")}</b></div>`;
- $("craftPageInfo").textContent=`${craftPage} / ${pages}ページ`;
- $("craftPrev").disabled=craftPage<=1;$("craftNext").disabled=craftPage>=pages;
-
- $("craftRecipeList").innerHTML=items.length?items.map(r=>{
-  const st=craftRecipeState(d,r.id);
-  return `<div class="card ${st.done?"archived":""}">
-   <div class="row">
-    <div>
-     <label style="margin:0;color:var(--text)"><input type="checkbox" class="craftCheck" data-id="${r.id}" style="width:auto" ${st.done?"checked":""}> <b>${esc(r.name)}</b></label>
-     <div class="time">${esc(r.craft)} Lv.${r.level}${r.stars?` ★${r.stars}`:""}${r.patch?` ／ Patch ${craftPatchLabel(r.patch)}`:""}</div>
-    </div>
-    <div class="wrap">
-     ${r.secret?'<span class="badge gold">秘伝書</span>':""}
-     ${r.specialist?'<span class="badge purple">マイスター</span>':""}
-     ${r.expert?'<span class="badge purple">高難易度</span>':""}
-     ${!r.quick?'<span class="badge">簡易不可</span>':""}
-     ${r.amount>1?`<span class="badge">×${r.amount}</span>`:""}
-    </div>
-   </div>
-   <div class="inline2" style="margin-top:8px">
-    <input class="craftNote" data-id="${r.id}" value="${esc(st.note||"")}" placeholder="自分用メモ">
-    <div class="wrap">
-      <label style="margin:0"><input type="checkbox" class="craftPlanToggle" data-id="${r.id}" style="width:auto" ${(d.craftingPlan?.items?.[r.id])?"checked":""}> 計画に追加</label>
-      <input type="number" min="1" step="1" class="craftPlanQty" data-id="${r.id}" value="${Number(d.craftingPlan?.items?.[r.id]||1)}" style="width:90px" title="作りたい個数">
-      <button type="button" class="secondary craftMaterials" data-id="${r.id}" data-item="${r.itemId}" data-name="${esc(r.name)}">🧺 素材を見る</button>
-      <button type="button" class="secondary craftOfficial" data-name="${esc(r.name)}">公式DBで検索</button>
-    </div>
-   </div>
-   <div class="craftMaterialBox" id="craftMaterialBox_${r.id}" style="display:none;margin-top:8px"></div>
-  </div>`;
- }).join(""):'<div class="empty">該当するレシピはありません。</div>';
+ const forceOpen=!!($("craftSearch")?.value.trim()||$("craftJob")?.value||$("craftLevelBand")?.value||$("craftStatus")?.value||$("craftSpecial")?.value);
+ const groups=new Map();for(const r of arr){const job=CRAFT_JOB_LABEL[r.craft]||r.craft,band=craftBandLabel(r.level);if(!groups.has(job))groups.set(job,new Map());const bands=groups.get(job);if(!bands.has(band))bands.set(band,[]);bands.get(band).push(r)}
+ $("craftPageInfo").textContent=`開いたレベル帯ごと最大${size}制作物`;
+ $("craftPrev").disabled=true;$("craftNext").disabled=true;
+ $("craftRecipeList").innerHTML=arr.length?[...groups].map(([job,bands])=>{const jo=forceOpen||craftOpenJobs.has(job);return `<details class="craft-tree-job" data-craft-job="${esc(job)}" ${jo?"open":""}><summary><b>${esc(job)}</b><span>${[...bands.values()].flat().length.toLocaleString("ja-JP")}件</span></summary>${jo?`<div class="craft-tree-bands">${[...bands].map(([band,recipes])=>{const bk=`${job}\u001f${band}`,bo=forceOpen||craftOpenBands.has(bk);return `<details class="craft-tree-band" data-craft-band="${esc(bk)}" ${bo?"open":""}><summary><b>${esc(band)}</b><span>${recipes.length.toLocaleString("ja-JP")}件</span></summary>${bo?`<div class="craft-tree-products">${recipes.slice(0,size).map(r=>{const st=craftRecipeState(d,r.id),linked=craftLinkedLeves(r,leveIndex),pk=String(r.id),po=craftOpenProducts.has(pk),tag=linked.length?`<span class="badge green">リーヴ${linked.length>1?`×${linked.length}`:""}</span>`:"";return `<details class="craft-tree-product ${st.done?"is-done":""}" data-craft-product="${r.id}" ${po?"open":""}><summary><label aria-label="${esc(r.name)}を制作済みにする"><input type="checkbox" class="craftCheck" data-id="${r.id}" ${st.done?"checked":""}></label><b>${esc(r.name)}</b>${tag}</summary>${po?`<div class="craft-tree-body"><div class="wrap"><span class="badge">制作手帳</span><span>Lv.${r.level}</span><span>1回の制作：${Number(r.amount||1)}個</span>${r.stars?`<span>★${r.stars}</span>`:""}</div><input class="craftNote" data-id="${r.id}" value="${esc(st.note||"")}" placeholder="制作手帳の自分用メモ"><details class="craft-tree-materials" data-craft-tree-materials="${r.id}"><summary>必要素材</summary><div class="craft-tree-material-body"></div></details><div class="wrap craft-tree-actions"><label><input type="checkbox" class="craftPlanToggle" data-id="${r.id}" ${(d.craftingPlan?.items?.[r.id])?"checked":""}> 計画に追加</label><input type="number" min="1" step="1" class="craftPlanQty" data-id="${r.id}" value="${Number(d.craftingPlan?.items?.[r.id]||1)}" title="作りたい個数"><button type="button" class="secondary craftOfficial" data-name="${esc(r.name)}">公式DBで検索</button></div>${linked.length?`<details class="craft-tree-leves" open><summary>ギルドリーヴ（${linked.length}件）</summary>${linked.map(x=>craftLeveDetailHtml(x,d)).join("")}</details>`:""}</div>`:""}</details>`}).join("")}</div>`:""}</details>`}).join("")}</div>`:""}</details>`}).join(""):'<div class="empty">該当するレシピはありません。</div>';
 
  renderCraftPlan();
  renderCraftInventory();
  fillCraftIngredientCatalog();
  if($("craftIndexStatus"))$("craftIndexStatus").textContent=craftIndexReady()?`準備済み ${Object.keys(craftReverseIndex.recipes).length.toLocaleString("ja-JP")}レシピ`:"未準備";
+ document.querySelectorAll("[data-craft-job]").forEach(x=>x.ontoggle=()=>{if(forceOpen)return;const k=x.dataset.craftJob;if(x.open&&!craftOpenJobs.has(k)){craftOpenJobs.add(k);renderCrafting()}else if(!x.open)craftOpenJobs.delete(k)});
+ document.querySelectorAll("[data-craft-band]").forEach(x=>x.ontoggle=()=>{if(forceOpen)return;const k=x.dataset.craftBand;if(x.open&&!craftOpenBands.has(k)){craftOpenBands.add(k);renderCrafting()}else if(!x.open)craftOpenBands.delete(k)});
+ document.querySelectorAll("[data-craft-product]").forEach(x=>x.ontoggle=()=>{const k=String(x.dataset.craftProduct);if(x.open&&!craftOpenProducts.has(k)){craftOpenProducts.add(k);renderCrafting()}else if(!x.open)craftOpenProducts.delete(k)});
+ document.querySelectorAll("[data-craft-leve]").forEach(x=>x.ontoggle=()=>{const k=String(x.dataset.craftLeve);if(x.open&&!craftOpenLeves.has(k)){craftOpenLeves.add(k);renderCrafting()}else if(!x.open)craftOpenLeves.delete(k)});
+ document.querySelectorAll(".craft-tree-product>summary label,.craft-linked-leve>summary label").forEach(x=>x.onclick=e=>e.stopPropagation());
  document.querySelectorAll(".craftCheck").forEach(c=>c.onchange=()=>{
   const d=load(),id=c.dataset.id;d.craftingProgress=d.craftingProgress||{};
   const st=d.craftingProgress[id]||{done:false,note:""};st.done=c.checked;d.craftingProgress[id]=st;save(d);renderCrafting();
@@ -2761,6 +2760,8 @@ function renderCrafting(){
   const d=load(),id=i.dataset.id;d.craftingProgress=d.craftingProgress||{};
   const st=d.craftingProgress[id]||{done:false,note:""};st.note=i.value;d.craftingProgress[id]=st;save(d);
  });
+ document.querySelectorAll(".craftLeveCheck").forEach(c=>c.onchange=()=>{const d=load(),id=c.dataset.id;d.guildleveProgress=d.guildleveProgress||{};const st=d.guildleveProgress[id]||{done:false,note:""};st.done=c.checked;d.guildleveProgress[id]=st;save(d);renderCrafting()});
+ document.querySelectorAll(".craftLeveNote").forEach(i=>i.onchange=()=>{const d=load(),id=i.dataset.id;d.guildleveProgress=d.guildleveProgress||{};const st=d.guildleveProgress[id]||{done:false,note:""};st.note=i.value;d.guildleveProgress[id]=st;save(d)});
  document.querySelectorAll(".craftPlanToggle").forEach(c=>c.onchange=()=>{
   const d=load(),id=c.dataset.id;d.craftingPlan=d.craftingPlan||{items:{},checks:{}};d.craftingPlan.items=d.craftingPlan.items||{};
   if(c.checked){const q=Number(document.querySelector(`.craftPlanQty[data-id="${id}"]`)?.value||1);d.craftingPlan.items[id]=Math.max(1,Math.floor(q));}
@@ -2771,7 +2772,7 @@ function renderCrafting(){
   const d=load(),id=i.dataset.id,q=Math.max(1,Math.floor(Number(i.value)||1));i.value=q;
   if(d.craftingPlan?.items?.[id]){d.craftingPlan.items[id]=q;save(d);renderCraftPlan();}
  });
- document.querySelectorAll(".craftMaterials").forEach(b=>b.onclick=()=>openCraftMaterials(b));
+ document.querySelectorAll("[data-craft-tree-materials]").forEach(x=>x.ontoggle=async()=>{if(!x.open)return;const box=x.querySelector(".craft-tree-material-body");if(!box||box.dataset.loaded)return;box.innerHTML='<div class="small">素材を読み込んでいます…</div>';try{const rows=await fetchCraftMaterials(Number(x.dataset.craftTreeMaterials));box.innerHTML=renderMaterialRows(rows);box.dataset.loaded="1";bindCraftSubButtons(box)}catch(e){console.error(e);box.innerHTML='<div class="empty">素材データを取得できませんでした。</div>'}});
  document.querySelectorAll(".craftOfficial").forEach(b=>b.onclick=()=>openTemplate("https://jp.finalfantasyxiv.com/lodestone/playguide/db/item/?q={query}",b.dataset.name));
 }
 
@@ -4583,7 +4584,7 @@ async function loadGuildleves(force=false){
    if(c.length){
     guildleveData=c.filter(x=>!isPlaceholderLeveTitle(x.name));
     if(status)status.textContent=`キャッシュ ${guildleveData.length}件`;
-    fillLeveFilters();renderGuildleves();leveLoading=false;return;
+    fillLeveFilters();renderGuildleves();renderCrafting();leveLoading=false;return;
    }
   }
 
@@ -4803,14 +4804,14 @@ async function loadGuildleves(force=false){
   const withAcceptNpc=guildleveData.filter(x=>x.acceptNpc).length;
   const withClient=guildleveData.filter(x=>x.clientName||x.deliveryPlace).length;
   if(status)status.textContent=`取得済み ${guildleveData.length}件 ／ 制作物 ${withDelivery}件 ／ 分類済み ${classified}件 ／ 受注場所 ${withAcceptPlace}件 ／ 受注NPC ${withAcceptNpc}件 ／ 納品先 ${withClient}件`;
-  fillLeveFilters();renderGuildleves();
+  fillLeveFilters();renderGuildleves();renderCrafting();
  }catch(e){
   console.error("guildleve load failed",e);
   const c=readLeveCache().filter(x=>!isPlaceholderLeveTitle(x.name));
   if(c.length){
    guildleveData=c;
    if(status)status.textContent=`通信失敗・キャッシュ ${c.length}件`;
-   fillLeveFilters();renderGuildleves();
+   fillLeveFilters();renderGuildleves();renderCrafting();
   }else if(status)status.textContent=`データ取得に失敗しました：${String(e?.message||e)}`;
  }finally{leveLoading=false}
 }
