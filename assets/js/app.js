@@ -4457,8 +4457,11 @@ function renderWeapons(){
  });
 }
 
-const GUILDLEVE_CACHE_KEY="life_archive_guildleves_v8";
+const GUILDLEVE_CACHE_KEY="life_archive_guildleves_v9_delivery_items";
+const GUILDLEVE_LEGACY_CACHE_KEY="life_archive_guildleves_v8";
+const LEVE_CRAFTER_JOBS=new Set(["木工師","鍛冶師","甲冑師","彫金師","革細工師","裁縫師","錬金術師","調理師"]);
 let guildleveData=[],levePage=1,leveLoading=false;
+const leveOpenJobs=new Set(),leveOpenBands=new Set(),leveOpenItems=new Set(),leveOpenDetails=new Set();
 function leveState(d,id){return d.guildleveProgress?.[id]||{done:false,note:""};}
 function readLeveCache(){try{const x=JSON.parse(localStorage.getItem(GUILDLEVE_CACHE_KEY)||"null");return Array.isArray(x?.results)?x.results:[]}catch(e){return []}}
 function pickField(f,names){for(const n of names){if(f&&f[n]!=null)return f[n]}return null}
@@ -4605,7 +4608,11 @@ async function loadGuildleves(force=false){
 
   const allRows=[];
   await fetchPaged((after,limit)=>{
-   const qs=new URLSearchParams({language:"ja",limit:String(limit)});
+   const qs=new URLSearchParams({
+    language:"ja",
+    fields:"Name,ClassJobLevel,ClassJobCategory.Name,LeveAssignmentType,DataId@as(raw),DataId.Item[].Name,DataId.Item[].CanBeHq,DataId.Item@as(raw),DataId.ItemCount,DataId.Repeats",
+    limit:String(limit)
+   });
    if(after>=0)qs.set("after",String(after));
    return `https://v2.xivapi.com/api/sheet/Leve?${qs.toString()}`;
   },rows=>allRows.push(...rows));
@@ -4773,15 +4780,29 @@ async function loadGuildleves(force=false){
    const acceptCoords=Number.isFinite(acceptX)&&Number.isFinite(acceptY)?[acceptX,acceptY]:[];
    const desc=leveTitleText(pickField(f,["Description","Objective","DataId"]));
    const category=leveType||resolvedJob||"その他";
-   return {id,name,classJob:resolvedJob||classJob,category,level,place,acceptPlace:place,acceptNpc,acceptCoords,clientName,deliveryPlace,deliveryCoords,description:desc,assignmentTypeId:rawTypeId};
+   const craftData=f?.DataId?.fields||{};
+   const rawItems=Array.isArray(craftData["Item@as(raw)"])?craftData["Item@as(raw)"]:[];
+   const richItems=Array.isArray(craftData.Item)?craftData.Item:[];
+   const itemCounts=Array.isArray(craftData.ItemCount)?craftData.ItemCount:[];
+   const deliveryByItem=new Map();
+   const deliveryLen=Math.max(rawItems.length,richItems.length,itemCounts.length);
+   for(let i=0;i<deliveryLen;i++){
+    const rel=richItems[i],itemId=Number(rawItems[i]??rel?.row_id??rel?.value??0)||0,count=Number(itemCounts[i]||0);
+    if(itemId<=0||count<=0)continue;
+    const prev=deliveryByItem.get(itemId)||{itemId,name:"",count:0,canHQ:false};
+    prev.name=prev.name||relName(rel)||String(rel?.fields?.Name||"").trim();prev.count+=count;prev.canHQ=prev.canHQ||!!rel?.fields?.CanBeHq;
+    deliveryByItem.set(itemId,prev);
+   }
+   return {id,name,classJob:resolvedJob||classJob,category,level,place,acceptPlace:place,acceptNpc,acceptCoords,clientName,deliveryPlace,deliveryCoords,description:desc,assignmentTypeId:rawTypeId,craftLeveId:Number(f?.["DataId@as(raw)"]??f?.DataId?.value??0)||0,deliveryItems:[...deliveryByItem.values()],repeats:Number(craftData.Repeats||0)||0};
   }).filter(x=>x.id>0&&!isPlaceholderLeveTitle(x.name));
 
   try{localStorage.setItem(GUILDLEVE_CACHE_KEY,JSON.stringify({savedAt:Date.now(),results:guildleveData}))}catch(e){}
   const classified=guildleveData.filter(x=>x.category&&x.category!=="その他").length;
+  const withDelivery=guildleveData.filter(x=>Array.isArray(x.deliveryItems)&&x.deliveryItems.length).length;
   const withAcceptPlace=guildleveData.filter(x=>x.acceptPlace).length;
   const withAcceptNpc=guildleveData.filter(x=>x.acceptNpc).length;
   const withClient=guildleveData.filter(x=>x.clientName||x.deliveryPlace).length;
-  if(status)status.textContent=`取得済み ${guildleveData.length}件 ／ 分類済み ${classified}件 ／ 受注場所 ${withAcceptPlace}件 ／ 受注NPC ${withAcceptNpc}件 ／ 納品 ${withClient}件`;
+  if(status)status.textContent=`取得済み ${guildleveData.length}件 ／ 制作物 ${withDelivery}件 ／ 分類済み ${classified}件 ／ 受注場所 ${withAcceptPlace}件 ／ 受注NPC ${withAcceptNpc}件 ／ 納品先 ${withClient}件`;
   fillLeveFilters();renderGuildleves();
  }catch(e){
   console.error("guildleve load failed",e);
@@ -4795,28 +4816,57 @@ async function loadGuildleves(force=false){
 }
 function fillLeveFilters(){
  const c=$("leveCategory"),l=$("leveLevel");if(!c||!l)return;
+ const search=$("leveSearch");
+ if(search){
+  search.placeholder="制作物名・リーヴ名・依頼内容";
+  const label=search.closest("div")?.querySelector("label");if(label)label.textContent="制作物・リーヴ名を検索";
+ }
+ const reload=$("leveReload");if(reload)reload.textContent="納品情報を再取得";
  const cv=c.value,lv=l.value;
  const order=["木工師","鍛冶師","甲冑師","彫金師","革細工師","裁縫師","錬金術師","調理師","採掘師","園芸師","漁師","傭兵稼業","黒渦団","双蛇党","不滅隊","その他"];
- const cats=[...new Set(guildleveData.map(x=>x.category).filter(Boolean))].sort((a,b)=>{const ai=order.indexOf(a),bi=order.indexOf(b);return (ai<0?999:ai)-(bi<0?999:bi)||a.localeCompare(b,"ja")});
- const levels=[...new Set(guildleveData.map(x=>x.level).filter(x=>x>0))].sort((a,b)=>a-b);
+ const craftLeves=guildleveData.filter(x=>LEVE_CRAFTER_JOBS.has(x.classJob)&&Array.isArray(x.deliveryItems)&&x.deliveryItems.length);
+ const cats=[...new Set(craftLeves.map(x=>x.category).filter(Boolean))].sort((a,b)=>{const ai=order.indexOf(a),bi=order.indexOf(b);return (ai<0?999:ai)-(bi<0?999:bi)||a.localeCompare(b,"ja")});
+ const levels=[...new Set(craftLeves.map(x=>x.level).filter(x=>x>0))].sort((a,b)=>a-b);
  c.innerHTML='<option value="">すべて</option>'+cats.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");
  l.innerHTML='<option value="">すべて</option>'+levels.map(x=>`<option value="${x}">Lv.${x}</option>`).join("");
  if(cats.includes(cv))c.value=cv;if(levels.map(String).includes(lv))l.value=lv;
 }
 function filteredLeves(){
  const d=load(),q=($("leveSearch")?.value||"").trim().toLowerCase(),status=$("leveStatus")?.value||"",cat=$("leveCategory")?.value||"",level=$("leveLevel")?.value||"";
- return guildleveData.filter(x=>{const st=leveState(d,x.id),hay=[x.name,x.classJob,x.category,x.place,x.description].join(" ").toLowerCase();return(!q||hay.includes(q))&&(!status||(status==="done"?st.done:!st.done))&&(!cat||x.category===cat)&&(!level||String(x.level)===level)});
+ return guildleveData.filter(x=>{const st=leveState(d,x.id),hay=[x.name,x.classJob,x.category,x.place,x.description,...(x.deliveryItems||[]).map(i=>i.name)].join(" ").toLowerCase();return LEVE_CRAFTER_JOBS.has(x.classJob)&&Array.isArray(x.deliveryItems)&&x.deliveryItems.length&&(!q||hay.includes(q))&&(!status||(status==="done"?st.done:!st.done))&&(!cat||x.category===cat)&&(!level||String(x.level)===level)});
+}
+function leveRecipeForItem(itemId,classJob){
+ const job=String(classJob||"").trim();
+ const craft=job==="錬金術師"?"錬金":job.replace(/師$/u,"");
+ const rows=CRAFT_RECIPE_DATA.filter(r=>Number(r.itemId)===Number(itemId));
+ return rows.find(r=>r.craft===craft)||(rows.length===1?rows[0]:null);
+}
+function leveBandLabel(level){
+ const n=Number(level)||0;if(n<=0)return "レベル不明";if(n<10)return "Lv.1～9";if(n>=100)return `Lv.${Math.floor(n/10)*10}～`;
+ const from=Math.floor(n/10)*10;return `Lv.${from}～${from+9}`;
+}
+function leveProductKey(job,band,itemId){return `${job}\u001f${band}\u001f${itemId}`}
+function leveDetailHtml(x,delivery){
+ const st=leveState(load(),x.id),maxTurns=(Number(x.repeats)||0)+1,total=delivery.count*maxTurns;
+ return `<details class="leve-entry ${st.done?"is-done":""}" data-leve-detail="${x.id}" ${leveOpenDetails.has(String(x.id))?"open":""}><summary><label aria-label="${esc(x.name)}を完了"><input type="checkbox" class="leveCheck" data-id="${x.id}" ${st.done?"checked":""}></label><b>${esc(x.name)}</b><span>${x.level?`Lv.${x.level} ／ `:""}${st.done?"達成済み":"未達成"}</span></summary>${leveOpenDetails.has(String(x.id))?`<div class="leve-entry-body"><div class="leve-quantity"><b>1回の納品：${delivery.count.toLocaleString("ja-JP")}個</b>${maxTurns>1?`<span>最大${maxTurns}回納品可能</span><span>すべて納品する場合：${total.toLocaleString("ja-JP")}個</span>`:""}</div><div class="small">${x.acceptPlace||x.acceptNpc?`📥 受注：${x.acceptPlace?esc(x.acceptPlace):""}${x.acceptPlace&&x.acceptNpc?" ／ ":""}${x.acceptNpc?esc(x.acceptNpc):""}${Array.isArray(x.acceptCoords)&&x.acceptCoords.length===2?`（X:${Number(x.acceptCoords[0]).toFixed(1)} Y:${Number(x.acceptCoords[1]).toFixed(1)}）`:""}`:"📥 受注場所：未取得"}${x.clientName||x.deliveryPlace?`<br>📦 納品：${x.deliveryPlace?esc(x.deliveryPlace)+" ／ ":""}${x.clientName?esc(x.clientName):""}${Array.isArray(x.deliveryCoords)&&x.deliveryCoords.length===2?`（X:${Number(x.deliveryCoords[0]).toFixed(1)} Y:${Number(x.deliveryCoords[1]).toFixed(1)}）`:""}`:"<br>📦 納品先：未取得"}</div>${x.description?`<div class="small leve-description">${esc(x.description)}</div>`:""}<label>自分用メモ</label><input class="leveNote" data-id="${x.id}" value="${esc(st.note||"")}" placeholder="自分用メモ"></div>`:""}</details>`;
 }
 function renderGuildleves(){
  if(!$("leveList"))return;
- const d=load(),arr=filteredLeves(),size=Number($("levePageSize")?.value||100),pages=Math.max(1,Math.ceil(arr.length/size));levePage=Math.min(Math.max(1,levePage),pages);
- const items=arr.slice((levePage-1)*size,levePage*size),done=guildleveData.filter(x=>leveState(d,x.id).done).length;
- $("leveTotal").textContent=guildleveData.length.toLocaleString("ja-JP");$("leveDone").textContent=done.toLocaleString("ja-JP");$("leveTodo").textContent=(guildleveData.length-done).toLocaleString("ja-JP");$("leveShown").textContent=arr.length.toLocaleString("ja-JP");$("levePageInfo").textContent=`${levePage} / ${pages}ページ`;$("levePrev").disabled=levePage<=1;$("leveNext").disabled=levePage>=pages;
- $("leveList").innerHTML=items.length?items.map(x=>{const st=leveState(d,x.id);return `<div class="card ${st.done?"archived":""}"><div class="row"><div><label style="margin:0;color:var(--text)"><input type="checkbox" class="leveCheck" data-id="${x.id}" style="width:auto" ${st.done?"checked":""}> <b>${esc(x.name)}</b></label><div class="time">${x.level?`Lv.${x.level}`:""}${x.category?` ／ ${esc(x.category)}`:""}${x.classJob&&x.classJob!==x.category?` ／ ${esc(x.classJob)}`:""}</div></div></div>
- <div class="small" style="margin-top:6px">${x.acceptPlace||x.acceptNpc?`📥 受注：${x.acceptPlace?esc(x.acceptPlace):""}${x.acceptPlace&&x.acceptNpc?" ／ ":""}${x.acceptNpc?esc(x.acceptNpc):""}${Array.isArray(x.acceptCoords)&&x.acceptCoords.length===2?`（X:${Number(x.acceptCoords[0]).toFixed(1)} Y:${Number(x.acceptCoords[1]).toFixed(1)}）`:""}`:"📥 受注場所：未取得"}${x.clientName||x.deliveryPlace?`<br>📦 納品：${x.deliveryPlace?esc(x.deliveryPlace)+" ／ ":""}${x.clientName?esc(x.clientName):""}${Array.isArray(x.deliveryCoords)&&x.deliveryCoords.length===2?`（X:${Number(x.deliveryCoords[0]).toFixed(1)} Y:${Number(x.deliveryCoords[1]).toFixed(1)}）`:""}`:"<br>📦 納品先：未取得"}</div>
- ${x.description?`<div class="small" style="margin-top:6px">${esc(x.description)}</div>`:""}<input class="leveNote" data-id="${x.id}" value="${esc(st.note||"")}" placeholder="自分用メモ" style="margin-top:8px"></div>`}).join(""):'<div class="empty">該当するギルドリーヴはありません。</div>';
+ const d=load(),arr=filteredLeves(),allCraft=guildleveData.filter(x=>LEVE_CRAFTER_JOBS.has(x.classJob)&&Array.isArray(x.deliveryItems)&&x.deliveryItems.length),done=allCraft.filter(x=>leveState(d,x.id).done).length;
+ const grouped=new Map();
+ for(const leve of arr){const job=leve.classJob||leve.category||"その他",band=leveBandLabel(leve.level);if(!grouped.has(job))grouped.set(job,new Map());const bands=grouped.get(job);if(!bands.has(band))bands.set(band,new Map());const products=bands.get(band);for(const delivery of leve.deliveryItems){const key=String(delivery.itemId);if(!products.has(key))products.set(key,{itemId:delivery.itemId,name:delivery.name||`Item #${delivery.itemId}`,leves:[],recipe:leveRecipeForItem(delivery.itemId,job)});products.get(key).leves.push({leve,delivery})}}
+ const size=Number($("levePageSize")?.value||100),maxProducts=Math.max(0,...[...grouped.values()].flatMap(b=>[...b.values()].map(p=>p.size))),pages=Math.max(1,Math.ceil(maxProducts/size));levePage=Math.min(Math.max(1,levePage),pages);const start=(levePage-1)*size;
+ $("leveTotal").textContent=allCraft.length.toLocaleString("ja-JP");$("leveDone").textContent=done.toLocaleString("ja-JP");$("leveTodo").textContent=(allCraft.length-done).toLocaleString("ja-JP");$("leveShown").textContent=arr.length.toLocaleString("ja-JP");$("levePageInfo").textContent=`開いたレベル帯ごと最大${size}制作物（${levePage} / ${pages}ページ）`;$("levePrev").disabled=levePage<=1;$("leveNext").disabled=levePage>=pages;
+ const forceOpen=!!($("leveSearch")?.value.trim()||$("leveCategory")?.value||$("leveLevel")?.value||$("leveStatus")?.value);
+ $("leveList").innerHTML=arr.length?[...grouped.entries()].map(([job,bands])=>{const jobOpen=forceOpen||leveOpenJobs.has(job),jobLeves=[...bands.values()].flatMap(p=>[...p.values()].flatMap(x=>x.leves.map(v=>v.leve))),jobTodo=new Set(jobLeves.filter(x=>!leveState(d,x.id).done).map(x=>x.id)).size;const bandHtml=jobOpen?[...bands.entries()].map(([band,products])=>{const bandKey=`${job}\u001f${band}`,bandOpen=forceOpen||leveOpenBands.has(bandKey),productPage=bandOpen?[...products.values()].slice(start,start+size):[];const bandLeves=[...products.values()].flatMap(x=>x.leves.map(v=>v.leve)),bandTodo=new Set(bandLeves.filter(x=>!leveState(d,x.id).done).map(x=>x.id)).size;return `<details class="leve-band" data-leve-band="${esc(bandKey)}" ${bandOpen?"open":""}><summary><b>${esc(band)}</b><span>未完了 ${bandTodo.toLocaleString("ja-JP")}</span><span>制作物 ${products.size.toLocaleString("ja-JP")}</span></summary><div class="leve-products">${productPage.map(product=>{const productKey=leveProductKey(job,band,product.itemId),productOpen=leveOpenItems.has(productKey),uniqueLeves=[...new Map(product.leves.map(v=>[v.leve.id,v])).values()],tag=uniqueLeves.length>1?`ギルドリーヴ×${uniqueLeves.length}`:"ギルドリーヴ",recipe=product.recipe;return `<details class="leve-product" data-leve-product="${esc(productKey)}" ${productOpen?"open":""}><summary><b>${esc(product.name)}</b><span class="badge">${recipe?"制作手帳":"制作手帳未照合"}</span><span class="badge green">${tag}</span></summary>${productOpen?`<div class="leve-product-body">${uniqueLeves.map(({leve,delivery})=>leveDetailHtml(leve,delivery)).join("")}${recipe?`<details class="leve-materials" data-leve-materials="${recipe.id}"><summary>必要素材</summary><div class="leve-material-body"></div></details>`:""}</div>`:""}</details>`}).join("")}</div></details>`}).join(""):"";return `<details class="leve-job" data-leve-job="${esc(job)}" ${jobOpen?"open":""}><summary><b>${esc(job)}</b><span>未完了 ${jobTodo.toLocaleString("ja-JP")}</span></summary><div class="leve-bands">${bandHtml}</div></details>`}).join(""):'<div class="empty">制作物情報を持つギルドリーヴがありません。「正式タイトルを再取得」で納品情報を取得してください。</div>';
+ document.querySelectorAll("[data-leve-job]").forEach(x=>x.ontoggle=()=>{if(forceOpen)return;const key=x.dataset.leveJob;if(x.open&&!leveOpenJobs.has(key)){leveOpenJobs.add(key);renderGuildleves()}else if(!x.open)leveOpenJobs.delete(key)});
+ document.querySelectorAll("[data-leve-band]").forEach(x=>x.ontoggle=()=>{if(forceOpen)return;const key=x.dataset.leveBand;if(x.open&&!leveOpenBands.has(key)){leveOpenBands.add(key);renderGuildleves()}else if(!x.open)leveOpenBands.delete(key)});
+ document.querySelectorAll("[data-leve-product]").forEach(x=>x.ontoggle=()=>{const key=x.dataset.leveProduct;if(x.open&&!leveOpenItems.has(key)){leveOpenItems.add(key);renderGuildleves()}else if(!x.open)leveOpenItems.delete(key)});
+ document.querySelectorAll("[data-leve-detail]").forEach(x=>x.ontoggle=()=>{const key=String(x.dataset.leveDetail);if(x.open&&!leveOpenDetails.has(key)){leveOpenDetails.add(key);renderGuildleves()}else if(!x.open)leveOpenDetails.delete(key)});
+ document.querySelectorAll(".leve-entry>summary label").forEach(x=>x.onclick=e=>e.stopPropagation());
  document.querySelectorAll(".leveCheck").forEach(c=>c.onchange=()=>{const d=load();d.guildleveProgress=d.guildleveProgress||{};const st=d.guildleveProgress[c.dataset.id]||{done:false,note:""};st.done=c.checked;d.guildleveProgress[c.dataset.id]=st;save(d);renderGuildleves()});
  document.querySelectorAll(".leveNote").forEach(i=>i.onchange=()=>{const d=load();d.guildleveProgress=d.guildleveProgress||{};const st=d.guildleveProgress[i.dataset.id]||{done:false,note:""};st.note=i.value;d.guildleveProgress[i.dataset.id]=st;save(d)});
+ document.querySelectorAll("[data-leve-materials]").forEach(x=>x.ontoggle=async()=>{if(!x.open)return;const box=x.querySelector(".leve-material-body");if(!box||box.dataset.loaded)return;box.innerHTML='<div class="small">素材を読み込んでいます…</div>';try{const rows=await fetchCraftMaterials(Number(x.dataset.leveMaterials));box.innerHTML=renderMaterialRows(rows);box.dataset.loaded="1";bindCraftSubButtons(box)}catch(e){console.error(e);box.innerHTML='<div class="empty">素材データを取得できませんでした。通信状態を確認してください。</div>'}});
 }
 
 /* YOKAI_EVENT_DATA moved to assets/js/data/yokai_event_data.js */
