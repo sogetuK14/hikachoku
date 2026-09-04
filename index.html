@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="0.1.0-la-split" name="eorzea-archive-build"/><link href="assets/css/app.css" rel="stylesheet"/></head>
+<meta content="0.1.0-la-split" name="eorzea-archive-build"/><link href="assets/css/app.css?v=20260904-achgoal1" rel="stylesheet"/></head>
 <body class="hikachoku-theme">
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 <div class="app-shell">
@@ -386,6 +386,7 @@
 <div class="inline3"><div><label>優先度</label><select id="goalPriority"><option value="5">★★★★★ 最優先</option><option value="4">★★★★☆ 優先</option><option value="3" selected>★★★☆☆ 普通</option><option value="2">★★☆☆☆ 低め</option><option value="1">★☆☆☆☆ そのうち</option></select></div><div><label>開始日（任意）</label><input id="goalStartDate" type="date"/></div><div><label>期限（任意）</label><input id="goalDeadline" type="date"/></div></div>
 <label>メモ（任意）</label><textarea id="goalNote" rows="3"></textarea>
 <div class="wrap"><button class="primary" id="goalSave" type="button">登録する</button><button class="secondary" id="goalCancel" type="button" hidden>編集をやめる</button></div>
+<div class="small" id="goalMessage" role="status" aria-live="polite"></div>
 </div>
 <div class="goal-toolbar"><label>並び順 <select id="goalSort"><option value="priority">優先度順</option><option value="deadline">期限が近い順</option><option value="remaining">残数が少ない順</option><option value="rate">達成率が高い順</option><option value="created">登録順</option></select></label><label class="checkline"><input id="goalShowDone" type="checkbox"/> 完了済みも表示</label></div>
 <div id="goalList"></div>
@@ -1621,5 +1622,5 @@ SANチェック処理
 <script src="assets/js/extra-2.js"></script>
 <script src="assets/js/extra-3.js"></script>
 <script src="assets/js/extra-4.js"></script>
-<script src="assets/js/data/achievement_db.js"></script><script src="assets/js/data/fish_data.js"></script><script src="assets/js/data/craft_recipe_data.js"></script><script src="assets/js/data/craft_recipe_meta_data.js"></script><script src="assets/js/data/craft_item_meta_data.js"></script><script src="assets/js/data/craft_item_usage_data.js"></script><script src="assets/js/data/minion_data.js"></script><script src="assets/js/data/mount_data.js"></script><script src="assets/js/data/ff_hunt_acq_preset.js"></script><script src="assets/js/data/fc_ja_description_sheets.js"></script><script src="assets/js/data/triple_triad_data.js"></script><script src="assets/js/data/yokai_event_data.js"></script><script src="assets/js/data/relic_series.js"></script><script src="assets/js/app.js"></script><script src="assets/js/eorzea-hub.js"></script></body>
+<script src="assets/js/data/achievement_db.js"></script><script src="assets/js/data/fish_data.js"></script><script src="assets/js/data/craft_recipe_data.js"></script><script src="assets/js/data/craft_recipe_meta_data.js"></script><script src="assets/js/data/craft_item_meta_data.js"></script><script src="assets/js/data/craft_item_usage_data.js"></script><script src="assets/js/data/minion_data.js"></script><script src="assets/js/data/mount_data.js"></script><script src="assets/js/data/ff_hunt_acq_preset.js"></script><script src="assets/js/data/fc_ja_description_sheets.js"></script><script src="assets/js/data/triple_triad_data.js"></script><script src="assets/js/data/yokai_event_data.js"></script><script src="assets/js/data/relic_series.js"></script><script src="assets/js/app.js?v=20260904-achgoal1"></script><script src="assets/js/eorzea-hub.js"></script></body>
 </html>
