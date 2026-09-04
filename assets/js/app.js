@@ -82,6 +82,8 @@ function checklistFromLines(value,oldItems=[]){
   return {id:prev?.id||uid(),name,done:!!prev?.done};
  });
 }
+function progressRate(done,total){return `${(total?done/total*100:0).toFixed(1)}%`}
+function compactProgress(done,total){return `${done.toLocaleString("ja-JP")} / ${total.toLocaleString("ja-JP")}　残り${Math.max(0,total-done).toLocaleString("ja-JP")}　${progressRate(done,total)}`}
 
 let LIVE_DATA=null;
 const DB_NAME="LifeArchiveDB",DB_VERSION=1,DB_STORE="state",DB_KEY="main";
@@ -2579,17 +2581,18 @@ function renderAchievements(){
  const categoryRows=[...grouped.values()].flatMap(cats=>[...cats.values()]);
  const size=Number($("achPageSize").value||50),longest=Math.max(0,...categoryRows.map(rows=>rows.length)),pages=Math.max(1,Math.ceil(longest/size));
  achPage=Math.min(Math.max(1,achPage),pages);const start=(achPage-1)*size;
- $("achTotal").textContent=visibleBase.length;$("achDone").textContent=visibleDone;$("achPoints").textContent=points.toLocaleString("ja-JP");$("achShown").textContent=arr.length;$("achRate").textContent=(visibleBase.length?visibleDone/visibleBase.length*100:0).toFixed(1)+"%";
+ $("achTotal").textContent=visibleBase.length;$("achDone").textContent=visibleDone;$("achTodo").textContent=(visibleBase.length-visibleDone).toLocaleString("ja-JP");$("achPoints").textContent=points.toLocaleString("ja-JP");$("achShown").textContent=arr.length;$("achRate").textContent=progressRate(visibleDone,visibleBase.length);
+ const fullAchievementKinds=new Map();visibleBase.forEach(a=>{if(!fullAchievementKinds.has(a.kind))fullAchievementKinds.set(a.kind,new Map());const cats=fullAchievementKinds.get(a.kind);if(!cats.has(a.category))cats.set(a.category,[]);cats.get(a.category).push(a)});
  $("achList").innerHTML=arr.length?[...grouped.entries()].map(([kind,categories])=>{
    const kindRows=[...categories.values()].flat(),kindTodo=kindRows.filter(a=>!achievementState(d,a.id).done).length,kindDone=kindRows.length-kindTodo,kindOpen=achievementOpenKinds.has(kind);
    const categoryHtml=kindOpen?[...categories.entries()].map(([category,allRows])=>{
-    const key=achievementCategoryKey(kind,category),todoRows=allRows.filter(a=>!achievementState(d,a.id).done),doneRows=allRows.filter(a=>achievementState(d,a.id).done),categoryOpen=achievementOpenCategories.has(key),completedOpen=achievementOpenCompleted.has(key);
+    const key=achievementCategoryKey(kind,category),todoRows=allRows.filter(a=>!achievementState(d,a.id).done),doneRows=allRows.filter(a=>achievementState(d,a.id).done),categoryOpen=achievementOpenCategories.has(key),completedOpen=achievementOpenCompleted.has(key),fullRows=fullAchievementKinds.get(kind)?.get(category)||allRows,fullDone=fullRows.filter(a=>achievementState(d,a.id).done).length;
     const todoPage=categoryOpen?todoRows.slice(start,start+size):[],donePage=categoryOpen&&completedOpen?doneRows.slice(start,start+size):[];
     const statusLabel=todoRows.length?`未完了 ${todoRows.length.toLocaleString("ja-JP")}`:"✓ 完了";
-    return `<details class="achievement-category" data-ach-category="${esc(key)}" ${categoryOpen?"open":""}><summary><b>${esc(category)}</b><span>${statusLabel}</span><span class="achievement-category-done">完了 ${doneRows.length.toLocaleString("ja-JP")}</span></summary><div class="achievement-items">${todoPage.map(a=>achievementItemHtml(a,achievementState(d,a.id))).join("")}${doneRows.length?`<details class="achievement-done-group" data-ach-completed="${esc(key)}" ${completedOpen?"open":""}><summary>完了済み ${doneRows.length.toLocaleString("ja-JP")}件</summary><div>${donePage.map(a=>achievementItemHtml(a,achievementState(d,a.id))).join("")}</div></details>`:""}${categoryOpen&&(todoRows.length>size||doneRows.length>size)?`<div class="small achievement-page-note">この分類は${size}件単位で表示しています。</div>`:""}</div></details>`;
+    return `<details class="achievement-category" data-ach-category="${esc(key)}" ${categoryOpen?"open":""}><summary><b>${esc(category)}</b><span>${statusLabel}</span><span class="achievement-category-done">${compactProgress(fullDone,fullRows.length)}</span></summary><div class="achievement-items">${todoPage.map(a=>achievementItemHtml(a,achievementState(d,a.id))).join("")}${doneRows.length?`<details class="achievement-done-group" data-ach-completed="${esc(key)}" ${completedOpen?"open":""}><summary>完了済み ${doneRows.length.toLocaleString("ja-JP")}件</summary><div>${donePage.map(a=>achievementItemHtml(a,achievementState(d,a.id))).join("")}</div></details>`:""}${categoryOpen&&(todoRows.length>size||doneRows.length>size)?`<div class="small achievement-page-note">この分類は${size}件単位で表示しています。</div>`:""}</div></details>`;
    }).join(""):"";
-   const kindLabel=kindTodo?`未完了 ${kindTodo.toLocaleString("ja-JP")}`:"✓ 完了";
-   return `<details class="achievement-kind" data-ach-kind="${esc(kind)}" ${kindOpen?"open":""}><summary><b>${esc(kind)}</b><span>${kindLabel}</span><span class="achievement-kind-done-count">完了 ${kindDone.toLocaleString("ja-JP")}</span></summary><div class="achievement-categories">${categoryHtml}</div></details>`;
+   const kindLabel=kindTodo?`未完了 ${kindTodo.toLocaleString("ja-JP")}`:"✓ 完了",fullKindRows=[...(fullAchievementKinds.get(kind)?.values()||[])].flat(),fullKindDone=fullKindRows.filter(a=>achievementState(d,a.id).done).length;
+   return `<details class="achievement-kind" data-ach-kind="${esc(kind)}" ${kindOpen?"open":""}><summary><b>${esc(kind)}</b><span>${kindLabel}</span><span class="achievement-kind-done-count">${compactProgress(fullKindDone,fullKindRows.length)}</span></summary><div class="achievement-categories">${categoryHtml}</div></details>`;
  }).join(""):'<div class="empty">条件に合うアチーブメントはありません。</div>';
  $("achPageInfo").textContent=`開いた中分類ごと最大${size}件 ／ 絞り込み結果 ${arr.length}件（${achPage}/${pages}ページ）`;
  $("achPrev").disabled=achPage<=1;$("achNext").disabled=achPage>=pages;
@@ -2650,6 +2653,7 @@ function renderFishing(){
  $("fishTotal").textContent=FISH_DATA.length.toLocaleString("ja-JP");
  $("fishDone").textContent=done.toLocaleString("ja-JP");
  $("fishTodo").textContent=(FISH_DATA.length-done).toLocaleString("ja-JP");
+ $("fishRate").textContent=progressRate(done,FISH_DATA.length);
  $("fishBig").textContent=FISH_DATA.filter(f=>f.bigFish).length.toLocaleString("ja-JP");
  $("fishLegendary").textContent=FISH_DATA.filter(f=>f.legendaryBigFish).length.toLocaleString("ja-JP");
  $("fishShown").textContent=arr.length.toLocaleString("ja-JP");
@@ -2794,12 +2798,15 @@ function renderCrafting(){
  $("craftRecipeTotal").textContent=CRAFT_RECIPE_DATA.length.toLocaleString("ja-JP");
  $("craftRecipeDone").textContent=done.toLocaleString("ja-JP");
  $("craftRecipeTodo").textContent=(CRAFT_RECIPE_DATA.length-done).toLocaleString("ja-JP");
+ $("craftRecipeRate").textContent=progressRate(done,CRAFT_RECIPE_DATA.length);
  $("craftRecipeShown").textContent=arr.length.toLocaleString("ja-JP");
  $("craftingSummary").innerHTML=`<div class="listitem">制作済みチェック：<b>${done.toLocaleString("ja-JP")} / ${CRAFT_RECIPE_DATA.length.toLocaleString("ja-JP")}</b></div>`;
+ const craftFullStats=new Map();
+ for(const r of CRAFT_RECIPE_DATA){const job=CRAFT_JOB_LABEL[r.craft]||r.craft,band=craftBandLabel(r.level),doneFlag=craftRecipeState(d,r.id).done;for(const key of [job,`${job}\u001f${band}`]){const st=craftFullStats.get(key)||{done:0,total:0};st.total++;if(doneFlag)st.done++;craftFullStats.set(key,st)}}
  const groups=new Map();for(const r of arr){const job=CRAFT_JOB_LABEL[r.craft]||r.craft,band=craftBandLabel(r.level);if(!groups.has(job))groups.set(job,new Map());const bands=groups.get(job);if(!bands.has(band))bands.set(band,[]);bands.get(band).push(r)}
  $("craftPageInfo").textContent=`開いたレベル帯ごと最大${size}制作物`;
  $("craftPrev").disabled=true;$("craftNext").disabled=true;
- $("craftRecipeList").innerHTML=arr.length?[...groups].map(([job,bands])=>{const jo=filterActive||craftOpenJobs.has(job);return `<details class="craft-tree-job" data-craft-job="${esc(job)}" ${jo?"open":""}><summary><b>${esc(job)}</b><span>${[...bands.values()].flat().length.toLocaleString("ja-JP")}件</span></summary>${jo?`<div class="craft-tree-bands">${[...bands].map(([band,recipes])=>{const bk=`${job}\u001f${band}`,bo=filterActive||craftOpenBands.has(bk);return `<details class="craft-tree-band" data-craft-band="${esc(bk)}" ${bo?"open":""}><summary><b>${esc(band)}</b><span>${recipes.length.toLocaleString("ja-JP")}件</span></summary>${bo?`<div class="craft-tree-products">${recipes.slice(0,size).map(r=>{const st=craftRecipeState(d,r.id),linked=craftLinkedLeves(r,leveIndex),pk=String(r.id),po=craftOpenProducts.has(pk),mo=craftOpenMaterials.has(pk),lo=craftOpenLeveGroups.has(pk),tags=craftDisplayTags(r,linked),itemMeta=craftItemMeta(r.itemId),equipment=itemMeta&&itemMeta.equipSlotCategoryId?`<div class="craft-equipment"><b>装備：</b>${esc(itemMeta.classJobs||"装備条件未取得")} Lv.${itemMeta.levelEquip}～${itemMeta.itemUiCategory?` <span class="small">（${esc(itemMeta.itemUiCategory)}）</span>`:""}</div>`:"";return `<details class="craft-tree-product ${st.done?"is-done":""}" data-craft-product="${r.id}" ${po?"open":""}><summary><label aria-label="${esc(r.name)}を制作済みにする"><input type="checkbox" class="craftCheck" data-id="${r.id}" ${st.done?"checked":""}></label><b>${esc(r.name)}</b><span class="craft-tag-list">${tags}</span></summary>${po?`<div class="craft-tree-body"><div class="craft-facts"><span><b>制作：</b>${esc(CRAFT_JOB_LABEL[r.craft]||r.craft)} Lv.${r.level}</span><span>1回の制作：${Number(r.amount||1)}個</span>${r.stars?`<span>★${r.stars}</span>`:""}</div>${equipment}${tags?`<div class="craft-detail-tags">${tags}</div>`:""}<input class="craftNote" data-id="${r.id}" value="${esc(st.note||"")}" placeholder="制作手帳の自分用メモ"><details class="craft-tree-materials" data-craft-tree-materials="${r.id}" ${mo?"open":""}><summary>必要素材</summary><div class="craft-tree-material-body"></div></details><div class="wrap craft-tree-actions"><label><input type="checkbox" class="craftPlanToggle" data-id="${r.id}" ${(d.craftingPlan?.items?.[r.id])?"checked":""}> 計画に追加</label><input type="number" min="1" step="1" class="craftPlanQty" data-id="${r.id}" value="${Number(d.craftingPlan?.items?.[r.id]||1)}" title="作りたい個数"><button type="button" class="secondary craftOfficial" data-name="${esc(r.name)}">公式DBで検索</button></div>${linked.length?`<details class="craft-tree-leves" data-craft-leve-group="${r.id}" ${lo?"open":""}><summary>ギルドリーヴ（${linked.length}件）</summary>${lo?linked.map(x=>craftLeveDetailHtml(x,d)).join(""):""}</details>`:""}</div>`:""}</details>`}).join("")}</div>`:""}</details>`}).join("")}</div>`:""}</details>`}).join(""):'<div class="empty">該当するレシピはありません。</div>';
+ $("craftRecipeList").innerHTML=arr.length?[...groups].map(([job,bands])=>{const jo=filterActive||craftOpenJobs.has(job),js=craftFullStats.get(job)||{done:0,total:0};return `<details class="craft-tree-job" data-craft-job="${esc(job)}" ${jo?"open":""}><summary><b>${esc(job)}</b><span>${compactProgress(js.done,js.total)}</span></summary>${jo?`<div class="craft-tree-bands">${[...bands].map(([band,recipes])=>{const bk=`${job}\u001f${band}`,bo=filterActive||craftOpenBands.has(bk),bs=craftFullStats.get(bk)||{done:0,total:0};return `<details class="craft-tree-band" data-craft-band="${esc(bk)}" ${bo?"open":""}><summary><b>${esc(band)}</b><span>${compactProgress(bs.done,bs.total)}</span></summary>${bo?`<div class="craft-tree-products">${recipes.slice(0,size).map(r=>{const st=craftRecipeState(d,r.id),linked=craftLinkedLeves(r,leveIndex),pk=String(r.id),po=craftOpenProducts.has(pk),mo=craftOpenMaterials.has(pk),lo=craftOpenLeveGroups.has(pk),tags=craftDisplayTags(r,linked),itemMeta=craftItemMeta(r.itemId),equipment=itemMeta&&itemMeta.equipSlotCategoryId?`<div class="craft-equipment"><b>装備：</b>${esc(itemMeta.classJobs||"装備条件未取得")} Lv.${itemMeta.levelEquip}～${itemMeta.itemUiCategory?` <span class="small">（${esc(itemMeta.itemUiCategory)}）</span>`:""}</div>`:"";return `<details class="craft-tree-product ${st.done?"is-done":""}" data-craft-product="${r.id}" ${po?"open":""}><summary><label aria-label="${esc(r.name)}を制作済みにする"><input type="checkbox" class="craftCheck" data-id="${r.id}" ${st.done?"checked":""}></label><b>${esc(r.name)}</b><span class="craft-tag-list">${tags}</span></summary>${po?`<div class="craft-tree-body"><div class="craft-facts"><span><b>制作：</b>${esc(CRAFT_JOB_LABEL[r.craft]||r.craft)} Lv.${r.level}</span><span>1回の制作：${Number(r.amount||1)}個</span>${r.stars?`<span>★${r.stars}</span>`:""}</div>${equipment}${tags?`<div class="craft-detail-tags">${tags}</div>`:""}<input class="craftNote" data-id="${r.id}" value="${esc(st.note||"")}" placeholder="制作手帳の自分用メモ"><details class="craft-tree-materials" data-craft-tree-materials="${r.id}" ${mo?"open":""}><summary>必要素材</summary><div class="craft-tree-material-body"></div></details><div class="wrap craft-tree-actions"><label><input type="checkbox" class="craftPlanToggle" data-id="${r.id}" ${(d.craftingPlan?.items?.[r.id])?"checked":""}> 計画に追加</label><input type="number" min="1" step="1" class="craftPlanQty" data-id="${r.id}" value="${Number(d.craftingPlan?.items?.[r.id]||1)}" title="作りたい個数"><button type="button" class="secondary craftOfficial" data-name="${esc(r.name)}">公式DBで検索</button></div>${linked.length?`<details class="craft-tree-leves" data-craft-leve-group="${r.id}" ${lo?"open":""}><summary>ギルドリーヴ（${linked.length}件）</summary>${lo?linked.map(x=>craftLeveDetailHtml(x,d)).join(""):""}</details>`:""}</div>`:""}</details>`}).join("")}</div>`:""}</details>`}).join("")}</div>`:""}</details>`}).join(""):'<div class="empty">該当するレシピはありません。</div>';
 
  renderCraftPlan();
  renderCraftInventory();
@@ -4227,6 +4234,7 @@ function renderCollections(){
  $("collectionTotal").textContent=data.length.toLocaleString("ja-JP");
  $("collectionDone").textContent=done.toLocaleString("ja-JP");
  $("collectionTodo").textContent=Math.max(0,data.length-done).toLocaleString("ja-JP");
+ $("collectionRate").textContent=progressRate(Math.min(done,data.length),data.length);
  $("collectionShown").textContent=arr.length.toLocaleString("ja-JP");
  $("collectionPageInfo").textContent=`${collectionPage} / ${pages}ページ`;
  $("collectionPrev").disabled=collectionPage<=1;$("collectionNext").disabled=collectionPage>=pages;
@@ -4290,6 +4298,7 @@ function renderCards(){
  $("cardTotal").textContent=TRIPLE_TRIAD_DATA.length.toLocaleString("ja-JP");
  $("cardDone").textContent=done.toLocaleString("ja-JP");
  $("cardTodo").textContent=(TRIPLE_TRIAD_DATA.length-done).toLocaleString("ja-JP");
+ $("cardRate").textContent=progressRate(done,TRIPLE_TRIAD_DATA.length);
  $("cardShown").textContent=arr.length.toLocaleString("ja-JP");
  $("cardPageInfo").textContent=`${cardPage} / ${pages}ページ`;
  $("cardPrev").disabled=cardPage<=1;$("cardNext").disabled=cardPage>=pages;
@@ -4391,6 +4400,7 @@ function renderTriadNpcs(){
  $("triadNpcTotal").textContent=triadNpcData.length.toLocaleString("ja-JP");
  $("triadNpcDone").textContent=done.toLocaleString("ja-JP");
  $("triadNpcTodo").textContent=(triadNpcData.length-done).toLocaleString("ja-JP");
+ $("triadNpcRate").textContent=progressRate(done,triadNpcData.length);
  $("triadNpcShown").textContent=arr.length.toLocaleString("ja-JP");
  $("triadNpcPageInfo").textContent=`${triadNpcPage} / ${pages}ページ`;
  $("triadNpcPrev").disabled=triadNpcPage<=1;$("triadNpcNext").disabled=triadNpcPage>=pages;
@@ -4958,8 +4968,10 @@ function renderYokai(){
  $("yokaiMinionProgress").textContent=`${minionDone} / 17`;
  $("yokaiWeaponProgress").textContent=`${weaponDone} / 17`;
  $("yokaiMedalProgress").textContent=`${medalTouched} / 17`;
- const rate=((minionDone+weaponDone)/(17*2)*100);
- $("yokaiRate").textContent=`${rate.toFixed(1)}%`;
+ const yokaiTotal=YOKAI_EVENT_DATA.length*2,yokaiDone=minionDone+weaponDone;
+ $("yokaiOverallProgress").textContent=`${yokaiDone} / ${yokaiTotal}`;
+ $("yokaiOverallTodo").textContent=String(Math.max(0,yokaiTotal-yokaiDone));
+ $("yokaiRate").textContent=progressRate(yokaiDone,yokaiTotal);
 
  const milestones=[
   {name:"ウィスパー号",ok:minionDone>=13,cond:"ミニオン13体"},
