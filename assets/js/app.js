@@ -62,7 +62,9 @@ const achievementOpenKinds=new Set();
 const achievementOpenCategories=new Set();
 const achievementOpenCompleted=new Set();
 const achievementOpenExtras=new Set();
-function base(){return {inbox:[],records:[],stackParents:[],stackDays:[],stackEntries:[],historyItems:[],historyEvents:[],toolChecklists:[],trpgAnalyses:[],people:[],characters:[],characterRelations:[],scenarioLibrary:[],quickCaptures:[],shopping:[],purchases:[],foodInventory:[],cookingRecipes:[],cookingHistory:[],achievements:[],achievementProgress:{},fishing:[],fishingProgress:{},craftingProgress:{},craftingPlan:{items:{},checks:{}},craftInventory:{},relicProgress:{},guildleveProgress:{},yokaiProgress:{},minionProgress:{},mountProgress:{},cardProgress:{},triadNpcProgress:{},weapons:[],ffProfile:{lodestoneId:"",profileUrl:"",lastFetchedAt:0,source:"",character:null,jobs:[],minionSync:{lastImportedAt:0,lodestoneTotal:0,matched:0,fileName:""},
+const manualProgressOpenLists=new Set();
+const manualProgressOpenGroups=new Set();
+function base(){return {inbox:[],records:[],stackParents:[],stackDays:[],stackEntries:[],historyItems:[],historyEvents:[],toolChecklists:[],trpgAnalyses:[],people:[],characters:[],characterRelations:[],scenarioLibrary:[],quickCaptures:[],shopping:[],purchases:[],foodInventory:[],cookingRecipes:[],cookingHistory:[],achievements:[],manualProgressLists:[],achievementProgress:{},fishing:[],fishingProgress:{},craftingProgress:{},craftingPlan:{items:{},checks:{}},craftInventory:{},relicProgress:{},guildleveProgress:{},yokaiProgress:{},minionProgress:{},mountProgress:{},cardProgress:{},triadNpcProgress:{},weapons:[],ffProfile:{lodestoneId:"",profileUrl:"",lastFetchedAt:0,source:"",character:null,jobs:[],minionSync:{lastImportedAt:0,lodestoneTotal:0,matched:0,fileName:""},
 ffxivCollect:{lastCatalogSyncAt:0,catalogs:{},sources:{}}},backupMeta:{lastExportAt:0,lastImportAt:0,lastExportSavedAt:0},settings:{guideUrl:"https://www.google.com/search?q={query}+FF14+攻略",youtubeUrl:"https://www.youtube.com/results?search_query={query}+FF14"},migrated:false}}
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2)}
 
@@ -105,7 +107,7 @@ function hasUsefulData(d){
 function normalizeData(d){
  const src=(d&&typeof d==="object")?d:{};
  const out={...base(),...src,migrated:true};
- const arrKeys=["inbox","records","stackParents","stackDays","stackEntries","historyItems","historyEvents","toolChecklists","trpgAnalyses","people","characters","characterRelations","scenarioLibrary","quickCaptures","shopping","purchases","foodInventory","cookingRecipes","cookingHistory","purchases","achievements","fishing","weapons"];
+ const arrKeys=["inbox","records","stackParents","stackDays","stackEntries","historyItems","historyEvents","toolChecklists","trpgAnalyses","people","characters","characterRelations","scenarioLibrary","quickCaptures","shopping","purchases","foodInventory","cookingRecipes","cookingHistory","purchases","achievements","manualProgressLists","fishing","weapons"];
  for(const k of arrKeys)if(!Array.isArray(out[k]))out[k]=[];
  if(!out.achievementProgress||typeof out.achievementProgress!=="object"||Array.isArray(out.achievementProgress))out.achievementProgress={};
  if(!out.fishingProgress||typeof out.fishingProgress!=="object"||Array.isArray(out.fishingProgress))out.fishingProgress={};
@@ -878,7 +880,7 @@ function toggleBudgetTypeUI(){
 function renderFixedCosts(){if(!$("fixedList"))return;const d=budgetRoot(load());const fixedTotal=d.householdBudget.fixed.reduce((s,x)=>s+Number(x.amount||0),0);if($("fixedTotal"))$("fixedTotal").textContent=yen(fixedTotal);$("fixedList").innerHTML=d.householdBudget.fixed.length?d.householdBudget.fixed.map(x=>`<div class="listitem"><div class="row"><div>${esc(x.name)} <b>${yen(x.amount)}</b></div><button class="danger fixedDelete" data-id="${x.id}">削除</button></div></div>`).join(""):'<div class="empty">固定費は未登録です。</div>';document.querySelectorAll(".fixedDelete").forEach(b=>b.onclick=()=>{const d=budgetRoot(load());d.householdBudget.fixed=d.householdBudget.fixed.filter(x=>x.id!==b.dataset.id);save(d);renderFixedCosts()})}
 function addFixedCost(){const name=$("fixedName").value.trim(),amount=nval("fixedAmount");if(!name||!amount)return alert("項目と金額を入力してください。");const d=budgetRoot(load());d.householdBudget.fixed.push({id:uid(),name,amount});save(d);$("fixedName").value="";$("fixedAmount").value="";renderFixedCosts()}
 const UI_KEY="eorzeaArchive_ui_v1";
-const pageTitles={home:"ホーム",activityLog:"時間記録",dateArchive:"日付アーカイブ",inbox:"受信箱",records:"記録庫",history:"履歴",shopping:"買い物・在庫",cooking:"料理図鑑",ff14:"エオルゼア",achievements:"アチーブメント",ffxivAcquisition:"入手・交換品図鑑",ffxivDamage:"火力計算機",householdBudget:"家計簿",guildleves:"ギルドリーヴ",yokai:"妖怪ウォッチ",eventsHome:"イベント",crafting:"制作手帳",weapons:"武器制作",fishing:"釣り手帳",trpg:"TRPG・PL履歴",trpg_kp:"TRPG・KP履歴",peopleCodex:"人物・PC図鑑",scenarioLibrary:"所持シナリオ",trpgAssets:"TRPG素材庫",todayHub:"今日",quickCapture:"クイック記録",diceTool:"ダイスログ抽出",kpTools:"KP補助",checklistTool:"自由チェックメモ",sakumeru:"SAKU+MERU",settings:"設定",backup:"バックアップ",ffcollect:"収集図鑑",bicolor:"バイカラージェム"};
+const pageTitles={home:"ホーム",activityLog:"時間記録",dateArchive:"日付アーカイブ",inbox:"受信箱",records:"記録庫",history:"履歴",shopping:"買い物・在庫",cooking:"料理図鑑",ff14:"エオルゼア",achievements:"アチーブメント",manualProgress:"手動進捗",ffxivAcquisition:"入手・交換品図鑑",ffxivDamage:"火力計算機",householdBudget:"家計簿",guildleves:"ギルドリーヴ",yokai:"妖怪ウォッチ",eventsHome:"イベント",crafting:"制作手帳",weapons:"武器制作",fishing:"釣り手帳",trpg:"TRPG・PL履歴",trpg_kp:"TRPG・KP履歴",peopleCodex:"人物・PC図鑑",scenarioLibrary:"所持シナリオ",trpgAssets:"TRPG素材庫",todayHub:"今日",quickCapture:"クイック記録",diceTool:"ダイスログ抽出",kpTools:"KP補助",checklistTool:"自由チェックメモ",sakumeru:"SAKU+MERU",settings:"設定",backup:"バックアップ",ffcollect:"収集図鑑",bicolor:"バイカラージェム"};
 function loadUI(){try{return JSON.parse(localStorage.getItem(UI_KEY)||"{}")}catch{return {}}}
 function saveUI(patch){const ui={...loadUI(),...patch};localStorage.setItem(UI_KEY,JSON.stringify(ui));return ui}
 function closeSidebar(){document.getElementById("sidebar")?.classList.remove("open");document.getElementById("sidebarOverlay")?.classList.remove("open")}
@@ -6075,6 +6077,70 @@ function renderTrpgDays(){
  }
 }
 
+function manualProgressStats(groups){
+ const rows=(Array.isArray(groups)?groups:[]).flatMap(g=>Array.isArray(g?.checklist)?g.checklist:[]);
+ const total=rows.length,done=rows.filter(x=>!!x?.done).length;
+ return {total,done,left:Math.max(0,total-done),rate:total?Math.round(done/total*100):0};
+}
+function manualProgressGroupKey(listId,groupId){return `${String(listId)}::${String(groupId)}`}
+function manualProgressDoneAtText(value){
+ if(!value)return "";
+ const date=new Date(value);
+ return Number.isNaN(date.getTime())?"":date.toLocaleDateString("ja-JP");
+}
+function renderManualProgress(){
+ const root=$("manualProgressList");if(!root)return;
+ const d=load(),lists=Array.isArray(d.manualProgressLists)?d.manualProgressLists:[];
+ root.innerHTML=lists.length?lists.map(list=>{
+  const listId=String(list?.id||""),open=manualProgressOpenLists.has(listId),stats=manualProgressStats(list?.groups);
+  const groups=Array.isArray(list?.groups)?list.groups:[];
+  const groupHtml=open?groups.map(group=>{
+   const groupId=String(group?.id||""),key=manualProgressGroupKey(listId,groupId),groupOpen=manualProgressOpenGroups.has(key),items=Array.isArray(group?.checklist)?group.checklist:[],groupStats=manualProgressStats([{checklist:items}]);
+   const nextId=String(items.find(x=>!x?.done)?.id||"");
+   const itemHtml=groupOpen?items.map(item=>{
+    const itemId=String(item?.id||""),date=manualProgressDoneAtText(item?.doneAt);
+    return `<div class="manual-progress-item ${item?.done?"is-done":""}" data-manual-item="${esc(itemId)}">
+     <label><input class="manualProgressCheck" data-list-id="${esc(listId)}" data-group-id="${esc(groupId)}" data-item-id="${esc(itemId)}" type="checkbox" ${item?.done?"checked":""}/> <span>${esc(checklistItemName(item)||"名称未設定")}</span></label>
+     ${!item?.done&&itemId===nextId?'<span class="badge manual-next">NEXT</span>':""}${date?`<span class="small manual-done-at">${esc(date)}</span>`:""}
+     <button class="ghost manualProgressRenameItem" data-list-id="${esc(listId)}" data-group-id="${esc(groupId)}" data-item-id="${esc(itemId)}">名称変更</button>
+     <button class="danger manualProgressDeleteItem" data-list-id="${esc(listId)}" data-group-id="${esc(groupId)}" data-item-id="${esc(itemId)}">削除</button>
+    </div>`;
+   }).join(""):"";
+   return `<details class="manual-progress-group" data-manual-group="${esc(key)}" ${groupOpen?"open":""}>
+    <summary><b>${esc(group?.name||"名称未設定")}</b><span>${groupStats.done} / ${groupStats.total}</span><span>${groupStats.total?(groupStats.left?`残り${groupStats.left}`:"COMPLETE"):"項目なし"}</span></summary>
+    ${groupOpen?`<div class="manual-progress-group-body">
+     <div class="manual-progress-actions"><button class="ghost manualProgressRenameGroup" data-list-id="${esc(listId)}" data-group-id="${esc(groupId)}">グループ名変更</button><button class="danger manualProgressDeleteGroup" data-list-id="${esc(listId)}" data-group-id="${esc(groupId)}">グループ削除</button></div>
+     ${itemHtml||'<div class="empty">チェック項目はまだありません。</div>'}
+     <div class="manual-progress-add"><input class="manualProgressNewItem" data-group-key="${esc(key)}" placeholder="チェック項目名"/><button class="secondary manualProgressAddItem" data-list-id="${esc(listId)}" data-group-id="${esc(groupId)}">＋ 項目追加</button></div>
+    </div>`:""}
+   </details>`;
+  }).join(""):"";
+  return `<details class="manual-progress-list" data-manual-list="${esc(listId)}" ${open?"open":""}>
+   <summary><b>${esc(list?.title||"名称未設定")}</b><span>${stats.done} / ${stats.total}</span><span>残り${stats.left}</span><span>${stats.rate}%</span></summary>
+   ${open?`<div class="manual-progress-list-body">
+    <div class="manual-progress-actions"><button class="ghost manualProgressRenameList" data-list-id="${esc(listId)}">タイトル変更</button><button class="danger manualProgressDeleteList" data-list-id="${esc(listId)}">進捗リスト削除</button></div>
+    ${groupHtml||'<div class="empty">グループはまだありません。</div>'}
+    <div class="manual-progress-add"><input class="manualProgressNewGroup" data-list-id="${esc(listId)}" placeholder="グループ名"/><button class="secondary manualProgressAddGroup" data-list-id="${esc(listId)}">＋ グループ追加</button></div>
+   </div>`:""}
+  </details>`;
+ }).join(""):'<div class="empty">手動進捗はまだありません。上の欄から最初のリストを作成できます。</div>';
+
+ const findList=(data,id)=>(data.manualProgressLists||[]).find(x=>String(x?.id)===String(id));
+ const findGroup=(list,id)=>(list?.groups||[]).find(x=>String(x?.id)===String(id));
+ document.querySelectorAll("[data-manual-list]").forEach(el=>el.ontoggle=()=>{const id=el.dataset.manualList;if(el.open&&!manualProgressOpenLists.has(id)){manualProgressOpenLists.add(id);renderManualProgress()}else if(!el.open)manualProgressOpenLists.delete(id)});
+ document.querySelectorAll("[data-manual-group]").forEach(el=>el.ontoggle=()=>{const key=el.dataset.manualGroup;if(el.open&&!manualProgressOpenGroups.has(key)){manualProgressOpenGroups.add(key);renderManualProgress()}else if(!el.open)manualProgressOpenGroups.delete(key)});
+ document.querySelectorAll(".manualProgressCheck").forEach(el=>el.onchange=e=>{e.stopPropagation();const data=load(),list=findList(data,el.dataset.listId),group=findGroup(list,el.dataset.groupId),item=(group?.checklist||[]).find(x=>String(x?.id)===String(el.dataset.itemId));if(!item)return;item.done=el.checked;item.doneAt=el.checked?new Date().toISOString():null;save(data);renderManualProgress()});
+ document.querySelectorAll(".manualProgressAddGroup").forEach(el=>el.onclick=e=>{e.stopPropagation();const input=document.querySelector(`.manualProgressNewGroup[data-list-id="${CSS.escape(el.dataset.listId)}"]`),name=input?.value.trim();if(!name)return alert("グループ名を入力してください。");const data=load(),list=findList(data,el.dataset.listId);if(!list)return;list.groups=Array.isArray(list.groups)?list.groups:[];list.groups.push({id:uid(),name,checklist:[]});save(data);renderManualProgress()});
+ document.querySelectorAll(".manualProgressAddItem").forEach(el=>el.onclick=e=>{e.stopPropagation();const key=manualProgressGroupKey(el.dataset.listId,el.dataset.groupId),input=document.querySelector(`.manualProgressNewItem[data-group-key="${CSS.escape(key)}"]`),name=input?.value.trim();if(!name)return alert("チェック項目名を入力してください。");const data=load(),list=findList(data,el.dataset.listId),group=findGroup(list,el.dataset.groupId);if(!group)return;group.checklist=Array.isArray(group.checklist)?group.checklist:[];group.checklist.push({id:uid(),name,done:false,doneAt:null});save(data);renderManualProgress()});
+ document.querySelectorAll(".manualProgressRenameList").forEach(el=>el.onclick=e=>{e.stopPropagation();const data=load(),list=findList(data,el.dataset.listId);if(!list)return;const value=prompt("新しい進捗リスト名",list.title||"");if(value===null||!value.trim())return;list.title=value.trim();save(data);renderManualProgress()});
+ document.querySelectorAll(".manualProgressRenameGroup").forEach(el=>el.onclick=e=>{e.stopPropagation();const data=load(),group=findGroup(findList(data,el.dataset.listId),el.dataset.groupId);if(!group)return;const value=prompt("新しいグループ名",group.name||"");if(value===null||!value.trim())return;group.name=value.trim();save(data);renderManualProgress()});
+ document.querySelectorAll(".manualProgressRenameItem").forEach(el=>el.onclick=e=>{e.stopPropagation();const data=load(),group=findGroup(findList(data,el.dataset.listId),el.dataset.groupId),item=(group?.checklist||[]).find(x=>String(x?.id)===String(el.dataset.itemId));if(!item)return;const value=prompt("新しい項目名",checklistItemName(item));if(value===null||!value.trim())return;item.name=value.trim();save(data);renderManualProgress()});
+ document.querySelectorAll(".manualProgressDeleteItem").forEach(el=>el.onclick=e=>{e.stopPropagation();if(!confirm("このチェック項目を削除しますか？"))return;const data=load(),group=findGroup(findList(data,el.dataset.listId),el.dataset.groupId);if(!group)return;group.checklist=(group.checklist||[]).filter(x=>String(x?.id)!==String(el.dataset.itemId));save(data);renderManualProgress()});
+ document.querySelectorAll(".manualProgressDeleteGroup").forEach(el=>el.onclick=e=>{e.stopPropagation();if(!confirm("このグループと中のチェック項目を削除しますか？"))return;const data=load(),list=findList(data,el.dataset.listId);if(!list)return;manualProgressOpenGroups.delete(manualProgressGroupKey(el.dataset.listId,el.dataset.groupId));list.groups=(list.groups||[]).filter(x=>String(x?.id)!==String(el.dataset.groupId));save(data);renderManualProgress()});
+ document.querySelectorAll(".manualProgressDeleteList").forEach(el=>el.onclick=e=>{e.stopPropagation();if(!confirm("この進捗リストを削除しますか？"))return;const data=load(),id=String(el.dataset.listId);manualProgressOpenLists.delete(id);for(const key of [...manualProgressOpenGroups])if(key.startsWith(id+"::"))manualProgressOpenGroups.delete(key);data.manualProgressLists=(data.manualProgressLists||[]).filter(x=>String(x?.id)!==id);save(data);renderManualProgress()});
+ const addList=$("manualProgressAddList");if(addList)addList.onclick=()=>{const input=$("manualProgressNewTitle"),title=input?.value.trim();if(!title)return alert("進捗リスト名を入力してください。");const data=load(),id=uid();data.manualProgressLists=Array.isArray(data.manualProgressLists)?data.manualProgressLists:[];data.manualProgressLists.push({id,title,groups:[]});manualProgressOpenLists.add(String(id));save(data);if(input)input.value="";renderManualProgress()};
+}
+
 function renderSettings(){const d=load();$("guideUrl").value=d.settings.guideUrl;$("youtubeUrl").value=d.settings.youtubeUrl;$("ruleView").innerHTML=Object.entries(rules).map(([k,v])=>`<div class="listitem"><b>${k}</b><div class="small">${v.join("・")}</div></div>`).join("")}
 function safeRender(name,fn){try{fn()}catch(e){console.error("Life Archive render error:",name,e);const st=$("saveStatus");if(st)st.textContent=`⚠ ${name}表示エラー（他の画面は継続）`;}}
 function render(){
@@ -6091,6 +6157,7 @@ function render(){
 safeRender("火力計算機",()=>{applyFoodPreset();applyPotionPreset();renderDamageGear();renderDamageCalc();renderDamageHistory()});
  safeRender("収集図鑑",renderFFXIVCollectHub);
  safeRender("入手・交換品図鑑",renderFFAcquisition);
+ safeRender("手動進捗",renderManualProgress);
  safeRender("バイカラージェム",renderBicolor);
  safeRender("データ引き継ぎ確認",renderPersistenceTest);
  safeRender("ギルドリーヴ",renderGuildleves);
