@@ -64,7 +64,7 @@ const achievementOpenCompleted=new Set();
 const achievementOpenExtras=new Set();
 const manualProgressOpenLists=new Set();
 const manualProgressOpenGroups=new Set();
-function base(){return {inbox:[],records:[],stackParents:[],stackDays:[],stackEntries:[],historyItems:[],historyEvents:[],toolChecklists:[],trpgAnalyses:[],people:[],characters:[],characterRelations:[],scenarioLibrary:[],quickCaptures:[],shopping:[],purchases:[],foodInventory:[],cookingRecipes:[],cookingHistory:[],achievements:[],manualProgressLists:[],achievementProgress:{},fishing:[],fishingProgress:{},craftingProgress:{},craftingPlan:{items:{},checks:{}},craftInventory:{},relicProgress:{},guildleveProgress:{},yokaiProgress:{},minionProgress:{},mountProgress:{},cardProgress:{},triadNpcProgress:{},weapons:[],ffProfile:{lodestoneId:"",profileUrl:"",lastFetchedAt:0,source:"",character:null,jobs:[],minionSync:{lastImportedAt:0,lodestoneTotal:0,matched:0,fileName:""},
+function base(){return {inbox:[],records:[],stackParents:[],stackDays:[],stackEntries:[],historyItems:[],historyEvents:[],toolChecklists:[],trpgAnalyses:[],people:[],characters:[],characterRelations:[],scenarioLibrary:[],quickCaptures:[],shopping:[],purchases:[],foodInventory:[],cookingRecipes:[],cookingHistory:[],achievements:[],manualProgressLists:[],goals:[],achievementProgress:{},fishing:[],fishingProgress:{},craftingProgress:{},craftingPlan:{items:{},checks:{}},craftInventory:{},relicProgress:{},guildleveProgress:{},yokaiProgress:{},minionProgress:{},mountProgress:{},cardProgress:{},triadNpcProgress:{},weapons:[],ffProfile:{lodestoneId:"",profileUrl:"",lastFetchedAt:0,source:"",character:null,jobs:[],minionSync:{lastImportedAt:0,lodestoneTotal:0,matched:0,fileName:""},
 ffxivCollect:{lastCatalogSyncAt:0,catalogs:{},sources:{}}},backupMeta:{lastExportAt:0,lastImportAt:0,lastExportSavedAt:0},settings:{guideUrl:"https://www.google.com/search?q={query}+FF14+攻略",youtubeUrl:"https://www.youtube.com/results?search_query={query}+FF14"},migrated:false}}
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2)}
 
@@ -109,7 +109,7 @@ function hasUsefulData(d){
 function normalizeData(d){
  const src=(d&&typeof d==="object")?d:{};
  const out={...base(),...src,migrated:true};
- const arrKeys=["inbox","records","stackParents","stackDays","stackEntries","historyItems","historyEvents","toolChecklists","trpgAnalyses","people","characters","characterRelations","scenarioLibrary","quickCaptures","shopping","purchases","foodInventory","cookingRecipes","cookingHistory","purchases","achievements","manualProgressLists","fishing","weapons"];
+ const arrKeys=["inbox","records","stackParents","stackDays","stackEntries","historyItems","historyEvents","toolChecklists","trpgAnalyses","people","characters","characterRelations","scenarioLibrary","quickCaptures","shopping","purchases","foodInventory","cookingRecipes","cookingHistory","purchases","achievements","manualProgressLists","goals","fishing","weapons"];
  for(const k of arrKeys)if(!Array.isArray(out[k]))out[k]=[];
  if(!out.achievementProgress||typeof out.achievementProgress!=="object"||Array.isArray(out.achievementProgress))out.achievementProgress={};
  if(!out.fishingProgress||typeof out.fishingProgress!=="object"||Array.isArray(out.fishingProgress))out.fishingProgress={};
@@ -882,7 +882,7 @@ function toggleBudgetTypeUI(){
 function renderFixedCosts(){if(!$("fixedList"))return;const d=budgetRoot(load());const fixedTotal=d.householdBudget.fixed.reduce((s,x)=>s+Number(x.amount||0),0);if($("fixedTotal"))$("fixedTotal").textContent=yen(fixedTotal);$("fixedList").innerHTML=d.householdBudget.fixed.length?d.householdBudget.fixed.map(x=>`<div class="listitem"><div class="row"><div>${esc(x.name)} <b>${yen(x.amount)}</b></div><button class="danger fixedDelete" data-id="${x.id}">削除</button></div></div>`).join(""):'<div class="empty">固定費は未登録です。</div>';document.querySelectorAll(".fixedDelete").forEach(b=>b.onclick=()=>{const d=budgetRoot(load());d.householdBudget.fixed=d.householdBudget.fixed.filter(x=>x.id!==b.dataset.id);save(d);renderFixedCosts()})}
 function addFixedCost(){const name=$("fixedName").value.trim(),amount=nval("fixedAmount");if(!name||!amount)return alert("項目と金額を入力してください。");const d=budgetRoot(load());d.householdBudget.fixed.push({id:uid(),name,amount});save(d);$("fixedName").value="";$("fixedAmount").value="";renderFixedCosts()}
 const UI_KEY="eorzeaArchive_ui_v1";
-const pageTitles={home:"ホーム",activityLog:"時間記録",dateArchive:"日付アーカイブ",inbox:"受信箱",records:"記録庫",history:"履歴",shopping:"買い物・在庫",cooking:"料理図鑑",ff14:"エオルゼア",achievements:"アチーブメント",manualProgress:"手動進捗",ffxivAcquisition:"入手・交換品図鑑",ffxivDamage:"火力計算機",householdBudget:"家計簿",guildleves:"ギルドリーヴ",yokai:"妖怪ウォッチ",eventsHome:"イベント",crafting:"制作手帳",weapons:"武器制作",fishing:"釣り手帳",trpg:"TRPG・PL履歴",trpg_kp:"TRPG・KP履歴",peopleCodex:"人物・PC図鑑",scenarioLibrary:"所持シナリオ",trpgAssets:"TRPG素材庫",todayHub:"今日",quickCapture:"クイック記録",diceTool:"ダイスログ抽出",kpTools:"KP補助",checklistTool:"自由チェックメモ",sakumeru:"SAKU+MERU",settings:"設定",backup:"バックアップ",ffcollect:"収集図鑑",bicolor:"バイカラージェム"};
+const pageTitles={home:"ホーム",activityLog:"時間記録",dateArchive:"日付アーカイブ",inbox:"受信箱",records:"記録庫",history:"履歴",shopping:"買い物・在庫",cooking:"料理図鑑",ff14:"エオルゼア",goals:"GOALS",goalCalendar:"イベント",achievements:"アチーブメント",manualProgress:"手動進捗",ffxivAcquisition:"入手・交換品図鑑",ffxivDamage:"火力計算機",householdBudget:"家計簿",guildleves:"ギルドリーヴ",yokai:"妖怪ウォッチ",eventsHome:"イベント",crafting:"制作手帳",weapons:"武器制作",fishing:"釣り手帳",trpg:"TRPG・PL履歴",trpg_kp:"TRPG・KP履歴",peopleCodex:"人物・PC図鑑",scenarioLibrary:"所持シナリオ",trpgAssets:"TRPG素材庫",todayHub:"今日",quickCapture:"クイック記録",diceTool:"ダイスログ抽出",kpTools:"KP補助",checklistTool:"自由チェックメモ",sakumeru:"SAKU+MERU",settings:"設定",backup:"バックアップ",ffcollect:"収集図鑑",bicolor:"バイカラージェム"};
 function loadUI(){try{return JSON.parse(localStorage.getItem(UI_KEY)||"{}")}catch{return {}}}
 function saveUI(patch){const ui={...loadUI(),...patch};localStorage.setItem(UI_KEY,JSON.stringify(ui));return ui}
 function closeSidebar(){document.getElementById("sidebar")?.classList.remove("open");document.getElementById("sidebarOverlay")?.classList.remove("open")}
@@ -2487,6 +2487,9 @@ function renderShopping(){const d=load();$("shopList").innerHTML=d.shopping.leng
 function achievementState(d,id){
  return (d.achievementProgress&&d.achievementProgress[id])||{done:false,date:"",note:"",checklist:[],tags:[]};
 }
+function achievementTagCatalog(d=load()){
+ return [...new Set(Object.values(d.achievementProgress||{}).flatMap(st=>normalizeTags(st?.tags)))].sort((a,b)=>a.localeCompare(b,"ja"));
+}
 function filteredAchievements(){
  const d=load(),q=$("achSearch").value.trim().toLowerCase(),kind=$("achKind").value,cat=$("achCategory").value,status=$("achStatus").value,hidden=$("achIncludeHidden").checked;
  const tagQ=$("achTagSearch").value.trim().toLowerCase(),inputStatus=$("achInputStatus").value,reward=$("achReward").value,sort=$("achSort").value;
@@ -2541,9 +2544,10 @@ function achievementDisplayTags(a){
  return tags;
 }
 function achievementCategoryKey(kind,category){return `${kind}\u001f${category}`}
-function achievementExtraHtml(a,st){
+function achievementExtraHtml(a,st,tagCatalog=[]){
  return `<div class="achievement-extra-detail">
   <label>ユーザータグ（カンマ区切り）</label><input class="achTags" data-id="${a.id}" value="${esc((st.tags||[]).join(", "))}" placeholder="例：事件屋, 黄金, 優先">
+  ${tagCatalog.length?`<div class="achievement-tag-suggestions"><span class="small">既存タグ：</span>${tagCatalog.map(t=>`<button class="ghost achTagSuggest" type="button" data-id="${a.id}" data-tag="${esc(t)}">${esc(t)}</button>`).join("")}</div>`:""}
   <label>攻略・参考URL（任意）</label><input class="achRefUrl" data-id="${a.id}" type="url" value="${esc(st.refUrl||"")}" placeholder="https://...">
  <div class="achievement-user-tags">${(st.tags||[]).map(t=>`<span class="badge">#${esc(t)}</span>`).join("")}</div>
  <div class="achievement-checklist-box">
@@ -2556,7 +2560,7 @@ function achievementExtraHtml(a,st){
  <div class="wrap achievement-detail-actions"><button class="secondary achOfficial" data-name="${esc(a.name)}">公式で確認</button>${st.refUrl?`<button class="secondary achRefOpen" data-url="${esc(st.refUrl)}">参考URLを開く</button>`:""}<button class="ghost achSave" data-id="${a.id}">日付・メモ・URLを保存</button></div>
   </div>`;
 }
-function achievementItemHtml(a,st){
+function achievementItemHtml(a,st,tagCatalog=[]){
  const extraOpen=achievementOpenExtras.has(String(a.id));
  const tags=achievementDisplayTags(a);
  return `<article class="achievement-item ${st.done?"is-done":""}" data-ach-item="${a.id}">
@@ -2565,7 +2569,7 @@ function achievementItemHtml(a,st){
    <div class="achievement-description"><b>達成条件</b><p>${nl(a.description)}</p></div>
    ${st.done?`<div class="achievement-date-field"><label>達成日</label><input class="achDate" data-id="${a.id}" type="date" value="${esc(st.date||"")}"></div>`:""}
    <div class="achievement-note-field"><label>自分用メモ</label><div><input class="achNoteQuick" data-id="${a.id}" value="${esc(st.note||"")}" placeholder="進捗、思い出など"><button class="ghost achNoteSave" data-id="${a.id}">メモを保存</button></div></div>
-   <details class="achievement-extra" data-ach-extra="${a.id}" ${extraOpen?"open":""}><summary>その他の記録</summary>${extraOpen?achievementExtraHtml(a,st):""}</details>
+   <details class="achievement-extra" data-ach-extra="${a.id}" ${extraOpen?"open":""}><summary>その他の記録</summary>${extraOpen?achievementExtraHtml(a,st,tagCatalog):""}</details>
   </div>
  </article>`;
 }
@@ -2575,6 +2579,7 @@ function renderAchievements(){
  const points=ACHIEVEMENT_DB.filter(a=>a.kind!=="レガシー").reduce((n,a)=>n+(achievementState(d,a.id).done?a.points:0),0);
  const visibleBase=ACHIEVEMENT_DB.filter(a=>!a.hidden&&a.kind!=="レガシー");
  const visibleDone=visibleBase.filter(a=>achievementState(d,a.id).done).length;
+ const tagCatalog=achievementTagCatalog(d),tagList=$("achievementTagCatalog");if(tagList)tagList.innerHTML=tagCatalog.map(t=>`<option value="${esc(t)}"></option>`).join("");
  const arr=filteredAchievements();
  if(!$("achStatus").value)arr.sort((a,b)=>Number(achievementState(d,a.id).done)-Number(achievementState(d,b.id).done));
  const grouped=new Map();arr.forEach(a=>{if(!grouped.has(a.kind))grouped.set(a.kind,new Map());const cats=grouped.get(a.kind);if(!cats.has(a.category))cats.set(a.category,[]);cats.get(a.category).push(a)});
@@ -2589,7 +2594,7 @@ function renderAchievements(){
     const key=achievementCategoryKey(kind,category),todoRows=allRows.filter(a=>!achievementState(d,a.id).done),doneRows=allRows.filter(a=>achievementState(d,a.id).done),categoryOpen=achievementOpenCategories.has(key),completedOpen=achievementOpenCompleted.has(key),fullRows=fullAchievementKinds.get(kind)?.get(category)||allRows,fullDone=fullRows.filter(a=>achievementState(d,a.id).done).length;
     const todoPage=categoryOpen?todoRows.slice(start,start+size):[],donePage=categoryOpen&&completedOpen?doneRows.slice(start,start+size):[];
     const statusLabel=todoRows.length?`未完了 ${todoRows.length.toLocaleString("ja-JP")}`:"✓ 完了";
-    return `<details class="achievement-category" data-ach-category="${esc(key)}" ${categoryOpen?"open":""}><summary><b>${esc(category)}</b><span>${statusLabel}</span><span class="achievement-category-done">${compactProgress(fullDone,fullRows.length)}</span></summary><div class="achievement-items">${todoPage.map(a=>achievementItemHtml(a,achievementState(d,a.id))).join("")}${doneRows.length?`<details class="achievement-done-group" data-ach-completed="${esc(key)}" ${completedOpen?"open":""}><summary>完了済み ${doneRows.length.toLocaleString("ja-JP")}件</summary><div>${donePage.map(a=>achievementItemHtml(a,achievementState(d,a.id))).join("")}</div></details>`:""}${categoryOpen&&(todoRows.length>size||doneRows.length>size)?`<div class="small achievement-page-note">この分類は${size}件単位で表示しています。</div>`:""}</div></details>`;
+    return `<details class="achievement-category" data-ach-category="${esc(key)}" ${categoryOpen?"open":""}><summary><b>${esc(category)}</b><span>${statusLabel}</span><span class="achievement-category-done">${compactProgress(fullDone,fullRows.length)}</span></summary><div class="achievement-items">${todoPage.map(a=>achievementItemHtml(a,achievementState(d,a.id),tagCatalog)).join("")}${doneRows.length?`<details class="achievement-done-group" data-ach-completed="${esc(key)}" ${completedOpen?"open":""}><summary>完了済み ${doneRows.length.toLocaleString("ja-JP")}件</summary><div>${donePage.map(a=>achievementItemHtml(a,achievementState(d,a.id),tagCatalog)).join("")}</div></details>`:""}${categoryOpen&&(todoRows.length>size||doneRows.length>size)?`<div class="small achievement-page-note">この分類は${size}件単位で表示しています。</div>`:""}</div></details>`;
    }).join(""):"";
    const kindLabel=kindTodo?`未完了 ${kindTodo.toLocaleString("ja-JP")}`:"✓ 完了",fullKindRows=[...(fullAchievementKinds.get(kind)?.values()||[])].flat(),fullKindDone=fullKindRows.filter(a=>achievementState(d,a.id).done).length;
    return `<details class="achievement-kind" data-ach-kind="${esc(kind)}" ${kindOpen?"open":""}><summary><b>${esc(kind)}</b><span>${kindLabel}</span><span class="achievement-kind-done-count">${compactProgress(fullKindDone,fullKindRows.length)}</span></summary><div class="achievement-categories">${categoryHtml}</div></details>`;
@@ -2603,7 +2608,8 @@ function renderAchievements(){
  document.querySelectorAll(".achCheck").forEach(c=>c.onchange=()=>{const d=load(),id=c.dataset.id;d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]};const visibleDate=document.querySelector(`.achDate[data-id="${id}"]`)?.value||"";st.done=c.checked;if(c.checked){if(!st.doneAt)st.doneAt=Date.now();if(!visibleDate&&!st.date)st.date=localDateValue(Date.now())}else st.doneAt=0;if(visibleDate)st.date=visibleDate;d.achievementProgress[id]=st;save(d);renderAchievements();renderFFSummary();if(typeof renderDateArchive==="function")renderDateArchive()});
  document.querySelectorAll(".achDate").forEach(input=>input.onchange=()=>{const d=load(),id=input.dataset.id;d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]};st.date=input.value;d.achievementProgress[id]=st;save(d)});
  document.querySelectorAll(".achNoteSave").forEach(b=>b.onclick=()=>{const d=load(),id=b.dataset.id,input=document.querySelector(`.achNoteQuick[data-id="${id}"]`);d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]};st.note=input?.value||"";d.achievementProgress[id]=st;save(d);b.textContent="保存しました";setTimeout(()=>b.textContent="メモを保存",900)});
- document.querySelectorAll(".achSave").forEach(b=>b.onclick=()=>{const d=load(),id=b.dataset.id;d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]},dateInput=document.querySelector(`.achDate[data-id="${id}"]`),noteInput=document.querySelector(`.achNoteQuick[data-id="${id}"]`);if(dateInput)st.date=dateInput.value;if(noteInput)st.note=noteInput.value;st.tags=document.querySelector(`.achTags[data-id="${id}"]`).value.split(/[,、]/).map(v=>v.trim()).filter(Boolean);st.refUrl=document.querySelector(`.achRefUrl[data-id="${id}"]`).value.trim();d.achievementProgress[id]=st;save(d);renderAchievements()});
+ document.querySelectorAll(".achTagSuggest").forEach(b=>b.onclick=e=>{e.stopPropagation();const input=document.querySelector(`.achTags[data-id="${b.dataset.id}"]`);if(!input)return;const tags=normalizeTags(input.value),tag=b.dataset.tag;if(!tags.includes(tag))tags.push(tag);input.value=tags.join(", ")});
+ document.querySelectorAll(".achSave").forEach(b=>b.onclick=()=>{const d=load(),id=b.dataset.id;d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]},dateInput=document.querySelector(`.achDate[data-id="${id}"]`),noteInput=document.querySelector(`.achNoteQuick[data-id="${id}"]`);if(dateInput)st.date=dateInput.value;if(noteInput)st.note=noteInput.value;st.tags=normalizeTags(document.querySelector(`.achTags[data-id="${id}"]`).value);st.refUrl=document.querySelector(`.achRefUrl[data-id="${id}"]`).value.trim();d.achievementProgress[id]=st;save(d);renderAchievements()});
 
  document.querySelectorAll(".achSubAdd").forEach(b=>b.onclick=()=>{
    const id=b.dataset.id,input=document.querySelector(`.achSubInput[data-id="${id}"]`),name=input.value.trim();
@@ -2764,6 +2770,7 @@ function filteredCraftRecipes(index=craftLeveIndex()){
    ||(special==="secret"&&r.secret>0)
    ||(special==="specialist"&&r.specialist)
    ||(special==="expert"&&r.expert)
+   ||(special==="facility"&&craftRecipeMeta(r).statusRequiredId>0)
    ||(special==="noquick"&&!r.quick);
   const linked=craftLinkedLeves(r,index),itemMeta=craftItemMeta(r.itemId),usageInfo=craftUsage(r),secretName=craftSecretName(r);
   const isSecret=Number(r.secret)>0,isCosmo=craftIsCosmo(r);
@@ -6153,6 +6160,50 @@ function renderManualProgress(){
  const addList=$("manualProgressAddList");if(addList)addList.onclick=()=>{const input=$("manualProgressNewTitle"),title=input?.value.trim();if(!title)return alert("進捗リスト名を入力してください。");const data=load(),id=uid();data.manualProgressLists=Array.isArray(data.manualProgressLists)?data.manualProgressLists:[];data.manualProgressLists.push({id,title,groups:[]});manualProgressOpenLists.add(String(id));save(data);if(input)input.value="";renderManualProgress()};
 }
 
+let goalEditId="",goalCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+const goalOpenIds=new Set();
+const GOAL_PRIORITY_LABELS={5:"★★★★★ 最優先",4:"★★★★☆ 優先",3:"★★★☆☆ 普通",2:"★★☆☆☆ 低め",1:"★☆☆☆☆ そのうち"};
+function goalNumber(value){const n=Number(value);return Number.isFinite(n)?n:0}
+function goalDerived(goal){
+ const current=goalNumber(goal.current),target=goalNumber(goal.target),remaining=Math.max(target-current,0),rate=target>0?current/target*100:0;
+ return {current,target,remaining,rate,complete:target>0&&current>=target};
+}
+function localDateParts(value){const m=String(value||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?{y:+m[1],m:+m[2],d:+m[3]}:null}
+function localDayNumber(value){const p=localDateParts(value);return p?Math.floor(Date.UTC(p.y,p.m-1,p.d)/86400000):null}
+function todayLocalValue(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function goalDeadlineText(deadline){
+ if(!deadline)return "";const due=localDayNumber(deadline),today=localDayNumber(todayLocalValue());if(due==null||today==null)return "";const diff=due-today;
+ return diff===0?"本日期限":diff>0?`期限まであと${diff}日`:`期限超過 ${Math.abs(diff)}日`;
+}
+function clearGoalForm(){
+ goalEditId="";if(!$("goalName"))return;$("goalFormTitle").textContent="＋ GOALを登録";$("goalSave").textContent="登録する";$("goalCancel").hidden=true;
+ $("goalName").value="";$("goalCurrent").value="0";$("goalTarget").value="1";$("goalUnit").value="";$("goalPriority").value="3";$("goalStartDate").value="";$("goalDeadline").value="";$("goalNote").value="";
+}
+function fillGoalForm(goal){
+ if(!goal)return;goalEditId=String(goal.id);$("goalFormTitle").textContent="✎ GOALを編集";$("goalSave").textContent="変更を保存";$("goalCancel").hidden=false;
+ $("goalName").value=goal.name||"";$("goalCurrent").value=goalNumber(goal.current);$("goalTarget").value=goalNumber(goal.target);$("goalUnit").value=goal.unit||"";$("goalPriority").value=String(goal.priority||3);$("goalStartDate").value=goal.startDate||"";$("goalDeadline").value=goal.deadline||"";$("goalNote").value=goal.note||"";
+}
+function renderGoals(){
+ const list=$("goalList");if(!list)return;const d=load(),showDone=$("goalShowDone")?.checked,sort=$("goalSort")?.value||"priority";
+ let goals=(d.goals||[]).slice().filter(g=>showDone||!goalDerived(g).complete);
+ const cmp={priority:(a,b)=>(b.priority||3)-(a.priority||3)||Number(a.createdAt||0)-Number(b.createdAt||0),deadline:(a,b)=>(a.deadline||"9999-99-99").localeCompare(b.deadline||"9999-99-99"),remaining:(a,b)=>goalDerived(a).remaining-goalDerived(b).remaining,rate:(a,b)=>goalDerived(b).rate-goalDerived(a).rate,created:(a,b)=>Number(a.createdAt||0)-Number(b.createdAt||0)}[sort];goals.sort(cmp);
+ list.innerHTML=goals.length?goals.map(g=>{const x=goalDerived(g),open=goalOpenIds.has(String(g.id)),deadline=goalDeadlineText(g.deadline),unit=esc(g.unit||"");return `<details class="goal-item ${x.complete?"is-done":""}" data-goal-id="${esc(g.id)}" ${open?"open":""}><summary><b>${esc(g.name||"名称未設定")}</b><span class="goal-priority">${esc(GOAL_PRIORITY_LABELS[g.priority]||GOAL_PRIORITY_LABELS[3])}</span><span>${x.current.toLocaleString("ja-JP")} / ${x.target.toLocaleString("ja-JP")} ${unit}</span><span>${x.complete?"COMPLETE":`あと${x.remaining.toLocaleString("ja-JP")}${unit}`}</span><span>${x.rate.toFixed(1)}%</span></summary>${open?`<div class="goal-item-body"><div class="goal-meter"><i style="width:${Math.min(100,Math.max(0,x.rate))}%"></i></div><div class="goal-facts">${g.startDate?`<span>開始 ${esc(g.startDate)}</span>`:""}${g.deadline?`<span>期限 ${esc(g.deadline)}</span>`:""}${deadline?`<span class="${deadline.startsWith("期限超過")?"goal-overdue":""}">${esc(deadline)}</span>`:""}</div>${g.note?`<p>${nl(g.note)}</p>`:""}<div class="wrap"><button class="secondary goalEdit" data-id="${esc(g.id)}" type="button">編集</button><button class="danger goalDelete" data-id="${esc(g.id)}" type="button">削除</button></div></div>`:""}</details>`}).join(""):'<div class="empty">表示するGOALはありません。</div>';
+ document.querySelectorAll("[data-goal-id]").forEach(el=>el.ontoggle=()=>{const id=String(el.dataset.goalId);if(el.open&&!goalOpenIds.has(id)){goalOpenIds.add(id);renderGoals()}else if(!el.open)goalOpenIds.delete(id)});
+ document.querySelectorAll(".goalEdit").forEach(b=>b.onclick=e=>{e.stopPropagation();fillGoalForm((load().goals||[]).find(g=>String(g.id)===String(b.dataset.id)));$("goalName")?.focus();window.scrollTo({top:0,behavior:"smooth"})});
+ document.querySelectorAll(".goalDelete").forEach(b=>b.onclick=e=>{e.stopPropagation();if(!confirm("このGOALを削除しますか？"))return;const data=load();data.goals=(data.goals||[]).filter(g=>String(g.id)!==String(b.dataset.id));goalOpenIds.delete(String(b.dataset.id));if(goalEditId===String(b.dataset.id))clearGoalForm();save(data);renderGoals();renderGoalCalendar()});
+}
+function saveGoalFromForm(){
+ const name=$("goalName")?.value.trim(),current=goalNumber($("goalCurrent")?.value),target=goalNumber($("goalTarget")?.value);if(!name)return alert("目標名を入力してください。");if(target<0||current<0)return alert("現在値と目標値は0以上で入力してください。");
+ const d=load(),now=Date.now(),old=(d.goals||[]).find(g=>String(g.id)===goalEditId),goal={...(old||{}),id:old?.id||uid(),name,current,target,unit:$("goalUnit").value.trim(),priority:Math.min(5,Math.max(1,Number($("goalPriority").value)||3)),startDate:$("goalStartDate").value,deadline:$("goalDeadline").value,note:$("goalNote").value,done:target>0&&current>=target,createdAt:Number(old?.createdAt||now),updatedAt:now};
+ d.goals=Array.isArray(d.goals)?d.goals:[];if(old)Object.assign(old,goal);else d.goals.push(goal);goalOpenIds.add(String(goal.id));save(d);clearGoalForm();renderGoals();renderGoalCalendar();
+}
+function renderGoalCalendar(){
+ const grid=$("goalCalendarGrid");if(!grid)return;const year=goalCalendarMonth.getFullYear(),month=goalCalendarMonth.getMonth(),first=new Date(year,month,1),last=new Date(year,month+1,0),goals=(load().goals||[]);$("goalCalendarTitle").textContent=`${year}年${month+1}月 GOALカレンダー`;
+ const cells=[];for(let i=0;i<first.getDay();i++)cells.push('<div class="goal-calendar-day is-empty"></div>');
+ for(let day=1;day<=last.getDate();day++){const value=`${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`,n=localDayNumber(value),events=goals.filter(g=>{const s=localDayNumber(g.startDate),e=localDayNumber(g.deadline);if(s!=null&&e!=null)return n>=s&&n<=e;if(e!=null)return n===e;return s!=null&&n===s});cells.push(`<div class="goal-calendar-day"><b>${day}</b>${events.map(g=>{const x=goalDerived(g),mark=g.deadline===value?"締切":g.startDate===value?"開始":"期間";return `<button class="goal-calendar-event ${x.complete?"is-done":""}" data-calendar-goal="${esc(g.id)}" type="button"><span>${mark}</span>${esc(g.name)}<small>${x.complete?"COMPLETE":`残り${x.remaining.toLocaleString("ja-JP")}${esc(g.unit||"")}`}</small></button>`}).join("")}</div>`)}grid.innerHTML=cells.join("");
+ document.querySelectorAll("[data-calendar-goal]").forEach(b=>b.onclick=()=>{const id=String(b.dataset.calendarGoal);goalOpenIds.add(id);switchView("goals");requestAnimationFrame(()=>document.querySelector(`[data-goal-id="${CSS.escape(id)}"]`)?.scrollIntoView({behavior:"smooth",block:"center"}))});
+}
+
 function renderSettings(){const d=load();$("guideUrl").value=d.settings.guideUrl;$("youtubeUrl").value=d.settings.youtubeUrl;$("ruleView").innerHTML=Object.entries(rules).map(([k,v])=>`<div class="listitem"><b>${k}</b><div class="small">${v.join("・")}</div></div>`).join("")}
 function safeRender(name,fn){try{fn()}catch(e){console.error("Life Archive render error:",name,e);const st=$("saveStatus");if(st)st.textContent=`⚠ ${name}表示エラー（他の画面は継続）`;}}
 function render(){
@@ -6170,6 +6221,8 @@ safeRender("火力計算機",()=>{applyFoodPreset();applyPotionPreset();renderDa
  safeRender("収集図鑑",renderFFXIVCollectHub);
  safeRender("入手・交換品図鑑",renderFFAcquisition);
  safeRender("手動進捗",renderManualProgress);
+ safeRender("GOALS",renderGoals);
+ safeRender("GOALカレンダー",renderGoalCalendar);
  safeRender("バイカラージェム",renderBicolor);
  safeRender("データ引き継ぎ確認",renderPersistenceTest);
  safeRender("ギルドリーヴ",renderGuildleves);
@@ -6621,6 +6674,13 @@ if($("leveReload"))$("leveReload").onclick=()=>loadGuildleves(true);
 
 if($("yokaiSearch"))$("yokaiSearch").oninput=()=>renderYokai();
 if($("yokaiStatus"))$("yokaiStatus").onchange=()=>renderYokai();
+
+if($("goalSave"))$("goalSave").onclick=saveGoalFromForm;
+if($("goalCancel"))$("goalCancel").onclick=clearGoalForm;
+if($("goalSort"))$("goalSort").onchange=renderGoals;
+if($("goalShowDone"))$("goalShowDone").onchange=renderGoals;
+if($("goalCalendarPrev"))$("goalCalendarPrev").onclick=()=>{goalCalendarMonth=new Date(goalCalendarMonth.getFullYear(),goalCalendarMonth.getMonth()-1,1);renderGoalCalendar()};
+if($("goalCalendarNext"))$("goalCalendarNext").onclick=()=>{goalCalendarMonth=new Date(goalCalendarMonth.getFullYear(),goalCalendarMonth.getMonth()+1,1);renderGoalCalendar()};
 
 document.querySelectorAll(".event-launch").forEach(b=>b.onclick=()=>{const target=b.dataset.target;const tab=document.querySelector(`.tab[data-view="${target}"]`);if(tab)tab.click();});
 

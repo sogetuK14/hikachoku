@@ -14,7 +14,7 @@
 <h1>ヒカチョク</h1><div class="hikachoku-tagline">ヒカセン、進捗どうですか？</div>
 <div class="sub">v0.3.2 “Eye-comfort sky”<br/>エオルゼアの記録を、ひとつの場所に。</div>
 </div>
-<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="eorzeaHub">🧭 つながるヒカチョク</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="manualProgress">手動進捗</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><button class="tab" data-view="weapons">武器制作</button><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
+<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="goals">🎯 GOALS</button><button class="tab" data-view="goalCalendar">📅 イベント</button><button class="tab" data-view="eorzeaHub">🧭 つながるヒカチョク</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="manualProgress">手動進捗</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><button class="tab" data-view="weapons">武器制作</button><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
 </aside>
 <div class="content-wrap">
 <header class="content-header">
@@ -348,7 +348,7 @@
 <div><label>取得状態</label><select id="achStatus"><option value="">すべて</option><option value="todo">未取得</option><option value="done">取得済み</option></select></div>
 </div>
 <div class="inline2">
-<div><label>タグ検索</label><input id="achTagSearch" placeholder="例：事件屋、黄金、優先"/></div>
+<div><label>タグ検索</label><input id="achTagSearch" list="achievementTagCatalog" placeholder="例：事件屋、黄金、優先"/><datalist id="achievementTagCatalog"></datalist></div>
 <div><label>入力状況</label><select id="achInputStatus"><option value="">すべて</option><option value="noDate">達成日なし</option><option value="noNote">メモなし</option><option value="hasChecklist">チェックリストあり</option><option value="checklistIncomplete">チェックリスト未完了</option><option value="hasTag">タグあり</option></select></div>
 </div>
 <div class="inline2">
@@ -374,6 +374,32 @@
 <button class="primary" id="manualProgressAddList">＋ 進捗リスト作成</button>
 </div>
 <div id="manualProgressList"></div>
+</section>
+</section>
+<section class="view" id="goals">
+<section class="panel">
+<div class="row"><div><h2>🎯 GOALS</h2><div class="small">終わらせたい目標の「あといくつ・いつまで・優先度」を一か所で確認します。</div></div></div>
+<div class="goal-form card">
+<h3 id="goalFormTitle">＋ GOALを登録</h3>
+<div class="inline2"><div><label>目標名</label><input id="goalName" placeholder="例：モグモグ★コレクション"/></div><div><label>単位</label><input id="goalUnit" placeholder="個、回、枚など"/></div></div>
+<div class="inline2"><div><label>現在値</label><input id="goalCurrent" min="0" step="any" type="number" value="0"/></div><div><label>目標値</label><input id="goalTarget" min="0" step="any" type="number" value="1"/></div></div>
+<div class="inline3"><div><label>優先度</label><select id="goalPriority"><option value="5">★★★★★ 最優先</option><option value="4">★★★★☆ 優先</option><option value="3" selected>★★★☆☆ 普通</option><option value="2">★★☆☆☆ 低め</option><option value="1">★☆☆☆☆ そのうち</option></select></div><div><label>開始日（任意）</label><input id="goalStartDate" type="date"/></div><div><label>期限（任意）</label><input id="goalDeadline" type="date"/></div></div>
+<label>メモ（任意）</label><textarea id="goalNote" rows="3"></textarea>
+<div class="wrap"><button class="primary" id="goalSave" type="button">登録する</button><button class="secondary" id="goalCancel" type="button" hidden>編集をやめる</button></div>
+</div>
+<div class="goal-toolbar"><label>並び順 <select id="goalSort"><option value="priority">優先度順</option><option value="deadline">期限が近い順</option><option value="remaining">残数が少ない順</option><option value="rate">達成率が高い順</option><option value="created">登録順</option></select></label><label class="checkline"><input id="goalShowDone" type="checkbox"/> 完了済みも表示</label></div>
+<div id="goalList"></div>
+</section>
+</section>
+<section class="view" id="goalCalendar">
+<section class="panel">
+<div class="section-kicker">EVENT CALENDAR</div><h2>📅 イベントカレンダー</h2><p class="small">GOALの開始日・期限を、同じデータから月単位で確認します。</p>
+<div class="goal-calendar card">
+<div class="row"><button class="secondary" id="goalCalendarPrev" type="button">‹</button><h3 id="goalCalendarTitle">GOALカレンダー</h3><button class="secondary" id="goalCalendarNext" type="button">›</button></div>
+<div class="goal-calendar-week"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
+<div class="goal-calendar-grid" id="goalCalendarGrid"></div>
+<div class="small">GOALの開始日・期限を参照表示しています。カレンダー用のコピーは保存しません。</div>
+</div>
 </section>
 </section>
 <section class="view" id="crafting">
@@ -414,7 +440,7 @@
 <div><label>特殊条件</label><select id="craftSpecial">
 <option value="">すべて</option><option value="star">★付き</option><option value="secret">秘伝書</option>
 <option value="specialist">マイスター専用</option><option value="expert">高難易度</option>
-<option value="noquick">簡易制作不可</option>
+<option value="facility">製作施設条件</option><option value="noquick">簡易制作不可</option>
 </select></div>
 <div><label>表示件数</label><select id="craftPageSize">
 <option value="100">100件</option><option value="200">200件</option><option value="500">500件</option>
