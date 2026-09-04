@@ -14,7 +14,19 @@
 <h1>ヒカチョク</h1><div class="hikachoku-tagline">ヒカセン、進捗どうですか？</div>
 <div class="sub">凪節ってなんだっけ？</div>
 </div>
-<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="eorzeaHub">🧭 つながるヒカチョク</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><button class="tab" data-view="weapons">武器制作</button><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
+<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button>
+  <button class="tab" data-view="eorzeaHub">総合検索※重たい</button>
+  <button class="tab" data-view="achievements">アチーブメント</button>
+  <button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button>
+  <button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button>
+  <button class="tab" data-view="guildleves">ギルドリーヴ</button>
+  <button class="tab" data-view="crafting">制作手帳</button>
+  <button class="tab" data-view="weapons">レリック武器制作</button>
+  <button class="tab" data-view="fishing">釣り手帳</button>
+  <button class="tab" data-view="ffcollect">収集図鑑</button>
+  <button class="tab" data-view="bicolor">バイカラージェム</button>
+  <button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button>
+  <button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
 </aside>
 <div class="content-wrap">
 <header class="content-header">
@@ -22,12 +34,13 @@
 <strong id="currentPageTitle">エオルゼア</strong><span class="small" id="saveStatus" style="margin-left:auto">保存準備中…</span>
 </header>
 <main>
-<div class="storage-warning" id="localStorageWarning"><b>⚠ ローカル保存モード</b><div>ヒカチョクの記録は、ブラウザ上ではこのHTMLファイルの場所に結び付いて保存されます。GitHub Pagesでは、更新版を同じリポジトリの <b>index.html</b> に上書きして、同じ公開URLから使い続けてください。</div><div class="small storage-path" id="localStoragePath"></div></div>
+<div class="storage-warning" id="localStorageWarning"><b>⚠ ローカル保存モード</b>
+ <div class="small storage-path" id="localStoragePath"></div></div>
 <section class="view" id="records">
 <section class="panel">
 <div class="card" style="border-color:var(--gold)">
 <b>📚 記録庫</b>
-<div class="small">すべての記録はここに保存されます。単独記録も、親子でつながった記録も同じ記録庫から振り返れます。</div>
+<div class="small">SSを載せられるようにしたい</div>
 </div>
 <div id="recordGroupsPanel">
 <h2>🔗 親子ページ</h2>
@@ -72,7 +85,7 @@
 
 <section class="view" id="eorzeaHub">
 <section class="panel">
-<div class="pagehead"><div><h2>🧭 つながるヒカチョク</h2><div class="small">目的・エリア・アイテムを同じ進捗データで横断します。終わったもの・持っているものは、どこから見ても同じ状態になります。</div></div></div>
+<div class="pagehead"><div><h2>🧭総合検索</h2><div class="small">目的・エリア・アイテムを同じ進捗データで横断します。終わったもの・持っているものは、どこから見ても同じ状態になります。</div></div></div>
 <div class="hub-axis-nav">
 <button class="secondary hubAxis active" data-axis="goal" type="button">🎯 目的から</button>
 <button class="secondary hubAxis" data-axis="area" type="button">🗺 エリアから</button>
