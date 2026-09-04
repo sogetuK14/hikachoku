@@ -180,7 +180,7 @@
 <div class="card" style="margin-top:14px;border-color:var(--purple)">
 <div class="row"><div><h3>🛡 装備一式から作る</h3><div class="small">ILは管理・比較用。火力計算には各装備の武器性能・STR・サブステを合算して使います。装備検索はXIVAPI v2、確認先は公式Lodestoneです。</div></div><button class="secondary" id="dmgGearClear">装備をクリア</button></div>
 <div class="card" style="margin-top:10px">
-<div class="row"><div><b>🔎 FF14装備DB検索</b><div class="small">XIVAPI v2から日本語名で装備を検索し、武器・防具・アクセすべてのIL・物理基本性能・STR・VIT・サブステを入力欄へ反映します。</div></div><button class="ghost" id="dmgGearOfficialSearch">公式DBで確認</button></div>
+<div class="row"><div><b>🔎 FF14装備DB検索</b><div class="small">装備検索。武器・防具・アクセすべてのIL・物理基本性能・STR・VIT・サブステを入力欄へ反映します。</div></div><button class="ghost" id="dmgGearOfficialSearch">公式DBで確認</button></div>
 <div class="grid3" style="margin-top:8px">
 <div><label>検索する部位</label><select id="dmgGearSearchSlot"><option>武器</option><option>頭</option><option>胴</option><option>手</option><option>脚</option><option>足</option><option>耳</option><option>首</option><option>腕</option><option>指輪</option></select></div>
 <div><label>装備名</label><input id="dmgGearSearch" placeholder="例：ネオキングダム、ヘヴィアクス"/></div>
@@ -326,7 +326,7 @@
 </section>
 <section class="view" id="achievements">
 <section class="panel" id="achievementArchive">
-<div class="row"><div><h2>🏆 アチーブメント記録庫</h2><div class="small">日本語アチーブメント実データを内蔵。データ本体と取得状況を分離して保存します。</div></div><button class="secondary" id="achOfficialTop">公式一覧</button></div>
+<div class="row"><div><h2>🏆 アチーブメント記録庫</h2><div class="small">アチーブメント</div></div><button class="secondary" id="achOfficialTop">公式一覧</button></div>
 <div class="card" id="achDataPackInfo" style="border-color:var(--blue)">
 <b>📦 アチーブメント・データパック</b>
 <div class="small" id="achDataPackMeta">内蔵データを確認中…</div>
@@ -368,10 +368,10 @@
 <section class="view" id="crafting">
 <section class="panel">
 <h2>⚒ 制作手帳</h2>
-<p class="small">制作レシピ・素材・制作計画をここで管理します。レリック系の武器制作は専用ページへ分離しました。</p>
+<p class="small">制作レシピ・素材・制作計画をここで管理。</p>
 <div class="card" style="border-color:var(--blue)">
 <b>📦 制作レシピ・データパック v0.9421</b>
-<div class="small">日本語ゲームデータから8クラフターのレシピを収録。各レシピの「素材を見る」から必要素材を確認でき、複数完成品の素材集計に加えて、登録した素材在庫から「今すぐ作れる／加工すれば作れる／あと少し」の未制作レシピも逆引きできます。レシピ本体を更新しても制作済みチェックは別保存のため維持されます。</div>
+<div class="small">全クラフターのレシピを収録。各レシピの「素材を見る」から必要素材を確認でき、複数完成品の素材集計に加えて、登録した素材在庫から「今すぐ作れる／加工すれば作れる／あと少し」の未制作レシピも逆引きできます。レシピ本体を更新しても制作済みチェックは別保存のため維持されます。</div>
 </div>
 <div class="stats">
 <div class="stat">収録レシピ<b id="craftRecipeTotal">0</b></div>
@@ -439,7 +439,7 @@
 </div>
 <div class="card" id="craftPlannerPanel" style="border-color:var(--gold);margin:14px 0">
 <div class="row">
-<div><b>🧰 制作計画</b><div class="small">作りたい完成品を複数選び、必要素材をまとめて計算します。</div></div>
+<div><b>🧰 制作計画</b><div class="small">作りたい完成品を複数選び、必要素材をまとめて計算。</div></div>
 <div class="wrap"><button class="primary" id="craftPlanBuild" type="button">必要素材を集計</button><button class="danger" id="craftPlanClear" type="button">計画をクリア</button></div>
 </div>
 <div id="craftPlanProducts" style="margin-top:10px"></div>
@@ -456,11 +456,11 @@
 </section>
 <section class="view" id="guildleves">
 <section class="panel">
-<h2>📜 ギルドリーヴ</h2><p class="small">正式な日本語タイトルが取得できるリーヴのみ表示します。受注場所と納品NPCも、ゲームデータから取得できる範囲で表示します。クラスはLeveAssignmentTypeの正式データから、クラフター／ギャザラー職ごとに分けます。番号だけの仮タイトルは表示しません。</p>
+<h2>📜 ギルドリーヴ</h2><p class="small">受注場所と納品NPC一覧。</p>
 <p class="small">ギルドリーヴの一覧と達成状況を管理します。データ本体と自分のチェックは分離保存です。</p>
 <div class="card" style="border-color:var(--blue)">
-<b>📦 ギルドリーヴ・データパック v0.9480</b>
-<div class="small">日本語ゲームデータを必要時に読み込みます。戦闘・制作・採集、レベル帯、名称で絞り込める構造です。</div>
+<b>📦 ギルドリーヴ・データ</b>
+<div class="small"></div>
 </div>
 <div class="stats">
 <div class="stat">収録<b id="leveTotal">0</b></div>
@@ -569,11 +569,11 @@
 <div><h2>🌐 FF14 収集図鑑</h2><div class="small">FF14の収集品と入手方法をまとめて確認できます。</div></div>
 <div class="wrap">
 <button class="primary" id="ffxivCollectCatalogSync" type="button">図鑑を更新</button>
-<button class="secondary" id="ffxivCollectJapaneseSync" type="button">日本語説明を同期</button>
+<button class="secondary" id="ffxivCollectJapaneseSync" type="button"></button>
 <button class="secondary" id="ffxivCollectOwnershipSync" type="button">所持状況を同期</button>
 </div>
 <div class="small">公開プロフィールから同期できる分だけ反映します。</div>
-<div class="small" id="ffxivCollectJapaneseStatus" style="margin-top:6px">ミニオン・マウントの日本語説明：未同期</div>
+<div class="small" id="ffxivCollectJapaneseStatus" style="margin-top:6px">ミニオン・マウント：未同期</div>
 <div class="small" id="ffxivCollectOwnershipStatus" style="margin-top:6px"></div>
 </div>
 <div class="grid3" style="margin-top:10px">
@@ -594,7 +594,7 @@
 <div class="small" style="margin-top:7px">収集品の本籍地はこの「収集図鑑」です。アチーブメントだけは達成日・タグ・進捗管理があるため専用ページを本籍地とし、ここでは同じデータの概要を表示します。</div>
 </details>
 <div class="card" style="margin-top:12px">
-<div class="row"><div><b>🔎 外部図鑑を見る</b><div class="small">未取得品も入手方法から探せます。説明は日本語データを優先します。</div></div></div>
+<div class="row"><div><b>🔎 外部図鑑を見る</b><div class="small">入手方法検索</div></div></div>
 <div class="grid3" style="margin-top:8px">
 <div><label>カテゴリ</label><select id="fcExplorerKind">
 <option value="minions">ミニオン</option>
