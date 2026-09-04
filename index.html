@@ -14,7 +14,7 @@
 <h1>ヒカチョク</h1><div class="hikachoku-tagline">ヒカセン、進捗どうですか？</div>
 <div class="sub">v0.3.2 “Eye-comfort sky”<br/>エオルゼアの記録を、ひとつの場所に。</div>
 </div>
-<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="eorzeaHub">🧭 つながるヒカチョク</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><button class="tab" data-view="weapons">武器制作</button><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
+<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="eorzeaHub">🧭 つながるヒカチョク</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="manualProgress">手動進捗</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><button class="tab" data-view="weapons">武器制作</button><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
 </aside>
 <div class="content-wrap">
 <header class="content-header">
@@ -363,6 +363,16 @@
 </div>
 <div id="achList"></div>
 <div class="row" style="margin-top:12px"><button class="secondary" id="achPrev">前へ</button><span class="small" id="achPageInfo"></span><button class="secondary" id="achNext">次へ</button></div>
+</section>
+</section>
+<section class="view" id="manualProgress">
+<section class="panel">
+<div class="row"><div><h2>☑ 手動進捗</h2><div class="small">自動取得できない途中経過を、次に行う項目が分かる形で残します。</div></div></div>
+<div class="manual-progress-create">
+<input id="manualProgressNewTitle" placeholder="例：クラフター禁断" aria-label="新しい進捗リスト名"/>
+<button class="primary" id="manualProgressAddList">＋ 進捗リスト作成</button>
+</div>
+<div id="manualProgressList"></div>
 </section>
 </section>
 <section class="view" id="crafting">
