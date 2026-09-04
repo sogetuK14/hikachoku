@@ -82,7 +82,7 @@
 <div class="hub-axis-panel" data-axis="goal">
 <div class="card" style="border-color:var(--gold)">
 <b>⚒ 制作手帳コンプリート素材</b>
-<div class="small">1職のLv1～100を全部埋めるための素材を、同名アイテム1行に統合。制作済みレシピと所持数を差し引いて「あと何個」を出します。</div>
+<div class="small">手帳コンプリートするために必要な素材を自動計算！</div>
 <div class="inline2" style="margin-top:10px">
 <div><label>クラフター</label><select id="hubCraftJob"><option>木工</option><option>鍛冶</option><option>甲冑</option><option>彫金</option><option>革細工</option><option>裁縫</option><option>錬金</option><option>調理</option></select></div>
 <div style="display:flex;align-items:end"><button class="primary" id="hubCraftBuild" type="button" style="width:100%">Lv1～100を集計</button></div>
@@ -98,7 +98,7 @@
 <div class="stat">素材種類<b id="hubCraftMaterialKinds">0</b></div>
 <div class="stat">残り素材総数<b id="hubCraftMaterialTotal">0</b></div>
 </div>
-<div class="small" id="hubCraftStatus" style="margin:8px 0">「Lv1～100を集計」で制作手帳の素材索引を読み込みます。</div>
+<div class="small" id="hubCraftStatus" style="margin:8px 0">「Lv1～100を集計」で制作手帳の素材索引</div>
 <div id="hubCraftMaterials"></div>
 </div>
 </div>
@@ -106,7 +106,7 @@
 <div class="hub-axis-panel" data-axis="area" hidden>
 <div class="card">
 <b>🗺 エリアでまとめて探す</b>
-<div class="small">同じ場所で片付けられることをまとめます。現在は既存の釣り・ギルドリーヴ・入手交換データを接続しています。</div>
+<div class="small">場所ごと。現在は釣り・ギルドリーヴ・入手交換等。</div>
 <div class="wrap" style="margin-top:10px"><input id="hubAreaSearch" placeholder="例：クガネ" style="flex:1"><button class="primary" id="hubAreaRun" type="button">このエリアを見る</button></div>
 <div id="hubAreaResults" style="margin-top:10px"></div>
 </div>
@@ -115,7 +115,7 @@
 <div class="hub-axis-panel" data-axis="item" hidden>
 <div class="card">
 <b>📦 アイテムから横断する</b>
-<div class="small">同じ名前を用途ごとに重複させず、制作・交換・ミニオン・マウントなど接続済みデータをまとめて探します。</div>
+<div class="small">制作、交換、ミニオン、マウントなど。</div>
 <div class="wrap" style="margin-top:10px"><input id="hubItemSearch" placeholder="アイテム名を入力" style="flex:1"><button class="primary" id="hubItemRun" type="button">用途・入手先を探す</button></div>
 <div id="hubItemResults" style="margin-top:10px"></div>
 </div>
