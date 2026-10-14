@@ -14,6 +14,7 @@
 <h1>ヒカチョク</h1><div class="hikachoku-tagline">ヒカセン、進捗どうですか？</div>
 <div class="sub">v0.3.2 “Eye-comfort sky”<br/>エオルゼアの記録を、ひとつの場所に。</div>
 </div>
+<nav class="sidebar-nav notes-media-nav"><button class="tab" data-view="notesMedia">📷 SS・メモ</button></nav>
 <nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="goals">🎯 GOALS</button><button class="tab" data-view="goalCalendar">📅 イベント</button><button class="tab" data-view="eorzeaHub">🧭 つながるヒカチョク</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="manualProgress">手動進捗</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><button class="tab" data-view="weapons">武器制作</button><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
 </aside>
 <div class="content-wrap">
@@ -130,6 +131,31 @@
 </div>
 </div>
 </section>
+</section>
+
+<section class="view" id="notesMedia">
+<section class="panel notes-media-hero">
+<div class="section-kicker">HIKACHOKU MEMORY DESK</div>
+<div class="row"><div><h2>📷 SS・メモ</h2><div class="small">スクリーンショットと、その時のメモを一緒に残します。すべての記録をここから検索できます。</div></div><span class="badge gold" id="nmCount">0件</span></div>
+<div class="nm-searchbar"><input id="nmGlobalSearch" type="search" placeholder="タイトル・メモ・タグ・既存記録を横断検索"/><button class="primary" id="nmSearchBtn" type="button">検索</button></div>
+</section>
+<div class="grid2 notes-media-layout">
+<section class="panel">
+<h2>＋ すぐ記録する</h2>
+<label>タイトル</label><input id="nmTitle" maxlength="100" placeholder="例：黄金の夕暮れ／零式3層クリア"/>
+<label>メモ</label><textarea id="nmMemo" rows="5" placeholder="何があったか、次にすること、感想など"></textarea>
+<div class="inline2"><div><label>分類</label><select id="nmCategory"><option>FF14</option><option>TRPG</option><option>制作</option><option>日常</option><option>その他</option></select></div><div><label>日時</label><input id="nmDate" type="datetime-local"/></div></div>
+<label>タグ</label><input id="nmTags" placeholder="カンマ区切り：風景, 零式, 思い出"/>
+<label>スクリーンショット（複数可）</label><input id="nmFiles" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple/>
+<div class="small" id="nmFileStatus">画像なしでもメモだけ保存できます。</div>
+<button class="primary" id="nmSave" type="button" style="width:100%;margin-top:12px">SS・メモを保存</button>
+</section>
+<section class="panel">
+<div class="row"><h2>記録を探す</h2><select id="nmCategoryFilter" style="width:auto"><option value="">すべて</option><option>FF14</option><option>TRPG</option><option>制作</option><option>日常</option><option>その他</option><option value="existing">既存記録</option></select></div>
+<div class="small" id="nmResultSummary">検索語なし：新しい順に表示</div>
+<div id="nmResults"><div class="empty">読み込み中…</div></div>
+</section>
+</div>
 </section>
 
 <section class="view active" id="ff14">
@@ -1623,4 +1649,5 @@ SANチェック処理
 <script src="assets/js/extra-3.js"></script>
 <script src="assets/js/extra-4.js"></script>
 <script src="assets/js/data/achievement_db.js"></script><script src="assets/js/data/fish_data.js"></script><script src="assets/js/data/craft_recipe_data.js"></script><script src="assets/js/data/craft_recipe_meta_data.js"></script><script src="assets/js/data/craft_item_meta_data.js"></script><script src="assets/js/data/craft_item_usage_data.js"></script><script src="assets/js/data/minion_data.js"></script><script src="assets/js/data/mount_data.js"></script><script src="assets/js/data/ff_hunt_acq_preset.js"></script><script src="assets/js/data/fc_ja_description_sheets.js"></script><script src="assets/js/data/triple_triad_data.js"></script><script src="assets/js/data/yokai_event_data.js"></script><script src="assets/js/data/relic_series.js"></script><script src="assets/js/app.js?v=20260904-achgoal1"></script><script src="assets/js/eorzea-hub.js"></script></body>
+<script src="assets/js/hikachoku-notes.js?v=20261014"></script>
 </html>
