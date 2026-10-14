@@ -849,6 +849,10 @@ body.hikachoku-theme{
 .relic-step-editor{margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--bg) 55%,transparent)}
 .relic-step-editor textarea{resize:vertical}
 .relic-custom-add summary{cursor:pointer}
+.relic-member-checks{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:7px}
+.relic-member-checks label{display:inline-flex;align-items:center;gap:6px;margin:0;padding:5px 9px;border:1px solid var(--line);border-radius:999px;color:var(--text);font-size:.88rem}
+.relic-dual-rate{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.relic-party-panel input{min-width:0}
 @media(max-width:800px){.relic-work-step>.row{align-items:flex-start}.relic-work-step>.row>.danger,.relic-work-step>.row>.secondary{padding:7px 9px}}
 
 </style></head>
@@ -1405,6 +1409,12 @@ body.hikachoku-theme{
 <div class="card" style="border-color:var(--gold)">
 <b>🧭 戦士・武器制作ロードマップ</b>
 <div class="small">ゾディアック／アニマ／エウレカ／レジスタンス／マンダヴィル／ファントムを一画面に集約。工程チェックから進捗率を自動計算します。</div>
+</div>
+<div class="card relic-party-panel" style="border-color:var(--blue);margin-top:12px">
+<div class="row"><div><b>👥 ふたりの進行度</b><div class="small">同じ攻略工程に、それぞれ別の完了チェックを保存します。</div></div></div>
+<div class="inline2" style="margin-top:8px"><div><label>自分の表示名</label><input id="relicSelfName" value="自分" maxlength="30"></div><div><label>友人の表示名</label><input id="relicFriendName" value="友人" maxlength="30"></div></div>
+<div class="wrap" style="margin-top:10px"><button class="primary" id="relicNamesSave" type="button">表示名を保存</button><button class="secondary" id="relicShareExport" type="button">武器進捗を共有ファイルにする</button><button class="secondary" id="relicShareImportOpen" type="button">共有ファイルを読み込む</button><input id="relicShareImportFile" type="file" accept=".json,.hikachoku-relic,application/json" hidden></div>
+<div class="small" id="relicShareStatus" style="margin-top:8px">武器制作の進捗だけを共有します。他の個人記録は含みません。</div>
 </div>
 <div class="stats">
 <div class="stat">シリーズ<b id="relicSeriesTotal">6</b></div>
@@ -7340,14 +7350,25 @@ function renderTriadNpcs(){
 
 /* RELIC_SERIES moved to assets/js/data/relic_series.js */
 
+function relicProfiles(d){
+ d.relicProfiles=d.relicProfiles&&typeof d.relicProfiles==="object"?d.relicProfiles:{};
+ d.relicProfiles.self=String(d.relicProfiles.self||"自分");
+ d.relicProfiles.friend=String(d.relicProfiles.friend||"友人");
+ return d.relicProfiles;
+}
+
 function relicState(d,sid){
  d.relicProgress=d.relicProgress||{};
  if(!d.relicProgress[sid])d.relicProgress[sid]={steps:{},note:""};
  if(!d.relicProgress[sid].steps||typeof d.relicProgress[sid].steps!=="object")d.relicProgress[sid].steps={};
+ if(!d.relicProgress[sid].friendSteps||typeof d.relicProgress[sid].friendSteps!=="object")d.relicProgress[sid].friendSteps={};
  if(!d.relicProgress[sid].stepDetails||typeof d.relicProgress[sid].stepDetails!=="object")d.relicProgress[sid].stepDetails={};
  if(!Array.isArray(d.relicProgress[sid].customSteps))d.relicProgress[sid].customSteps=[];
  return d.relicProgress[sid];
 }
+function relicMemberDone(st,member,index){return !!(member==="friend"?st.friendSteps[index]:st.steps[index])}
+function setRelicMemberDone(st,member,index,done){const target=member==="friend"?st.friendSteps:st.steps;if(done)target[index]=true;else delete target[index]}
+function relicCustomMemberDone(step,member){return member==="friend"?!!step.friendDone:!!step.done}
 function relicSeriesStatus(d,s){
  const st=relicState(d,s.id),all=s.steps.length+st.customSteps.length,done=s.steps.filter((_,i)=>st.steps[i]).length+st.customSteps.filter(x=>x.done).length;
  return all&&done>=all?"done":done>0?"active":"notstarted";
@@ -7361,37 +7382,42 @@ function initializeWarRelicDefaults(){
 }
 function renderRelicRoadmap(){
  const box=$("relicRoadmap");if(!box)return;
- const d=load(),sf=$("relicSeriesFilter")?.value||"",status=$("relicStatusFilter")?.value||"";
+ const d=load(),profiles=relicProfiles(d),sf=$("relicSeriesFilter")?.value||"",status=$("relicStatusFilter")?.value||"";
+ if($("relicSelfName"))$("relicSelfName").value=profiles.self;if($("relicFriendName"))$("relicFriendName").value=profiles.friend;
  let totalSteps=0,doneSteps=0,doneSeries=0,activeSeries=0;
  RELIC_SERIES.forEach(s=>{const st=relicState(d,s.id),custom=st.customSteps||[],n=s.steps.filter((_,i)=>st.steps[i]).length+custom.filter(x=>x.done).length,all=s.steps.length+custom.length;totalSteps+=all;doneSteps+=n;const z=all&&n>=all?"done":n>0?"active":"notstarted";if(z==="done")doneSeries++;if(z==="active")activeSeries++;});
  $("relicSeriesDone").textContent=doneSeries;$("relicSeriesActive").textContent=activeSeries;$("relicStepProgress").textContent=`${doneSteps} / ${totalSteps}`;
  const visible=RELIC_SERIES.filter(s=>(!sf||s.id===sf)&&(!status||relicSeriesStatus(d,s)===status));
  box.innerHTML=visible.map(s=>{
-  const st=relicState(d,s.id),custom=st.customSteps||[],total=s.steps.length+custom.length,done=s.steps.filter((_,i)=>st.steps[i]).length+custom.filter(x=>x.done).length,pct=Math.round(done/Math.max(1,total)*100),z=relicSeriesStatus(d,s);
+  const st=relicState(d,s.id),custom=st.customSteps||[],total=s.steps.length+custom.length,done=s.steps.filter((_,i)=>st.steps[i]).length+custom.filter(x=>x.done).length,friendDone=s.steps.filter((_,i)=>st.friendSteps[i]).length+custom.filter(x=>x.friendDone).length,pct=Math.round(done/Math.max(1,total)*100),friendPct=Math.round(friendDone/Math.max(1,total)*100),z=relicSeriesStatus(d,s);
   return `<div class="card ${z==="done"?"archived":""}">
-   <div class="row"><div><b>${esc(s.name)}</b> <span class="badge">${esc(s.era)}</span> <span class="badge gold">戦士</span><div class="time">${z==="done"?"完成":z==="active"?"制作中":"未着手"} ／ ${done} / ${total}工程</div></div><b>${pct}%</b></div>
+   <div class="row"><div><b>${esc(s.name)}</b> <span class="badge">${esc(s.era)}</span> <span class="badge gold">戦士</span><div class="time">${esc(profiles.self)} ${done}/${total}工程 ／ ${esc(profiles.friend)} ${friendDone}/${total}工程</div></div><div class="relic-dual-rate"><span class="badge gold">${esc(profiles.self)} ${pct}%</span><span class="badge">${esc(profiles.friend)} ${friendPct}%</span></div></div>
    <div style="height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:10px 0"><div style="height:100%;width:${pct}%;background:var(--gold)"></div></div>
    <div>${s.steps.map((step,i)=>{const detail=st.stepDetails[i]||{};return `<div class="listitem relic-work-step">
-    <div class="row"><label style="margin:0;color:var(--text);flex:1"><input type="checkbox" class="relicStepCheck" data-series="${s.id}" data-step="${i}" style="width:auto" ${st.steps[i]?"checked":""}> <b>${esc(step)}</b></label><button type="button" class="ghost relicDetailToggle">工程を書く</button></div>
+    <div class="row"><div style="flex:1"><b>${esc(step)}</b><div class="relic-member-checks"><label><input type="checkbox" class="relicStepCheck" data-member="self" data-series="${s.id}" data-step="${i}" style="width:auto" ${relicMemberDone(st,"self",i)?"checked":""}> ${esc(profiles.self)}</label><label><input type="checkbox" class="relicStepCheck" data-member="friend" data-series="${s.id}" data-step="${i}" style="width:auto" ${relicMemberDone(st,"friend",i)?"checked":""}> ${esc(profiles.friend)}</label></div></div><button type="button" class="ghost relicDetailToggle">工程を見る</button></div>
     ${detail.target||detail.current?`<div class="small">進捗：${esc(detail.current||"0")} / ${esc(detail.target||"—")}</div>`:""}${detail.source?`<div class="small">入手先：${esc(detail.source)}</div>`:""}${detail.condition?`<div class="small">条件：${esc(detail.condition)}</div>`:""}${detail.note?`<div class="small relic-step-note">${nl(detail.note)}</div>`:""}
     <div class="relic-step-editor" hidden><div class="grid2" style="margin-top:8px"><div><label>必要数・周回数</label><input class="relicDetailField" data-series="${s.id}" data-step="${i}" data-field="target" value="${esc(detail.target||"")}" placeholder="例：クリスタル20個／15周"></div><div><label>現在数</label><input class="relicDetailField" data-series="${s.id}" data-step="${i}" data-field="current" value="${esc(detail.current||"")}" placeholder="例：12個／8周"></div><div><label>入手先・場所</label><input class="relicDetailField" data-series="${s.id}" data-step="${i}" data-field="source" value="${esc(detail.source||"")}" placeholder="例：南ザナラーンFATE"></div><div><label>期限・条件</label><input class="relicDetailField" data-series="${s.id}" data-step="${i}" data-field="condition" value="${esc(detail.condition||"")}" placeholder="例：週制限／天候"></div></div><label>工程メモ</label><textarea class="relicDetailField" data-series="${s.id}" data-step="${i}" data-field="note" rows="2" placeholder="次にやること、注意点、参考情報">${esc(detail.note||"")}</textarea></div>
    </div>`}).join("")}
-   ${custom.map((step,i)=>`<div class="listitem relic-work-step custom"><div class="row"><label style="margin:0;color:var(--text);flex:1"><input type="checkbox" class="relicCustomCheck" data-series="${s.id}" data-custom="${i}" style="width:auto" ${step.done?"checked":""}> <b>${esc(step.title||"追加工程")}</b></label><button type="button" class="secondary relicCustomEdit" data-series="${s.id}" data-custom="${i}">編集</button><button type="button" class="danger relicCustomDelete" data-series="${s.id}" data-custom="${i}">削除</button></div>${step.target||step.current?`<div class="small">進捗：${esc(step.current||"0")} / ${esc(step.target||"—")}</div>`:""}${step.source?`<div class="small">入手先：${esc(step.source)}</div>`:""}${step.note?`<div class="small">${nl(step.note)}</div>`:""}</div>`).join("")}
+   ${custom.map((step,i)=>`<div class="listitem relic-work-step custom"><div class="row"><div style="flex:1"><b>${esc(step.title||"追加工程")}</b><div class="relic-member-checks"><label><input type="checkbox" class="relicCustomCheck" data-member="self" data-series="${s.id}" data-custom="${i}" style="width:auto" ${relicCustomMemberDone(step,"self")?"checked":""}> ${esc(profiles.self)}</label><label><input type="checkbox" class="relicCustomCheck" data-member="friend" data-series="${s.id}" data-custom="${i}" style="width:auto" ${relicCustomMemberDone(step,"friend")?"checked":""}> ${esc(profiles.friend)}</label></div></div><button type="button" class="secondary relicCustomEdit" data-series="${s.id}" data-custom="${i}">編集</button><button type="button" class="danger relicCustomDelete" data-series="${s.id}" data-custom="${i}">削除</button></div>${step.target||step.current?`<div class="small">進捗：${esc(step.current||"0")} / ${esc(step.target||"—")}</div>`:""}${step.source?`<div class="small">入手先：${esc(step.source)}</div>`:""}${step.note?`<div class="small">${nl(step.note)}</div>`:""}</div>`).join("")}
    </div>
    <details class="card relic-custom-add" style="margin-top:10px"><summary><b>＋ 自分の工程を追加</b></summary><div class="grid2" style="margin-top:8px"><div><label>工程名</label><input class="relicCustomTitle" data-series="${s.id}" placeholder="例：苦々しき記憶を集める"></div><div><label>必要数・周回数</label><input class="relicCustomTarget" data-series="${s.id}" placeholder="例：15個"></div><div><label>現在数</label><input class="relicCustomCurrent" data-series="${s.id}" placeholder="例：6個"></div><div><label>入手先・場所</label><input class="relicCustomSource" data-series="${s.id}" placeholder="例：クリスタルタワー"></div></div><label>工程メモ</label><textarea class="relicCustomNote" data-series="${s.id}" rows="2"></textarea><button type="button" class="primary relicCustomAdd" data-series="${s.id}" style="margin-top:8px">この工程を追加</button></details>
-   <div class="inline2" style="margin-top:8px"><input class="relicNote" data-series="${s.id}" value="${esc(st.note||"")}" placeholder="現在の周回・残数などのメモ"><div class="wrap"><button type="button" class="secondary relicAll" data-series="${s.id}">全工程完了</button><button type="button" class="secondary relicReset" data-series="${s.id}">工程をリセット</button></div></div>
+   <div class="inline2" style="margin-top:8px"><input class="relicNote" data-series="${s.id}" value="${esc(st.note||"")}" placeholder="現在の周回・残数などのメモ"><div class="wrap"><button type="button" class="secondary relicAll" data-series="${s.id}">${esc(profiles.self)}を全工程完了</button><button type="button" class="secondary relicReset" data-series="${s.id}">${esc(profiles.self)}のチェックをリセット</button></div></div>
   </div>`;
  }).join("")||'<div class="empty">該当するシリーズはありません。</div>';
- document.querySelectorAll(".relicStepCheck").forEach(c=>c.onchange=()=>{const d=load(),st=relicState(d,c.dataset.series);if(c.checked)st.steps[c.dataset.step]=true;else delete st.steps[c.dataset.step];save(d);renderRelicRoadmap();});
- document.querySelectorAll(".relicDetailToggle").forEach(b=>b.onclick=()=>{const editor=b.closest(".relic-work-step")?.querySelector(".relic-step-editor");if(!editor)return;editor.hidden=!editor.hidden;b.textContent=editor.hidden?"工程を書く":"閉じる"});
+ document.querySelectorAll(".relicStepCheck").forEach(c=>c.onchange=()=>{const d=load(),st=relicState(d,c.dataset.series);setRelicMemberDone(st,c.dataset.member,c.dataset.step,c.checked);save(d);renderRelicRoadmap();});
+ document.querySelectorAll(".relicDetailToggle").forEach(b=>b.onclick=()=>{const editor=b.closest(".relic-work-step")?.querySelector(".relic-step-editor");if(!editor)return;editor.hidden=!editor.hidden;b.textContent=editor.hidden?"工程を見る":"閉じる"});
  document.querySelectorAll(".relicDetailField").forEach(i=>i.onchange=()=>{const d=load(),st=relicState(d,i.dataset.series),key=String(i.dataset.step);st.stepDetails[key]=st.stepDetails[key]||{};st.stepDetails[key][i.dataset.field]=i.value.trim();save(d)});
  document.querySelectorAll(".relicCustomAdd").forEach(b=>b.onclick=()=>{const sid=b.dataset.series,root=b.closest(".relic-custom-add"),title=root.querySelector(".relicCustomTitle").value.trim();if(!title)return alert("工程名を入力してください。");const d=load(),st=relicState(d,sid);st.customSteps.push({id:uid(),title,target:root.querySelector(".relicCustomTarget").value.trim(),current:root.querySelector(".relicCustomCurrent").value.trim(),source:root.querySelector(".relicCustomSource").value.trim(),note:root.querySelector(".relicCustomNote").value.trim(),done:false});save(d);renderRelicRoadmap()});
- document.querySelectorAll(".relicCustomCheck").forEach(c=>c.onchange=()=>{const d=load(),st=relicState(d,c.dataset.series),step=st.customSteps[Number(c.dataset.custom)];if(!step)return;step.done=c.checked;save(d);renderRelicRoadmap()});
+ document.querySelectorAll(".relicCustomCheck").forEach(c=>c.onchange=()=>{const d=load(),st=relicState(d,c.dataset.series),step=st.customSteps[Number(c.dataset.custom)];if(!step)return;if(c.dataset.member==="friend")step.friendDone=c.checked;else step.done=c.checked;save(d);renderRelicRoadmap()});
  document.querySelectorAll(".relicCustomEdit").forEach(b=>b.onclick=()=>{const d=load(),st=relicState(d,b.dataset.series),step=st.customSteps[Number(b.dataset.custom)];if(!step)return;const title=prompt("工程名",step.title||"");if(title===null)return;const target=prompt("必要数・周回数",step.target||"");if(target===null)return;const current=prompt("現在数",step.current||"");if(current===null)return;const source=prompt("入手先・場所",step.source||"");if(source===null)return;const note=prompt("工程メモ",step.note||"");if(note===null)return;Object.assign(step,{title:title.trim()||step.title,target:target.trim(),current:current.trim(),source:source.trim(),note});save(d);renderRelicRoadmap()});
  document.querySelectorAll(".relicCustomDelete").forEach(b=>b.onclick=()=>{if(!confirm("追加した工程を削除しますか？"))return;const d=load(),st=relicState(d,b.dataset.series);st.customSteps.splice(Number(b.dataset.custom),1);save(d);renderRelicRoadmap()});
  document.querySelectorAll(".relicNote").forEach(i=>i.onchange=()=>{const d=load(),st=relicState(d,i.dataset.series);st.note=i.value;save(d);});
  document.querySelectorAll(".relicAll").forEach(b=>b.onclick=()=>{const d=load(),s=RELIC_SERIES.find(x=>x.id===b.dataset.series),st=relicState(d,b.dataset.series);s.steps.forEach((_,i)=>st.steps[i]=true);st.customSteps.forEach(x=>x.done=true);save(d);renderRelicRoadmap();});
  document.querySelectorAll(".relicReset").forEach(b=>b.onclick=()=>{if(!confirm("このシリーズの工程チェックをリセットしますか？ 工程内容とメモは残ります。"))return;const d=load(),st=relicState(d,b.dataset.series);st.steps={};st.customSteps.forEach(x=>x.done=false);save(d);renderRelicRoadmap();});
+ if($("relicNamesSave"))$("relicNamesSave").onclick=()=>{const x=load(),p=relicProfiles(x);p.self=$("relicSelfName").value.trim()||"自分";p.friend=$("relicFriendName").value.trim()||"友人";save(x);renderRelicRoadmap();if($("relicShareStatus"))$("relicShareStatus").textContent="表示名を保存しました。"};
+ if($("relicShareExport"))$("relicShareExport").onclick=()=>{const x=load(),payload={format:"hikachoku-relic-share",version:1,exportedAt:Date.now(),profiles:relicProfiles(x),relicProgress:x.relicProgress||{}};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`hikachoku-weapon-progress-${new Date().toISOString().slice(0,10)}.hikachoku-relic.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);if($("relicShareStatus"))$("relicShareStatus").textContent="武器進捗だけを書き出しました。友人へこのファイルを渡せます。"};
+ if($("relicShareImportOpen"))$("relicShareImportOpen").onclick=()=>$("relicShareImportFile")?.click();
+ if($("relicShareImportFile"))$("relicShareImportFile").onchange=async()=>{const file=$("relicShareImportFile").files?.[0];if(!file)return;try{const payload=JSON.parse(await file.text());if(payload?.format!=="hikachoku-relic-share"||!payload.relicProgress)throw new Error("format");if(!confirm("共有ファイルの表示名と武器進捗を読み込みますか？ 他の記録には影響しません。"))return;const x=load();x.relicProfiles=payload.profiles||x.relicProfiles;x.relicProgress=payload.relicProgress;save(x);renderRelicRoadmap();if($("relicShareStatus"))$("relicShareStatus").textContent=`${file.name} を読み込みました。`;}catch(e){alert("ヒカチョクの武器進捗共有ファイルではありません。")}finally{$("relicShareImportFile").value=""}};
 }
 function fillRelicFilters(){
  const s=$("relicSeriesFilter");if(!s)return;
