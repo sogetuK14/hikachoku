@@ -7397,6 +7397,13 @@ const RELIC_TASK_PRESETS={
  "zodiac:6":["4つのゾディアッククエストを受注","指定ダンジョンを攻略","指定アイテムを収集・製作","各クエストを完了して4つの重要アイテムを入手","ジャルザーンへ納品してゾディアックウェポンへ強化"],
  "zodiac:7":["マハトマを順番に入手","各マハトマの魂を完全覚醒","全12個のマハトマを完成","ジャルザーンへ報告してゼータへ強化"]
 };
+const RELIC_JOB_TASK_DETAILS={
+ "zodiac:竜騎士:0:preset-0":"クエスト名：蘇る古の武器（ゲイボルグ）\n受注NPC：ゲロルト\n受注場所：黒衣森：北部森林 X:30.2 Y:20.2\n条件：竜騎士 Lv50、対象のLv50ジョブクエストおよび前提クエストを完了",
+ "zodiac:吟遊詩人:0:preset-0":"クエスト名：蘇る古の武器（アルテミスの弓）\n受注NPC：ゲロルト\n受注場所：黒衣森：北部森林 X:30.2 Y:20.2\n条件：吟遊詩人 Lv50、対象のLv50ジョブクエストおよび前提クエストを完了",
+ "zodiac:吟遊詩人:0:preset-1":"対象：朽ち果てたアルテミスの弓\n場所：クルザス中央高地・ナタラン入植地の宝箱\n入手後、ゲロルトへ届ける。",
+ "zodiac:吟遊詩人:0:preset-2":"納品武器：ロングアーム・コンポジットボウ\n装着するマテリア：天眼のマテリダ ×2\n武器へマテリアを2個装着し、ゲロルトへ納品する。"
+};
+function relicGuideTaskDetail(seriesId,job,index,taskId){return RELIC_JOB_TASK_DETAILS[`${seriesId}:${job}:${index}:${taskId}`]||""}
 function relicPresetTasks(seriesId,index,label){
  const preset=RELIC_TASK_PRESETS[`${seriesId}:${index}`];
  return (preset||[`${label}の開始クエストを受注`,`必要アイテム・討伐・攻略条件を達成`,`${label}への強化を完了して報告`]).map((title,i)=>({id:`preset-${i}`,title,preset:true}));
@@ -7412,8 +7419,9 @@ function relicTaskDone(st,index,id){const prefix=`${index}:`,has=Object.keys(st.
 function syncRelicParentFromTasks(st,seriesId,index,label){const tasks=relicStepTasks(st,seriesId,index,label);if(tasks.length&&tasks.every(t=>relicTaskDone(st,index,t.id)))st.steps[index]=true;else delete st.steps[index]}
 
 const RELIC_JOB_NAMES=["ナイト","戦士","暗黒騎士","ガンブレイカー","モンク","竜騎士","忍者","侍","リーパー","ヴァイパー","吟遊詩人","機工士","踊り子","黒魔道士","召喚士","赤魔道士","ピクトマンサー","白魔道士","学者","占星術師","賢者"];
+const DEFAULT_RELIC_SERIES_JOBS={zodiac:"吟遊詩人",anima:"暗黒騎士"};
 function relicJobData(d){d.relicSeriesJobs=d.relicSeriesJobs&&typeof d.relicSeriesJobs==="object"?d.relicSeriesJobs:{};return d.relicSeriesJobs}
-function relicJobForSeries(d,sid){const jobs=relicJobData(d),job=String(jobs[sid]||"戦士");return RELIC_JOB_NAMES.includes(job)?job:"戦士"}
+function relicJobForSeries(d,sid){const jobs=relicJobData(d),fallback=DEFAULT_RELIC_SERIES_JOBS[sid]||"戦士",job=String(jobs[sid]||fallback);return RELIC_JOB_NAMES.includes(job)?job:fallback}
 function relicState(d,sid){
  d.relicProgress=d.relicProgress||{};
  const job=relicJobForSeries(d,sid),key=job==="戦士"?sid:`${job}::${sid}`;
@@ -7454,7 +7462,7 @@ function renderRelicRoadmap(){
    <div>${s.steps.map((step,i)=>{const tasks=relicStepTasks(st,s.id,i,step),taskDone=tasks.filter(task=>relicTaskDone(st,i,task.id)).length;return `<div class="listitem relic-work-step ${st.steps[i]?"is-done":""}">
     <div class="row"><div style="flex:1"><b>${st.steps[i]?"✓ ":""}${esc(step)}</b><div class="small">${taskDone} / ${tasks.length}項目完了</div></div><button type="button" class="ghost relicDetailToggle">${st.steps[i]?"完了内容を見る":"チェック項目を見る"}</button></div>
     <div class="relic-step-editor" hidden>
-     <div class="relic-task-list">${tasks.map(task=>{const taskKey=`${i}:${task.id}`,detail=st.taskDetails[taskKey]||"";return `<div class="relic-task-row-wrap"><div class="relic-task-row"><label><input type="checkbox" class="relicTaskCheck" data-series="${s.id}" data-step="${i}" data-task="${esc(task.id)}" style="width:auto" ${relicTaskDone(st,i,task.id)?"checked":""}> <span>${esc(task.title)}</span></label><button type="button" class="secondary relicTaskDetailToggle">${detail?"詳細あり":"詳細を書く"}</button><button type="button" class="ghost relicTaskEdit" data-series="${s.id}" data-step="${i}" data-task="${esc(task.id)}">名前編集</button>${task.preset?"":`<button type="button" class="danger relicTaskDelete" data-series="${s.id}" data-step="${i}" data-task="${esc(task.id)}">削除</button>`}</div>${detail?`<div class="small relic-task-detail-preview">${nl(detail)}</div>`:""}<div class="relic-task-detail-editor" hidden><label>この工程の詳細</label><textarea class="relicTaskDetail" data-series="${s.id}" data-step="${i}" data-task="${esc(task.id)}" rows="4" placeholder="必要アイテムと個数、クエスト名、受注NPC・座標、攻略場所、注意点、参考URLなど">${esc(detail)}</textarea><div class="small">入力内容はこの端末に自動保存されます。</div></div></div>`}).join("")}</div>
+     <div class="relic-task-list">${tasks.map(task=>{const taskKey=`${i}:${task.id}`,detail=Object.prototype.hasOwnProperty.call(st.taskDetails,taskKey)?st.taskDetails[taskKey]:relicGuideTaskDetail(s.id,seriesJob,i,task.id);return `<div class="relic-task-row-wrap"><div class="relic-task-row"><label><input type="checkbox" class="relicTaskCheck" data-series="${s.id}" data-step="${i}" data-task="${esc(task.id)}" style="width:auto" ${relicTaskDone(st,i,task.id)?"checked":""}> <span>${esc(task.title)}</span></label><button type="button" class="secondary relicTaskDetailToggle">${detail?"詳細あり":"詳細を書く"}</button><button type="button" class="ghost relicTaskEdit" data-series="${s.id}" data-step="${i}" data-task="${esc(task.id)}">名前編集</button>${task.preset?"":`<button type="button" class="danger relicTaskDelete" data-series="${s.id}" data-step="${i}" data-task="${esc(task.id)}">削除</button>`}</div>${detail?`<div class="small relic-task-detail-preview">${nl(detail)}</div>`:""}<div class="relic-task-detail-editor" hidden><label>この工程の詳細</label><textarea class="relicTaskDetail" data-series="${s.id}" data-step="${i}" data-task="${esc(task.id)}" rows="4" placeholder="必要アイテムと個数、クエスト名、受注NPC・座標、攻略場所、注意点、参考URLなど">${esc(detail)}</textarea><div class="small">ジョブ別の初期情報も上書き編集できます。入力内容はこの端末に保存されます。</div></div></div>`}).join("")}</div>
      <div class="wrap relic-task-add"><input class="relicTaskNew" data-series="${s.id}" data-step="${i}" placeholder="チェック項目を追加"><button type="button" class="secondary relicTaskAdd" data-series="${s.id}" data-step="${i}">追加</button></div>
     </div>
    </div>`}).join("")}
