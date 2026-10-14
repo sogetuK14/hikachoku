@@ -851,6 +851,32 @@ body.hikachoku-theme{
 .relic-custom-add summary{cursor:pointer}
 @media(max-width:800px){.relic-work-step>.row{align-items:flex-start}.relic-work-step>.row>.danger,.relic-work-step>.row>.secondary{padding:7px 9px}}
 
+/* 画面を横へ引き延ばさず、読む・記録する範囲を中央へまとめる */
+.hikachoku-theme main{width:100%;max-width:1160px;margin-inline:auto;padding:18px 22px 48px}
+.hikachoku-theme .panel{padding:18px;border-radius:12px}
+.hikachoku-theme .card{border-radius:9px}
+.hikachoku-theme #weapons{max-width:980px;margin-inline:auto}
+.hikachoku-theme #weapons>.panel{padding:20px}
+.hikachoku-theme #weapons .stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.hikachoku-theme #weapons .stat{padding:10px 12px}
+.hikachoku-theme #weapons .stat b{font-size:1.3rem}
+.hikachoku-theme #weapons .relic-work-step{max-width:880px;margin-inline:auto;padding:10px 12px}
+.hikachoku-theme #weapons .relic-step-editor{padding:10px}
+.hikachoku-theme #weapons .relic-custom-add{max-width:880px;margin-inline:auto}
+@media(max-width:900px){.hikachoku-theme main{max-width:none;padding:12px 10px 38px}.hikachoku-theme .panel,.hikachoku-theme #weapons>.panel{padding:13px}.hikachoku-theme #weapons .stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.hikachoku-theme #weapons .stats{grid-template-columns:1fr 1fr}.hikachoku-theme #weapons .relic-work-step{padding:9px}.hikachoku-theme .row{flex-wrap:wrap}}
+
+/* 大見出し・小見出しを共通の折り畳み操作にする */
+.heading-fold-title{display:flex;align-items:center;gap:10px;min-width:0;cursor:default}
+.heading-fold-title .heading-fold-toggle{flex:0 0 auto;margin-left:auto;width:30px;height:30px;padding:0;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--muted);font-size:1.15rem;line-height:1;cursor:pointer}
+.heading-fold-title .heading-fold-toggle:hover{color:var(--text);border-color:var(--blue);background:color-mix(in srgb,var(--blue) 8%,transparent)}
+.heading-fold-content[hidden]{display:none!important}
+.heading-fold-content:not([hidden]){animation:headingFoldIn .14s ease-out}
+.heading-fold-h2{padding-top:2px}
+.heading-fold-h3{padding-top:1px}
+@keyframes headingFoldIn{from{opacity:.35;transform:translateY(-3px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.heading-fold-content:not([hidden]){animation:none}}
+
 </style></head>
 <body class="hikachoku-theme">
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -1406,7 +1432,6 @@ body.hikachoku-theme{
 <b>🧭 戦士・武器制作ロードマップ</b>
 <div class="small">ゾディアック／アニマ／エウレカ／レジスタンス／マンダヴィル／ファントムを一画面に集約。工程チェックから進捗率を自動計算します。</div>
 </div>
-<div class="card" style="border-color:var(--blue);margin-top:12px"><b>🤝 攻略工程を友人と共有</b><div class="small">このHTMLをそのまま友人へ渡せます。工程表は共通ですが、チェック状態やメモは各自のブラウザに別々に保存され、互いの進捗は混ざりません。</div></div>
 <div class="stats">
 <div class="stat">シリーズ<b id="relicSeriesTotal">6</b></div>
 <div class="stat">完成<b id="relicSeriesDone">0</b></div>
@@ -10121,6 +10146,64 @@ function init(){
  byId("nmFiles").onchange=()=>{const files=[...byId("nmFiles").files],bytes=files.reduce((sum,file)=>sum+file.size,0);byId("nmFileStatus").textContent=files.length?`${files.length}枚選択・${(bytes/1024/1024).toFixed(1)}MB（保存時に自動縮小）`:"画像なしでもメモだけ保存できます。"};
  document.querySelectorAll('[data-view="notesMedia"]').forEach(button=>button.addEventListener("click",()=>setTimeout(render,0)));
  render();
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+})();
+
+</script>
+<script data-bundled-from="assets/js/hikachoku-folds.js">
+(function(){
+"use strict";
+const STORE_KEY="hikachoku_fold_states_v1";
+let applying=false;
+function readState(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||"{}")||{}}catch{return {}}}
+function writeState(value){try{localStorage.setItem(STORE_KEY,JSON.stringify(value))}catch{}}
+function textKey(heading){
+ const view=heading.closest(".view")?.id||"global";
+ const panel=[...(heading.closest(".view")?.querySelectorAll("h2,h3")||[])].indexOf(heading);
+ return `${view}:${heading.tagName.toLowerCase()}:${panel}:${heading.textContent.trim().replace(/\s+/g," ").slice(0,80)}`;
+}
+function eligible(heading){
+ if(heading.dataset.foldReady||heading.closest("summary,dialog,.nm-viewer"))return false;
+ const parent=heading.parentElement;
+ if(!parent)return false;
+ if(parent.classList.contains("row"))return !!parent.parentElement?.matches(".panel,.card");
+ return parent.matches(".panel,.card,.listitem,.goal-item-body,.achievement-item-body");
+}
+function applyFold(heading){
+ if(!eligible(heading))return;
+ heading.dataset.foldReady="1";
+ const anchor=heading.parentElement.classList.contains("row")?heading.parentElement:heading;
+ const scope=anchor.parentElement;
+ const content=document.createElement("div");
+ content.className=`heading-fold-content heading-fold-${heading.tagName.toLowerCase()}`;
+ let node=anchor.nextSibling;
+ while(node){
+  const next=node.nextSibling;
+  if(node.nodeType===1){
+   const el=node;
+   if(el.matches?.(heading.tagName.toLowerCase())||el.querySelector?.(`:scope > ${heading.tagName.toLowerCase()}`))break;
+  }
+  content.appendChild(node);node=next;
+ }
+ if(!content.childNodes.length)return;
+ scope.insertBefore(content,node||null);
+ const button=document.createElement("button");
+ button.type="button";button.className="heading-fold-toggle";button.setAttribute("aria-label","この項目を折り畳む");
+ const key=textKey(heading),saved=readState()[key];
+ let open=saved===undefined?heading.tagName==="H2":!!saved;
+ function update(){content.hidden=!open;button.setAttribute("aria-expanded",String(open));button.textContent=open?"−":"＋";button.title=open?"折り畳む":"展開する"}
+ button.onclick=event=>{event.stopPropagation();open=!open;const state=readState();state[key]=open;writeState(state);update()};
+ heading.appendChild(button);heading.classList.add("heading-fold-title");update();
+}
+function applyAll(root=document){
+ if(applying)return;applying=true;
+ try{[...root.querySelectorAll("h2,h3")].forEach(applyFold)}finally{applying=false}
+}
+function init(){
+ applyAll();
+ const observer=new MutationObserver(records=>{if(applying)return;for(const record of records){for(const node of record.addedNodes){if(node.nodeType===1){if(node.matches?.("h2,h3"))applyFold(node);applyAll(node)}}}});
+ observer.observe(document.querySelector("main")||document.body,{childList:true,subtree:true});
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
