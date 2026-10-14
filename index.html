@@ -14,7 +14,7 @@ h1{margin:0;font-size:1.7rem}h2{margin-top:0}.sub,.muted,.small,label{color:var(
 .sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;padding:18px 14px;background:rgba(10,17,25,.98);border-right:1px solid var(--line);backdrop-filter:blur(12px);z-index:30}
 .brand{padding:8px 8px 18px;border-bottom:1px solid var(--line);margin-bottom:12px}.brand .sub{font-size:.78rem;line-height:1.5;margin-top:7px}
 .sidebar-nav{display:flex;flex-direction:column;gap:5px}.tab,.nav-anchor{width:100%;text-align:left;border:1px solid transparent;background:transparent;color:var(--text);padding:10px 12px;border-radius:10px;font-weight:700;cursor:pointer;text-decoration:none;display:block}
-.tab:hover,.nav-anchor:hover{background:#1c2a3b;border-color:var(--line)}.tab.active{background:var(--gold);color:#251f11;border-color:var(--gold)}
+.tab:hover,.nav-anchor:hover{background:#1c2a3b;border-color:var(--line)}.tab.active{background:var(--gold);color:#251f11;border-color:var(--gold)}.nav-anchor.active{background:rgba(143,197,255,.16);border-color:var(--blue);color:var(--text)}
 .nav-group{border:1px solid transparent;border-radius:12px}.nav-group[open]{background:rgba(34,49,71,.45);border-color:var(--line)}.nav-group summary{list-style:none;cursor:pointer;padding:10px 12px;font-weight:800;border-radius:10px;user-select:none}.nav-group summary::-webkit-details-marker{display:none}.nav-group summary::before{content:"▸";display:inline-block;width:18px;color:var(--muted)}.nav-group[open] summary::before{content:"▾"}.nav-children{padding:0 6px 7px 22px;display:flex;flex-direction:column;gap:3px}.nav-children .tab,.nav-children .nav-anchor{font-size:.92rem;padding:8px 10px;font-weight:600}
 .content-wrap{min-width:0}.content-header{display:flex;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line);background:rgba(11,17,24,.82);backdrop-filter:blur(10px);position:sticky;top:0;z-index:20}.content-header strong{font-size:1.05rem}.menu-toggle{display:none;background:#28394f;color:var(--text);font-size:1.15rem}
 main{max-width:1400px;margin:0 auto;padding:20px 24px 50px}.sidebar-overlay{display:none}
@@ -917,7 +917,7 @@ body.hikachoku-theme{
 <div class="sub">v0.3.2 “Eye-comfort sky”<br/>エオルゼアの記録を、ひとつの場所に。</div>
 </div>
 <nav class="sidebar-nav notes-media-nav"><button class="tab" data-view="notesMedia">📷 SS・メモ</button></nav>
-<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="goals">🎯 GOALS</button><button class="tab" data-view="goalCalendar">📅 イベント</button><button class="tab" data-view="eorzeaHub">🧭 つながるヒカチョク</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="manualProgress">手動進捗</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><button class="tab" data-view="weapons">武器制作</button><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
+<nav class="sidebar-nav"><button class="tab active" data-view="ff14">概要</button><button class="tab" data-view="goals">🎯 GOALS</button><button class="tab" data-view="goalCalendar">📅 イベント</button><button class="tab" data-view="eorzeaHub">🧭 つながるヒカチョク</button><button class="tab" data-view="achievements">アチーブメント</button><button class="tab" data-view="manualProgress">手動進捗</button><button class="tab" data-view="ffxivAcquisition">🎁 入手・交換品図鑑</button><button class="tab" data-view="ffxivDamage">⚔ 火力計算機</button><button class="tab" data-view="guildleves">ギルドリーヴ</button><button class="tab" data-view="crafting">制作手帳</button><details class="nav-group" data-group="weapons"><summary>武器制作</summary><div class="nav-children"><button class="nav-anchor relic-series-nav" data-view="weapons" data-relic-series="">すべて</button><button class="nav-anchor relic-series-nav" data-view="weapons" data-relic-series="zodiac">ゾディアックウェポン</button><button class="nav-anchor relic-series-nav" data-view="weapons" data-relic-series="anima">アニマウェポン</button><button class="nav-anchor relic-series-nav" data-view="weapons" data-relic-series="eureka">エウレカウェポン</button><button class="nav-anchor relic-series-nav" data-view="weapons" data-relic-series="resistance">レジスタンスウェポン</button><button class="nav-anchor relic-series-nav" data-view="weapons" data-relic-series="manderville">マンダヴィルウェポン</button><button class="nav-anchor relic-series-nav" data-view="weapons" data-relic-series="phantom">ファントムウェポン</button></div></details><button class="tab" data-view="fishing">釣り手帳</button><button class="tab" data-view="ffcollect">収集図鑑</button><button class="tab" data-view="bicolor">バイカラージェム</button><button class="nav-anchor" data-record-type="FF14" data-view="records">冒険記録</button><button class="nav-anchor" data-history-category="FF14" data-view="history">挑戦履歴</button></nav>
 </aside>
 <div class="content-wrap">
 <header class="content-header">
@@ -1457,11 +1457,6 @@ body.hikachoku-theme{
 <section class="view" id="weapons">
 <section class="panel">
 <h2>🗡 武器制作</h2>
-<p class="small">レリック系6シリーズの工程を、検索し直さなくてもここで確認・チェックできます。戦士の進捗をシリーズ別に保存します。</p>
-<div class="card" style="border-color:var(--gold)">
-<b>🧭 戦士・武器制作ロードマップ</b>
-<div class="small">ゾディアック／アニマ／エウレカ／レジスタンス／マンダヴィル／ファントムを一画面に集約。工程チェックから進捗率を自動計算します。</div>
-</div>
 <div class="stats">
 <div class="stat">シリーズ<b id="relicSeriesTotal">6</b></div>
 <div class="stat">完成<b id="relicSeriesDone">0</b></div>
@@ -7471,7 +7466,7 @@ function renderRelicRoadmap(){
  const visible=RELIC_SERIES.filter(s=>(!sf||s.id===sf)&&(!status||relicSeriesStatus(d,s)===status));
  box.innerHTML=visible.map(s=>{
   const seriesJob=relicJobForSeries(d,s.id),trackedJobs=relicTrackedJobs(d,s.id),st=relicState(d,s.id),custom=st.customSteps||[],total=s.steps.length+custom.length,done=s.steps.filter((_,i)=>st.steps[i]).length+custom.filter(x=>x.done).length,pct=Math.round(done/Math.max(1,total)*100),z=relicSeriesStatus(d,s);
-  return `<div class="card ${z==="done"?"archived":""}">
+  return `<div class="card ${z==="done"?"archived":""}" id="relic-series-${s.id}">
    <div class="row"><div><b>${esc(s.name)}</b> <span class="badge">${esc(s.era)}</span><div class="relic-series-job"><label>制作ジョブ</label><select class="relicSeriesJobSelect" data-series="${s.id}">${RELIC_JOB_NAMES.map(job=>`<option ${job===seriesJob?"selected":""}>${esc(job)}</option>`).join("")}</select></div><div class="time">${z==="done"?"完成":z==="active"?"制作中":"未着手"} ／ ${done} / ${total}工程</div></div><b>${pct}%</b></div>
    <div style="height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:10px 0"><div style="height:100%;width:${pct}%;background:var(--gold)"></div></div>
    <div class="relic-job-roster"><div class="row"><div><b>作成ジョブ一覧</b><div class="small">ジョブを選ぶと、そのジョブの工程へ切り替わります。</div></div><button type="button" class="danger relicJobRemove" data-series="${s.id}" data-job="${esc(seriesJob)}">選択中を削除</button></div><div class="relic-job-chips">${trackedJobs.map(job=>{const summary=relicJobSummary(d,s,job);return `<button type="button" class="relicJobQuick ${job===seriesJob?"active":""}" data-series="${s.id}" data-job="${esc(job)}"><b>${esc(job)}</b><span>${esc(summary.label)}</span></button>`}).join("")}</div></div>
@@ -9344,7 +9339,9 @@ renderLaLastKp();
 document.querySelectorAll(".trpgToolJump").forEach(b=>b.onclick=()=>switchView(b.dataset.viewTarget));
 document.querySelectorAll(".nav-anchor").forEach(b=>b.onclick=()=>{if(b.dataset.view==="records")currentRecordCategoryFilter=b.dataset.recordType||"";
  const view=b.dataset.view;
- switchView(view,{anchor:b.dataset.anchor||""});
+ const hasRelicSeries=b.hasAttribute("data-relic-series"),relicSeries=hasRelicSeries?b.dataset.relicSeries:"";
+ if(hasRelicSeries&&$("relicSeriesFilter")){$("relicSeriesFilter").value=relicSeries;document.querySelectorAll(".relic-series-nav").forEach(x=>x.classList.toggle("active",x===b))}
+ switchView(view,{anchor:relicSeries?`relic-series-${relicSeries}`:(b.dataset.anchor||"")});
  if(b.dataset.recordType&&$("recordFilter")){
   $("recordFilter").value=b.dataset.recordType;
   renderRecords();
