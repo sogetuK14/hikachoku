@@ -868,6 +868,11 @@ body.hikachoku-theme{
 .relic-series-job{display:inline-flex;align-items:center;gap:7px;margin:7px 0 4px}
 .relic-series-job label{margin:0;font-size:.74rem;white-space:nowrap}
 .relic-series-job select{width:auto;min-width:140px;margin:0;padding:6px 28px 6px 9px;font-size:.82rem}
+.relic-job-roster{margin:12px 0;padding:11px;border:1px solid var(--line);border-radius:9px;background:color-mix(in srgb,var(--blue) 4%,transparent)}
+.relic-job-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.relic-job-chips .relicJobQuick{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--text)}
+.relic-job-chips .relicJobQuick span{font-size:.72rem;color:var(--muted)}
+.relic-job-chips .relicJobQuick.active{border-color:var(--gold);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 55%,transparent)}
 @media(max-width:700px){.relic-job-controls{grid-template-columns:1fr}.relic-job-controls button{width:100%}.relic-task-row{align-items:flex-start;flex-wrap:wrap}.relic-task-row label{flex:1 1 100%}.relic-task-detail-preview,.relic-task-detail-editor{margin-left:8px;margin-right:8px}}
 .relic-custom-add summary{cursor:pointer}
 @media(max-width:800px){.relic-work-step>.row{align-items:flex-start}.relic-work-step>.row>.danger,.relic-work-step>.row>.secondary{padding:7px 9px}}
@@ -7422,20 +7427,24 @@ const RELIC_JOB_NAMES=["ナイト","戦士","暗黒騎士","ガンブレイカ�
 const DEFAULT_RELIC_SERIES_JOBS={zodiac:"吟遊詩人",anima:"暗黒騎士"};
 function relicJobData(d){d.relicSeriesJobs=d.relicSeriesJobs&&typeof d.relicSeriesJobs==="object"?d.relicSeriesJobs:{};return d.relicSeriesJobs}
 function relicJobForSeries(d,sid){const jobs=relicJobData(d),fallback=DEFAULT_RELIC_SERIES_JOBS[sid]||"戦士",job=String(jobs[sid]||fallback);return RELIC_JOB_NAMES.includes(job)?job:fallback}
-function relicState(d,sid){
- d.relicProgress=d.relicProgress||{};
- const job=relicJobForSeries(d,sid),key=job==="戦士"?sid:`${job}::${sid}`;
- if(!d.relicProgress[key])d.relicProgress[key]={steps:{},note:""};
- const state=d.relicProgress[key];
- if(!state.steps||typeof state.steps!=="object")state.steps={};
- if(!state.stepDetails||typeof state.stepDetails!=="object")state.stepDetails={};
- if(!Array.isArray(state.customSteps))state.customSteps=[];
- if(!state.taskChecks||typeof state.taskChecks!=="object")state.taskChecks={};
- if(!state.customTasks||typeof state.customTasks!=="object")state.customTasks={};
- if(!state.taskLabels||typeof state.taskLabels!=="object")state.taskLabels={};
- if(!state.taskDetails||typeof state.taskDetails!=="object")state.taskDetails={};
- return state;
+function relicProgressKey(sid,job){return job==="戦士"?sid:`${job}::${sid}`}
+function relicTrackedJobs(d,sid){
+ d.relicSeriesTrackedJobs=d.relicSeriesTrackedJobs&&typeof d.relicSeriesTrackedJobs==="object"?d.relicSeriesTrackedJobs:{};
+ const found=[];if(d.relicProgress?.[sid])found.push("戦士");
+ Object.keys(d.relicProgress||{}).forEach(key=>{if(key.endsWith(`::${sid}`)){const job=key.slice(0,-(`::${sid}`.length));if(RELIC_JOB_NAMES.includes(job))found.push(job)}});
+ const selected=relicJobForSeries(d,sid),stored=Array.isArray(d.relicSeriesTrackedJobs[sid])?d.relicSeriesTrackedJobs[sid]:[];
+ const list=[...new Set([...stored,...found,selected])].filter(job=>RELIC_JOB_NAMES.includes(job));d.relicSeriesTrackedJobs[sid]=list;return list;
 }
+function relicStateForJob(d,sid,job,create=true){
+ d.relicProgress=d.relicProgress||{};const key=relicProgressKey(sid,job);
+ if(!d.relicProgress[key]&&!create)return null;
+ if(!d.relicProgress[key])d.relicProgress[key]={steps:{},note:""};
+ const state=d.relicProgress[key];state.steps=state.steps&&typeof state.steps==="object"?state.steps:{};state.stepDetails=state.stepDetails&&typeof state.stepDetails==="object"?state.stepDetails:{};state.customSteps=Array.isArray(state.customSteps)?state.customSteps:[];state.taskChecks=state.taskChecks&&typeof state.taskChecks==="object"?state.taskChecks:{};state.customTasks=state.customTasks&&typeof state.customTasks==="object"?state.customTasks:{};state.taskLabels=state.taskLabels&&typeof state.taskLabels==="object"?state.taskLabels:{};state.taskDetails=state.taskDetails&&typeof state.taskDetails==="object"?state.taskDetails:{};return state;
+}
+function relicState(d,sid){
+ return relicStateForJob(d,sid,relicJobForSeries(d,sid),true);
+}
+function relicJobSummary(d,s,job){const st=relicStateForJob(d,s.id,job,false);if(!st)return {done:0,total:s.steps.length,label:"未着手"};const custom=st.customSteps||[],done=s.steps.filter((_,i)=>st.steps[i]).length+custom.filter(x=>x.done).length,total=s.steps.length+custom.length;return {done,total,label:done>=total&&total?"完成":done?`${done} / ${total}段階`:"未着手"}}
 function relicSeriesStatus(d,s){
  const st=relicState(d,s.id),all=s.steps.length+st.customSteps.length,done=s.steps.filter((_,i)=>st.steps[i]).length+st.customSteps.filter(x=>x.done).length;
  return all&&done>=all?"done":done>0?"active":"notstarted";
@@ -7455,10 +7464,11 @@ function renderRelicRoadmap(){
  $("relicSeriesDone").textContent=doneSeries;$("relicSeriesActive").textContent=activeSeries;$("relicStepProgress").textContent=`${doneSteps} / ${totalSteps}`;
  const visible=RELIC_SERIES.filter(s=>(!sf||s.id===sf)&&(!status||relicSeriesStatus(d,s)===status));
  box.innerHTML=visible.map(s=>{
-  const seriesJob=relicJobForSeries(d,s.id),st=relicState(d,s.id),custom=st.customSteps||[],total=s.steps.length+custom.length,done=s.steps.filter((_,i)=>st.steps[i]).length+custom.filter(x=>x.done).length,pct=Math.round(done/Math.max(1,total)*100),z=relicSeriesStatus(d,s);
+  const seriesJob=relicJobForSeries(d,s.id),trackedJobs=relicTrackedJobs(d,s.id),st=relicState(d,s.id),custom=st.customSteps||[],total=s.steps.length+custom.length,done=s.steps.filter((_,i)=>st.steps[i]).length+custom.filter(x=>x.done).length,pct=Math.round(done/Math.max(1,total)*100),z=relicSeriesStatus(d,s);
   return `<div class="card ${z==="done"?"archived":""}">
    <div class="row"><div><b>${esc(s.name)}</b> <span class="badge">${esc(s.era)}</span><div class="relic-series-job"><label>制作ジョブ</label><select class="relicSeriesJobSelect" data-series="${s.id}">${RELIC_JOB_NAMES.map(job=>`<option ${job===seriesJob?"selected":""}>${esc(job)}</option>`).join("")}</select></div><div class="time">${z==="done"?"完成":z==="active"?"制作中":"未着手"} ／ ${done} / ${total}工程</div></div><b>${pct}%</b></div>
    <div style="height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:10px 0"><div style="height:100%;width:${pct}%;background:var(--gold)"></div></div>
+   <div class="relic-job-roster"><div class="row"><div><b>作成ジョブ一覧</b><div class="small">ジョブを選ぶと、そのジョブの工程へ切り替わります。</div></div><button type="button" class="danger relicJobRemove" data-series="${s.id}" data-job="${esc(seriesJob)}">選択中を削除</button></div><div class="relic-job-chips">${trackedJobs.map(job=>{const summary=relicJobSummary(d,s,job);return `<button type="button" class="relicJobQuick ${job===seriesJob?"active":""}" data-series="${s.id}" data-job="${esc(job)}"><b>${esc(job)}</b><span>${esc(summary.label)}</span></button>`}).join("")}</div></div>
    <div>${s.steps.map((step,i)=>{const tasks=relicStepTasks(st,s.id,i,step),taskDone=tasks.filter(task=>relicTaskDone(st,i,task.id)).length;return `<div class="listitem relic-work-step ${st.steps[i]?"is-done":""}">
     <div class="row"><div style="flex:1"><b>${st.steps[i]?"✓ ":""}${esc(step)}</b><div class="small">${taskDone} / ${tasks.length}項目完了</div></div><button type="button" class="ghost relicDetailToggle">${st.steps[i]?"完了内容を見る":"チェック項目を見る"}</button></div>
     <div class="relic-step-editor" hidden>
@@ -7486,7 +7496,9 @@ function renderRelicRoadmap(){
  document.querySelectorAll(".relicNote").forEach(i=>i.onchange=()=>{const d=load(),st=relicState(d,i.dataset.series);st.note=i.value;save(d);});
  document.querySelectorAll(".relicAll").forEach(b=>b.onclick=()=>{const d=load(),s=RELIC_SERIES.find(x=>x.id===b.dataset.series),st=relicState(d,b.dataset.series);st.taskChecks={};s.steps.forEach((_,i)=>st.steps[i]=true);st.customSteps.forEach(x=>x.done=true);save(d);renderRelicRoadmap();});
  document.querySelectorAll(".relicReset").forEach(b=>b.onclick=()=>{if(!confirm("このシリーズのチェックをすべてリセットしますか？ 項目名とメモは残ります。"))return;const d=load(),st=relicState(d,b.dataset.series);st.steps={};st.taskChecks={};st.customSteps.forEach(x=>x.done=false);save(d);renderRelicRoadmap();});
- document.querySelectorAll(".relicSeriesJobSelect").forEach(select=>select.onchange=()=>{const x=load(),jobs=relicJobData(x);jobs[select.dataset.series]=select.value;save(x);renderRelicRoadmap()});
+ document.querySelectorAll(".relicSeriesJobSelect").forEach(select=>select.onchange=()=>{const x=load(),sid=select.dataset.series,jobs=relicJobData(x);jobs[sid]=select.value;const tracked=relicTrackedJobs(x,sid);if(!tracked.includes(select.value))tracked.push(select.value);relicStateForJob(x,sid,select.value,true);save(x);renderRelicRoadmap()});
+ document.querySelectorAll(".relicJobQuick").forEach(b=>b.onclick=()=>{const x=load(),sid=b.dataset.series,jobs=relicJobData(x);jobs[sid]=b.dataset.job;save(x);renderRelicRoadmap()});
+ document.querySelectorAll(".relicJobRemove").forEach(b=>b.onclick=()=>{const sid=b.dataset.series,job=b.dataset.job;if(!confirm(`${job}のこのシリーズの進捗・詳細・メモを削除しますか？`))return;const x=load(),tracked=relicTrackedJobs(x,sid).filter(v=>v!==job);delete x.relicProgress[relicProgressKey(sid,job)];x.relicSeriesTrackedJobs[sid]=tracked;const fallback=tracked[0]||DEFAULT_RELIC_SERIES_JOBS[sid]||"戦士";relicJobData(x)[sid]=fallback;save(x);renderRelicRoadmap()});
 }
 function fillRelicFilters(){
  const s=$("relicSeriesFilter");if(!s)return;
