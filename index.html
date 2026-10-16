@@ -911,6 +911,7 @@ body.hikachoku-theme{
 @keyframes headingFoldIn{from{opacity:.35;transform:translateY(-3px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.heading-fold-content:not([hidden]){animation:none}}
 
+.weapon-dashboard{margin-bottom:18px}.weapon-tabs{display:flex;gap:22px;overflow-x:auto;border-bottom:1px solid var(--line);padding:0 2px;margin-bottom:14px}.weapon-tab{appearance:none;background:transparent;border:0;border-bottom:3px solid transparent;border-radius:0;color:var(--muted);font-weight:800;padding:11px 2px 9px;white-space:nowrap;cursor:pointer}.weapon-tab:hover,.weapon-tab.active{color:var(--gold);border-bottom-color:var(--gold)}.weapon-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(230px,1.35fr) minmax(210px,1.1fr);gap:12px}.weapon-metric,.weapon-progress-card,.weapon-refresh-card{min-height:150px;border:1px solid var(--line);border-radius:18px;background:var(--panel);padding:20px;box-shadow:0 12px 30px rgba(0,0,0,.06)}.weapon-metric{display:flex;align-items:center;gap:14px}.weapon-metric-icon{display:grid;place-items:center;width:52px;height:52px;flex:0 0 52px;border-radius:50%;font-size:22px;background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold)}.weapon-metric-label,.weapon-progress-label{font-size:.82rem;font-weight:800;color:var(--muted)}.weapon-metric-value{display:block;font-size:2.05rem;line-height:1.05;margin-top:8px}.weapon-progress-card{display:grid;grid-template-columns:1fr 76px;gap:15px;align-items:center}.weapon-progress-value{font-size:2.1rem;font-weight:900;color:var(--gold);line-height:1}.weapon-progress-value small{font-size:1rem}.weapon-progress-bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:14px 0 10px}.weapon-progress-bar>span{display:block;height:100%;width:0;background:var(--gold);border-radius:inherit;transition:width .25s ease}.weapon-progress-ring{--pct:0%;width:72px;height:72px;border-radius:50%;background:conic-gradient(var(--gold) var(--pct),var(--line) 0);display:grid;place-items:center}.weapon-progress-ring:after{content:"";width:54px;height:54px;border-radius:50%;background:var(--panel)}.weapon-refresh-card{border:0;background:var(--gold);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer}.weapon-refresh-card:hover{filter:brightness(1.05);transform:translateY(-1px)}.weapon-refresh-card strong{font-size:1.05rem;margin-top:8px}.weapon-refresh-card span{font-size:.78rem;opacity:.86;margin-top:6px}.weapon-refresh-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.18);font-size:25px}.weapon-dashboard-status{min-height:1.4em;margin:10px 2px 0;color:var(--muted);font-size:.78rem}.weapon-dashboard-status:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#4c9b75;margin-right:8px}.relic-filter-row{margin-top:14px}.relic-material-panel{margin:16px 0;border-color:var(--gold)}.relic-material-form{display:grid;grid-template-columns:1.1fr 1.4fr 1.4fr .65fr 1.7fr auto;gap:8px;align-items:end;margin-top:12px}.relic-material-table{width:100%;border-collapse:collapse;margin-top:12px}.relic-material-table th,.relic-material-table td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.relic-material-table input{min-width:70px;max-width:100px}.relic-material-remain{font-size:1.15rem;color:var(--gold)}.relic-material-source{white-space:pre-line}.relic-material-registered{margin-top:12px}.relic-material-entry{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}@media(max-width:1050px){.weapon-overview{grid-template-columns:repeat(3,1fr)}.weapon-progress-card{grid-column:span 2}.weapon-refresh-card{grid-column:span 1}.relic-material-form{grid-template-columns:1fr 1fr 1fr}}@media(max-width:680px){.weapon-tabs{gap:15px}.weapon-overview{grid-template-columns:1fr 1fr}.weapon-metric,.weapon-progress-card,.weapon-refresh-card{min-height:120px;padding:15px}.weapon-progress-card,.weapon-refresh-card{grid-column:1/-1}.weapon-metric-value{font-size:1.65rem}.weapon-metric-icon{width:42px;height:42px;flex-basis:42px}.relic-material-form{grid-template-columns:1fr 1fr}.relic-material-table{display:block;overflow-x:auto}}
 </style></head>
 <body class="hikachoku-theme">
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -1461,18 +1462,43 @@ body.hikachoku-theme{
 <section class="view" id="weapons">
 <section class="panel">
 <h2>🗡 武器制作</h2>
-<div class="stats">
-<div class="stat">シリーズ<b id="relicSeriesTotal">6</b></div>
-<div class="stat">完成<b id="relicSeriesDone">0</b></div>
-<div class="stat">制作中<b id="relicSeriesActive">0</b></div>
-<div class="stat">総工程<b id="relicStepProgress">0 / 0</b></div>
+<div class="weapon-dashboard">
+<nav class="weapon-tabs" aria-label="武器制作の表示切替">
+<button class="weapon-tab active" type="button" data-relic-status="">すべて</button>
+<button class="weapon-tab" type="button" data-relic-status="active">制作中</button>
+<button class="weapon-tab" type="button" data-relic-status="done">完成</button>
+<button class="weapon-tab" type="button" data-relic-status="notstarted">未着手</button>
+<button class="weapon-tab" type="button" data-weapon-target="free">自由記録</button>
+</nav>
+<div class="weapon-overview">
+<div class="weapon-metric"><span class="weapon-metric-icon">≡</span><div><span class="weapon-metric-label">未着手</span><b class="weapon-metric-value" id="relicSeriesNotStarted">0</b></div></div>
+<div class="weapon-metric"><span class="weapon-metric-icon">◆</span><div><span class="weapon-metric-label">制作中</span><b class="weapon-metric-value" id="relicSeriesActive">0</b></div></div>
+<div class="weapon-metric"><span class="weapon-metric-icon">●</span><div><span class="weapon-metric-label">完成</span><b class="weapon-metric-value" id="relicSeriesDone">0</b></div></div>
+<div class="weapon-progress-card"><div><div class="weapon-progress-label">全体の進捗</div><div class="weapon-progress-value"><span id="relicProgressPercent">0</span><small>%</small></div><div class="weapon-progress-bar"><span id="relicProgressBar"></span></div><div class="small">完了 <b id="relicStepProgress">0 / 0</b> 工程</div></div><div class="weapon-progress-ring" id="relicProgressRing" aria-hidden="true"></div></div>
+<button class="weapon-refresh-card" id="relicRefresh" type="button"><span class="weapon-refresh-icon">✓</span><strong>進捗を再集計</strong><span>保存済みの工程チェックを反映</span></button>
 </div>
-<div class="inline2" style="margin-top:14px">
+<div class="weapon-dashboard-status" id="relicRefreshStatus">進捗を表示しました</div>
+</div>
+<details class="card relic-material-panel" id="relicMaterialPanel" open>
+<summary><b>必要素材・残数</b></summary>
+<div class="relic-material-form">
+<div><label>シリーズ</label><select id="relicMaterialSeries"></select></div>
+<div><label>工程</label><select id="relicMaterialStep"></select></div>
+<div><label>素材名</label><input id="relicMaterialName" placeholder="例：サベネアの霊薬"></div>
+<div><label>必要数</label><input id="relicMaterialQty" type="number" min="1" value="1"></div>
+<div><label>入手先</label><input id="relicMaterialSource" placeholder="交換場所・コンテンツなど"></div>
+<button class="primary" id="relicMaterialAdd" type="button">追加</button>
+</div>
+<div id="relicMaterialRegistered" class="relic-material-registered"></div>
+<div id="relicMaterialSummary"></div>
+<div id="relicMaterialComplete"></div>
+</details>
+<div class="inline2 relic-filter-row">
 <div><label>シリーズ</label><select id="relicSeriesFilter"><option value="">6シリーズすべて</option></select></div>
 <div><label>状態</label><select id="relicStatusFilter"><option value="">すべて</option><option value="done">完成</option><option value="active">制作中</option><option value="notstarted">未着手</option></select></div>
 </div>
 <div id="relicRoadmap"></div>
-<details style="margin-top:18px">
+<details id="weaponFreeRecords" style="margin-top:18px">
 <summary><b>📝 自由登録の武器制作記録</b></summary>
 <div class="stats" style="margin-top:12px">
 <div class="stat">登録中<b id="weaponTotal">0</b></div>
@@ -7469,6 +7495,28 @@ function relicSeriesStatus(d,s){
  const st=relicState(d,s.id),all=s.steps.length+st.customSteps.length,done=s.steps.filter((_,i)=>st.steps[i]).length+st.customSteps.filter(x=>x.done).length;
  return all&&done>=all?"done":done>0?"active":"notstarted";
 }
+function relicMaterialInventory(d){d.relicMaterialInventory=d.relicMaterialInventory&&typeof d.relicMaterialInventory==="object"?d.relicMaterialInventory:{};return d.relicMaterialInventory}
+function relicMaterials(st){st.materials=Array.isArray(st.materials)?st.materials:[];return st.materials}
+function renderRelicMaterials(){
+ const seriesSelect=$("relicMaterialSeries"),stepSelect=$("relicMaterialStep"),summary=$("relicMaterialSummary"),registered=$("relicMaterialRegistered");if(!seriesSelect||!stepSelect||!summary||!registered)return;
+ const d=load(),oldSeries=seriesSelect.value,seriesId=RELIC_SERIES.some(s=>s.id===oldSeries)?oldSeries:(RELIC_SERIES[0]?.id||"");
+ seriesSelect.innerHTML=RELIC_SERIES.map(s=>`<option value="${s.id}" ${s.id===seriesId?"selected":""}>${esc(s.name)}</option>`).join("");
+ const series=RELIC_SERIES.find(s=>s.id===seriesId),oldStep=Number(stepSelect.value)||0;
+ stepSelect.innerHTML=(series?.steps||[]).map((name,i)=>`<option value="${i}" ${i===oldStep?"selected":""}>${i+1}. ${esc(name)}</option>`).join("");
+ const job=relicJobForSeries(d,seriesId),st=relicStateForJob(d,seriesId,job,true),entries=relicMaterials(st);
+ registered.innerHTML=entries.length?`<div class="small"><b>${esc(series?.name||"")}／${esc(job)}</b> に登録済み</div>`+entries.map(item=>`<div class="relic-material-entry"><div><b>${esc(item.name)}</b> × ${Number(item.qty)||0}<div class="small">${esc((series?.steps||[])[Number(item.step)]||"工程")} ${item.source?`／ ${esc(item.source)}`:""}</div></div><button type="button" class="danger relicMaterialDelete" data-id="${esc(item.id)}">削除</button></div>`).join(""):'<div class="small">このジョブには素材がまだ登録されていません。</div>';
+ const aggregate=new Map(),allMaterials=new Map(),inventory=relicMaterialInventory(d);
+ RELIC_SERIES.forEach(s=>relicTrackedJobs(d,s.id).forEach(jobName=>{const state=relicStateForJob(d,s.id,jobName,false);if(!state)return;relicMaterials(state).forEach(item=>{const step=Number(item.step)||0,name=String(item.name||"").trim();if(!name)return;const all=allMaterials.get(name)||{name,sources:new Set(),uses:[]};if(item.source)all.sources.add(item.source);all.uses.push(`${s.name}／${jobName}／${s.steps[step]||"工程"}`);allMaterials.set(name,all);if(state.steps?.[step])return;const row=aggregate.get(name)||{name,required:0,sources:new Set(),uses:[]};row.required+=Math.max(0,Number(item.qty)||0);if(item.source)row.sources.add(item.source);row.uses.push(`${s.name}／${jobName}／${s.steps[step]||"工程"}`);aggregate.set(name,row)})}));
+ const rows=[...aggregate.values()].sort((a,b)=>a.name.localeCompare(b.name,"ja"));
+ summary.innerHTML=rows.length?`<table class="relic-material-table"><thead><tr><th>素材</th><th>必要</th><th>所持</th><th>あと</th><th>入手先</th><th>使用工程</th></tr></thead><tbody>${rows.map(row=>{const owned=Math.max(0,Number(inventory[row.name])||0),remain=Math.max(0,row.required-owned);return `<tr><td><b>${esc(row.name)}</b></td><td>${row.required}</td><td><input class="relicMaterialOwned" data-name="${esc(encodeURIComponent(row.name))}" type="number" min="0" value="${owned}"></td><td><b class="relic-material-remain">${remain}</b></td><td class="relic-material-source">${row.sources.size?[...row.sources].map(esc).join("\n"):"—"}</td><td><small>${row.uses.map(esc).join("<br>")}</small></td></tr>`}).join("")}</tbody></table>`:'<div class="empty" style="margin-top:12px">未完了工程に必要な素材はまだ登録されていません。</div>';
+ const completed=[...allMaterials.values()].map(item=>{const owned=Math.max(0,Number(inventory[item.name])||0),required=aggregate.get(item.name)?.required||0;return {...item,owned,required,sellable:Math.max(0,owned-required)}}).filter(item=>item.required===0||item.sellable>0).sort((a,b)=>b.sellable-a.sellable||a.name.localeCompare(b.name,"ja"));
+ const completeBox=$("relicMaterialComplete");completeBox.innerHTML=`<details style="margin-top:14px" ${completed.length?"open":""}><summary><b>完了素材・売却候補 ${completed.length}件</b></summary>${completed.length?`<table class="relic-material-table"><thead><tr><th>素材</th><th>判定</th><th>所持</th><th>売却候補</th><th></th></tr></thead><tbody>${completed.map(item=>`<tr><td><b>${esc(item.name)}</b><div class="small">${[...item.sources].map(esc).join("／")||"入手先未登録"}</div></td><td>${item.required===0?'<span class="badge green">今後の使用なし</span>':'<span class="badge">必要分を確保済み</span>'}</td><td>${item.owned}</td><td><b class="relic-material-remain">${item.sellable}</b></td><td>${item.sellable?`<button type="button" class="secondary relicMaterialSold" data-name="${esc(encodeURIComponent(item.name))}">売却済みにする</button>`:"—"}</td></tr>`).join("")}</tbody></table>`:'<div class="small" style="margin-top:10px">現在、手放せる登録素材はありません。</div>'}</details>`;
+ seriesSelect.onchange=()=>renderRelicMaterials();
+ $("relicMaterialAdd").onclick=()=>{const name=$("relicMaterialName").value.trim(),qty=Math.max(1,Number($("relicMaterialQty").value)||1),source=$("relicMaterialSource").value.trim();if(!name)return alert("素材名を入力してください。");const x=load(),sid=seriesSelect.value,state=relicStateForJob(x,sid,relicJobForSeries(x,sid),true);relicMaterials(state).push({id:uid(),step:Number(stepSelect.value)||0,name,qty,source});save(x);$("relicMaterialName").value="";$("relicMaterialSource").value="";$("relicMaterialQty").value="1";renderRelicMaterials()};
+ document.querySelectorAll(".relicMaterialDelete").forEach(b=>b.onclick=()=>{const x=load(),sid=seriesSelect.value,state=relicStateForJob(x,sid,relicJobForSeries(x,sid),true);state.materials=relicMaterials(state).filter(item=>item.id!==b.dataset.id);save(x);renderRelicMaterials()});
+ document.querySelectorAll(".relicMaterialOwned").forEach(input=>input.onchange=()=>{const x=load(),name=decodeURIComponent(input.dataset.name),value=Math.max(0,Number(input.value)||0);relicMaterialInventory(x)[name]=value;save(x);renderRelicMaterials()});
+ document.querySelectorAll(".relicMaterialSold").forEach(b=>b.onclick=()=>{const x=load(),name=decodeURIComponent(b.dataset.name),required=aggregate.get(name)?.required||0;relicMaterialInventory(x)[name]=required;save(x);renderRelicMaterials()});
+}
 function initializeWarRelicDefaults(){
  const d=load();let changed=false;
  const completed=["zodiac","anima","manderville","phantom"];
@@ -7481,7 +7529,8 @@ function renderRelicRoadmap(){
  const d=load(),sf=$("relicSeriesFilter")?.value||"",status=$("relicStatusFilter")?.value||"";
  let totalSteps=0,doneSteps=0,doneSeries=0,activeSeries=0;
  RELIC_SERIES.forEach(s=>{const st=relicState(d,s.id),custom=st.customSteps||[],n=s.steps.filter((_,i)=>st.steps[i]).length+custom.filter(x=>x.done).length,all=s.steps.length+custom.length;totalSteps+=all;doneSteps+=n;const z=all&&n>=all?"done":n>0?"active":"notstarted";if(z==="done")doneSeries++;if(z==="active")activeSeries++;});
- $("relicSeriesDone").textContent=doneSeries;$("relicSeriesActive").textContent=activeSeries;$("relicStepProgress").textContent=`${doneSteps} / ${totalSteps}`;
+ const notStarted=Math.max(0,RELIC_SERIES.length-doneSeries-activeSeries),progressPct=Math.round(doneSteps/Math.max(1,totalSteps)*100);
+ $("relicSeriesDone").textContent=doneSeries;$("relicSeriesActive").textContent=activeSeries;$("relicSeriesNotStarted").textContent=notStarted;$("relicStepProgress").textContent=`${doneSteps} / ${totalSteps}`;$("relicProgressPercent").textContent=progressPct;$("relicProgressBar").style.width=`${progressPct}%`;$("relicProgressRing").style.setProperty("--pct",`${progressPct}%`);renderRelicMaterials();
  const visible=RELIC_SERIES.filter(s=>(!sf||s.id===sf)&&(!status||relicSeriesStatus(d,s)===status));
  box.innerHTML=visible.map(s=>{
   const seriesJob=relicJobForSeries(d,s.id),trackedJobs=relicTrackedJobs(d,s.id),st=relicState(d,s.id),custom=st.customSteps||[],total=s.steps.length+custom.length,done=s.steps.filter((_,i)=>st.steps[i]).length+custom.filter(x=>x.done).length,pct=Math.round(done/Math.max(1,total)*100),z=relicSeriesStatus(d,s);
@@ -7521,6 +7570,9 @@ function renderRelicRoadmap(){
  document.querySelectorAll(".relicSeriesJobSelect").forEach(select=>select.onchange=()=>{const x=load(),sid=select.dataset.series,jobs=relicJobData(x);jobs[sid]=select.value;const tracked=relicTrackedJobs(x,sid);if(!tracked.includes(select.value))tracked.push(select.value);relicStateForJob(x,sid,select.value,true);save(x);renderRelicRoadmap()});
  document.querySelectorAll(".relicJobQuick").forEach(b=>b.onclick=()=>{const x=load(),sid=b.dataset.series,jobs=relicJobData(x);jobs[sid]=b.dataset.job;save(x);renderRelicRoadmap()});
  document.querySelectorAll(".relicJobRemove").forEach(b=>b.onclick=()=>{const sid=b.dataset.series,job=b.dataset.job;if(!confirm(`${job}のこのシリーズの進捗・詳細・メモを削除しますか？`))return;const x=load(),tracked=relicTrackedJobs(x,sid).filter(v=>v!==job);delete x.relicProgress[relicProgressKey(sid,job)];x.relicSeriesTrackedJobs[sid]=tracked;const fallback=tracked[0]||DEFAULT_RELIC_SERIES_JOBS[sid]||"戦士";relicJobData(x)[sid]=fallback;save(x);renderRelicRoadmap()});
+ document.querySelectorAll(".weapon-tab[data-relic-status]").forEach(b=>{b.classList.toggle("active",b.dataset.relicStatus===status);b.onclick=()=>{$("relicStatusFilter").value=b.dataset.relicStatus;renderRelicRoadmap()}});
+ const freeTab=document.querySelector('.weapon-tab[data-weapon-target="free"]');if(freeTab)freeTab.onclick=()=>{const target=$("weaponFreeRecords");target.open=true;target.scrollIntoView({behavior:"smooth",block:"start"})};
+ if($("relicRefresh"))$("relicRefresh").onclick=()=>{renderRelicRoadmap();const statusBox=$("relicRefreshStatus");if(statusBox)statusBox.textContent=`${new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})} に再集計しました`};
 }
 function fillRelicFilters(){
  const s=$("relicSeriesFilter");if(!s)return;
