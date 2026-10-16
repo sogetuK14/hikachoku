@@ -753,7 +753,7 @@ body.hikachoku-theme{
 .craft-tree-job[open]>summary:before,.craft-tree-band[open]>summary:before,.craft-tree-product[open]>summary:before,.craft-tree-materials[open]>summary:before,.craft-tree-leves[open]>summary:before,.craft-linked-leve[open]>summary:before{transform:rotate(90deg)}
 .craft-tree-job>summary{min-height:52px;padding:9px 13px;background:rgba(77,220,255,.06)}.craft-tree-job>summary b,.craft-tree-band>summary b{margin-right:auto}.craft-tree-bands{padding-left:20px}
 .craft-tree-band>summary{min-height:46px;padding:8px 13px}.craft-tree-products{padding:0 18px 10px 28px}
-.craft-tree-product{max-width:980px;border-bottom:1px dashed var(--line)}.craft-tree-product>summary{min-height:43px;padding:7px 0}.craft-tree-product>summary label,.craft-linked-leve>summary label{display:flex;margin:0!important}.craft-tree-product>summary input,.craft-linked-leve>summary input{width:20px!important;height:20px}.craft-tree-product>summary b,.craft-linked-leve>summary b{flex:1}.craft-tree-product.is-done>summary{opacity:.72}
+.craft-tree-product{max-width:980px;border-bottom:1px dashed var(--line)}.craft-tree-product>summary{min-height:43px;padding:7px 0}.craft-tree-product>summary label,.craft-linked-leve>summary label{display:flex;margin:0!important}.craft-tree-product>summary input,.craft-linked-leve>summary input{width:20px!important;height:20px}.craft-tree-product>summary b,.craft-linked-leve>summary b{flex:1}.craft-tree-product.is-done>summary{opacity:.72}.craft-tree-product.is-locked>summary{opacity:1}.craftLock{width:auto!important;min-height:30px!important;padding:3px 8px!important;margin-left:6px!important;white-space:nowrap;font-size:12px!important}.craft-tree-product.is-locked .craftCheck{cursor:not-allowed}
 .craft-tree-body{padding:4px 0 14px 29px;max-width:880px}.craft-tree-body>.craftNote{margin-top:9px}.craft-tree-materials,.craft-tree-leves{margin-top:10px;border-top:1px solid var(--line)}.craft-tree-materials>summary,.craft-tree-leves>summary{padding:9px 0;color:var(--sn-cyan)}.craft-tree-material-body{padding:0 0 7px 24px}.craft-tree-actions{margin-top:9px}.craft-tree-actions label{display:flex;align-items:center;gap:6px;margin:0}.craft-tree-actions input[type=checkbox]{width:auto!important}.craft-tree-actions .craftPlanQty{width:90px!important}
 .craft-linked-leve{border-top:1px dashed var(--line)}.craft-linked-leve>summary{min-height:42px;padding:7px 0}.craft-linked-leve>summary>span{font-size:.76rem;color:var(--muted)}.craft-linked-body{padding:3px 0 12px 29px}
 .craft-filter-strip{display:grid;grid-template-columns:repeat(2,minmax(150px,240px));gap:10px;margin:8px 0 12px}.craft-filter-strip label{font-size:.74rem}.craft-filter-strip select{margin:3px 0 0}.craft-equip-level>div{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:7px}.craft-equip-level input{min-width:0;margin:3px 0 0}.craftNote{display:block;min-height:76px;max-height:320px;resize:vertical;line-height:1.55;white-space:pre-wrap}
@@ -5680,7 +5680,7 @@ function craftPatchLabel(n){
  const major=Math.floor(v/100),minor=Math.floor((v%100)/10),sub=v%10;
  return `${major}.${minor}${sub?sub:""}`;
 }
-function craftRecipeState(d,id){return d.craftingProgress?.[id]||{done:false,note:""};}
+function craftRecipeState(d,id){const st=d.craftingProgress?.[id]||{};return {done:!!st.done,note:st.note||"",locked:!!st.locked};}
 function craftRecipeMeta(recipe){
  const row=(typeof CRAFT_RECIPE_META_DATA!=="undefined"&&CRAFT_RECIPE_META_DATA[recipe.id])||[0,0];
  return {notebookId:Number(row[0])||0,statusRequiredId:Number(row[1])||0};
@@ -5815,10 +5815,32 @@ function renderCrafting(){
   area.placeholder="制作手帳の自分用メモ（FF14マクロ、飯・薬、必要ステータスなど）";
   area.value=input.value;input.replaceWith(area);
  });
+ document.querySelectorAll(".craft-tree-product").forEach(row=>{
+  const id=row.dataset.craftProduct,st=craftRecipeState(d,id),check=row.querySelector(":scope>summary .craftCheck"),summary=row.querySelector(":scope>summary");
+  row.classList.toggle("is-locked",st.locked);
+  if(check)check.disabled=st.locked;
+  if(st.done&&summary){
+   const lock=document.createElement("button");
+   lock.type="button";lock.className="secondary craftLock";lock.dataset.id=id;
+   lock.textContent=st.locked?"🔓 解除":"🔒 ロック";
+   lock.title=st.locked?"ロックを解除":"制作済みチェックを固定";
+   lock.setAttribute("aria-label",`${row.querySelector(":scope>summary b")?.textContent||"レシピ"}の${lock.title}`);
+   summary.append(lock);
+  }
+ });
  document.querySelectorAll(".craft-tree-product>summary label,.craft-linked-leve>summary label").forEach(x=>x.onclick=e=>e.stopPropagation());
+ document.querySelectorAll(".craftLock").forEach(b=>b.onclick=e=>{
+  e.preventDefault();e.stopPropagation();
+  const d=load(),id=b.dataset.id;d.craftingProgress=d.craftingProgress||{};
+  const st=d.craftingProgress[id]||{done:false,note:"",locked:false};
+  if(!st.done)return;
+  st.locked=!st.locked;d.craftingProgress[id]=st;save(d);renderCrafting();
+ });
  document.querySelectorAll(".craftCheck").forEach(c=>c.onchange=()=>{
   const d=load(),id=c.dataset.id;d.craftingProgress=d.craftingProgress||{};
-  const st=d.craftingProgress[id]||{done:false,note:""};st.done=c.checked;d.craftingProgress[id]=st;save(d);renderCrafting();
+  const st=d.craftingProgress[id]||{done:false,note:"",locked:false};
+  if(st.locked){renderCrafting();return;}
+  st.done=c.checked;if(!st.done)st.locked=false;d.craftingProgress[id]=st;save(d);renderCrafting();
  });
  document.querySelectorAll(".craftNote").forEach(i=>i.onchange=()=>{
   const d=load(),id=i.dataset.id;d.craftingProgress=d.craftingProgress||{};
