@@ -8,6 +8,7 @@
     const current=Number(goal?.current)||0,target=Number(goal?.target)||0;
     return {complete:target>0&&current>=target,remaining:Math.max(0,target-current)};
   }
+  function localDateKey(){const date=new Date(),local=new Date(date.getTime()-date.getTimezoneOffset()*60000);return local.toISOString().slice(0,10)}
   function manualItems(data){
     return rows(data?.manualProgressLists).flatMap(list=>rows(list?.groups).flatMap(group=>rows(group?.checklist)));
   }
@@ -22,14 +23,16 @@
   }
   function summary(){
     const data=typeof window.load==="function"?window.load():{};
-    const goals=rows(data?.goals),activeGoals=goals.filter(goal=>!goalState(goal).complete);
+    const goals=rows(data?.goals),today=localDateKey(),incompleteGoals=goals.filter(goal=>!goalState(goal).complete);
+    const expiredGoals=incompleteGoals.filter(goal=>/^\d{4}-\d{2}-\d{2}$/.test(String(goal?.deadline||""))&&String(goal.deadline)<today);
+    const activeGoals=incompleteGoals.filter(goal=>!expiredGoals.includes(goal));
     const manual=manualItems(data),relic=relicCounts(data);
     const nextGoal=[...activeGoals].sort((a,b)=>(Number(b?.priority)||0)-(Number(a?.priority)||0)||String(a?.deadline||"9999-99-99").localeCompare(String(b?.deadline||"9999-99-99")))[0];
     return {
       protocol:PROTOCOL,type:"la:service-summary",service:"hikachoku",version:1,
       generatedAt:new Date().toISOString(),savedAt:Number(data?._savedAt||0),
       status:"connected",
-      metrics:{activeGoals:activeGoals.length,totalGoals:goals.length,manualRemaining:manual.filter(x=>!x?.done).length,manualTotal:manual.length,relicDone:relic.done,relicTotal:relic.total},
+      metrics:{activeGoals:activeGoals.length,expiredGoals:expiredGoals.length,totalGoals:goals.length,manualRemaining:manual.filter(x=>!x?.done).length,manualTotal:manual.length,relicDone:relic.done,relicTotal:relic.total},
       nextAction:nextGoal?{title:String(nextGoal.name||"GOAL"),deadline:String(nextGoal.deadline||""),remaining:goalState(nextGoal).remaining,unit:String(nextGoal.unit||"")}:null,
       links:{home:"https://sogetuk14.github.io/hikachoku/",goals:"https://sogetuk14.github.io/hikachoku/?la_view=goals",progress:"https://sogetuk14.github.io/hikachoku/?la_view=manualProgress",weapons:"https://sogetuk14.github.io/hikachoku/?la_view=weapons"}
     };
