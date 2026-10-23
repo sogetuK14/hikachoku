@@ -837,11 +837,14 @@ body.hikachoku-theme{
 .nm-thumb:hover{transform:translateY(-1px);border-color:var(--gold)}
 .nm-thumb img{display:block;width:100%;height:100%;object-fit:cover}
 .nm-actions{justify-content:flex-end;margin-top:8px}
+.nm-form-actions{display:flex;gap:8px;margin-top:12px}.nm-form-actions .primary{flex:1}.nm-editing{border-color:var(--gold)!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--gold) 20%,transparent)}
+.nm-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}.nm-toolbar .spacer{flex:1}.nm-toolbar label{display:flex;align-items:center;gap:6px;margin:0;font-size:.78rem}.nm-toolbar input[type=checkbox]{width:auto!important;margin:0}.nm-toolbar button.is-active{border-color:var(--gold);color:var(--gold)}
+.nm-calendar{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:10px 0 14px}.nm-calendar-head{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:var(--panel2)}.nm-calendar-head span{text-align:center;padding:7px 2px;font-size:.72rem;color:var(--muted)}.nm-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.nm-calendar-day{min-height:82px;padding:5px;border-top:1px solid var(--line);border-left:1px solid var(--line);background:transparent;text-align:left;color:var(--text);border-radius:0}.nm-calendar-day:nth-child(7n+1){border-left:0}.nm-calendar-day.is-out{opacity:.35}.nm-calendar-day.is-today{box-shadow:inset 0 0 0 2px var(--blue)}.nm-calendar-day.is-selected{background:color-mix(in srgb,var(--gold) 14%,var(--panel));box-shadow:inset 0 0 0 2px var(--gold)}.nm-calendar-day b{display:block;font-size:.76rem}.nm-calendar-day small{display:block;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}.nm-calendar-day .badge{margin-top:4px}.nm-hidden{display:none!important}
 .nm-viewer{width:min(96vw,1400px);height:min(94vh,1000px);padding:42px 12px 12px;border:1px solid var(--line);border-radius:16px;background:rgba(8,12,22,.96)}
 .nm-viewer::backdrop{background:rgba(0,0,0,.82)}
 .nm-viewer img{width:100%;height:100%;object-fit:contain}
 .nm-viewer-close{position:absolute;right:10px;top:8px;width:34px;height:34px;padding:0;border-radius:50%;font-size:24px}
-@media(max-width:800px){.notes-media-layout>section:first-child{position:static}.nm-searchbar{grid-template-columns:1fr}.nm-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:800px){.notes-media-layout>section:first-child{position:static}.nm-searchbar{grid-template-columns:1fr}.nm-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.nm-calendar-day{min-height:56px;padding:3px}.nm-calendar-day small{display:none}.nm-calendar-day .badge{font-size:.58rem;padding:2px 4px}.nm-toolbar .spacer{display:none}.nm-toolbar>*{flex:1 1 auto}}
 
 /* 武器制作：工程を「チェック」だけでなく実際に計画・記録する */
 .relic-work-step{border-left:3px solid color-mix(in srgb,var(--blue) 55%,transparent)}
@@ -1043,8 +1046,8 @@ body.hikachoku-theme{
 <section class="view" id="notesMedia">
 <section class="panel notes-media-hero">
 <div class="section-kicker">HIKACHOKU MEMORY DESK</div>
-<div class="row"><div><h2>📷 SS・メモ</h2><div class="small">スクリーンショットと、その時のメモを一緒に残します。すべての記録をここから検索できます。</div></div><span class="badge gold" id="nmCount">0件</span></div>
-<div class="nm-searchbar"><input id="nmGlobalSearch" type="search" placeholder="タイトル・メモ・タグ・既存記録を横断検索"/><button class="primary" id="nmSearchBtn" type="button">検索</button></div>
+<div class="row"><div><h2>📷 SS・メモ</h2><div class="small">スクリーンショットと、その時のメモを一緒に残します。月ごと・日ごと・タイトルから探せます。</div></div><span class="badge gold" id="nmCount">0件</span></div>
+<div class="nm-searchbar"><input id="nmGlobalSearch" type="search" placeholder="タイトルを検索（メモ・タグも対象）"/><button class="primary" id="nmSearchBtn" type="button">検索</button></div>
 </section>
 <div class="grid2 notes-media-layout">
 <section class="panel">
@@ -1055,11 +1058,13 @@ body.hikachoku-theme{
 <label>タグ</label><input id="nmTags" placeholder="カンマ区切り：風景, 零式, 思い出"/>
 <label>スクリーンショット（複数可）</label><input id="nmFiles" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple/>
 <div class="small" id="nmFileStatus">画像なしでもメモだけ保存できます。</div>
-<button class="primary" id="nmSave" type="button" style="width:100%;margin-top:12px">SS・メモを保存</button>
+<div class="nm-form-actions"><button class="primary" id="nmSave" type="button">SS・メモを保存</button><button class="secondary nm-hidden" id="nmCancelEdit" type="button">編集をやめる</button></div>
 </section>
 <section class="panel">
-<div class="row"><h2>記録を探す</h2><select id="nmCategoryFilter" style="width:auto"><option value="">すべて</option><option>FF14</option><option>TRPG</option><option>制作</option><option>日常</option><option>その他</option><option value="existing">既存記録</option></select></div>
-<div class="small" id="nmResultSummary">検索語なし：新しい順に表示</div>
+<div class="row"><h2>記録を探す</h2><select id="nmCategoryFilter" style="width:auto"><option value="">すべての分類</option><option>FF14</option><option>TRPG</option><option>制作</option><option>日常</option><option>その他</option></select></div>
+<div class="nm-toolbar"><button class="secondary is-active" id="nmCalendarMode" type="button">カレンダー</button><button class="secondary" id="nmListMode" type="button">一覧</button><span class="spacer"></span><label><input id="nmIncludeExisting" type="checkbox"/>ほかの記録も含める</label></div>
+<div id="nmCalendarWrap"><div class="row"><button class="secondary" id="nmPrevMonth" type="button">‹ 前月</button><h3 id="nmCalendarTitle" style="margin:0;text-align:center;flex:1"></h3><button class="secondary" id="nmToday" type="button">今月</button><button class="secondary" id="nmNextMonth" type="button">翌月 ›</button></div><div class="nm-calendar"><div class="nm-calendar-head"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div><div class="nm-calendar-grid" id="nmCalendarGrid"></div></div></div>
+<div class="small" id="nmResultSummary">日付を選ぶと、その日の記録を表示します。</div>
 <div id="nmResults"><div class="empty">読み込み中…</div></div>
 </section>
 </div>
@@ -10233,6 +10238,7 @@ const STORE="images";
 const byId=id=>document.getElementById(id);
 const safe=value=>String(value??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 const newId=()=>crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2);
+let editingId="",viewMode="calendar",calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1),selectedDay="";
 
 function readNotes(){
  try{const value=JSON.parse(localStorage.getItem(META_KEY)||"[]");return Array.isArray(value)?value:[]}
@@ -10259,6 +10265,7 @@ function localDateInput(time=Date.now()){
 }
 function formatDate(time){return new Date(time||Date.now()).toLocaleString("ja-JP",{year:"numeric",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}
 function tagsOf(value){return [...new Set(String(value||"").split(/[,、]/).map(v=>v.trim()).filter(Boolean))]}
+function dayKey(time){const d=new Date(time||Date.now());return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 
 async function shrinkImage(file){
  if(file.type==="image/gif")return file;
@@ -10282,18 +10289,26 @@ async function saveNote(){
  const title=byId("nmTitle").value.trim(),memo=byId("nmMemo").value.trim(),files=[...byId("nmFiles").files];
  if(!title&&!memo&&!files.length){alert("タイトル、メモ、またはSSを入力してください。");return}
  const button=byId("nmSave");button.disabled=true;button.textContent="保存中…";
- const note={id:newId(),title:title||memo.split(/\r?\n/)[0].slice(0,80)||"SS記録",memo,category:byId("nmCategory").value,tags:tagsOf(byId("nmTags").value),time:new Date(byId("nmDate").value||Date.now()).getTime(),createdAt:Date.now(),images:[]};
+ const notes=readNotes(),old=editingId?notes.find(x=>x.id===editingId):null;
+ const note={id:old?.id||newId(),title:title||memo.split(/\r?\n/)[0].slice(0,80)||"SS記録",memo,category:byId("nmCategory").value,tags:tagsOf(byId("nmTags").value),time:new Date(byId("nmDate").value||Date.now()).getTime(),createdAt:old?.createdAt||Date.now(),updatedAt:Date.now(),images:[...(old?.images||[])]};
  try{
   for(const file of files){
    const blob=await shrinkImage(file),imageId=newId();
    await putImage({id:imageId,noteId:note.id,name:file.name,type:blob.type||file.type,blob,createdAt:Date.now()});
    note.images.push({id:imageId,name:file.name,type:blob.type||file.type,size:blob.size});
   }
-  const notes=readNotes();notes.push(note);writeNotes(notes);
-  ["nmTitle","nmMemo","nmTags","nmFiles"].forEach(id=>byId(id).value="");byId("nmDate").value=localDateInput();byId("nmFileStatus").textContent="保存しました。画像なしでもメモだけ保存できます。";
+  if(old)notes.splice(notes.findIndex(x=>x.id===old.id),1,note);else notes.push(note);writeNotes(notes);
+  const message=old?"変更を保存しました。":"保存しました。";resetForm();byId("nmFileStatus").textContent=message+" 画像なしでもメモだけ保存できます。";selectedDay=dayKey(note.time);calendarMonth=new Date(new Date(note.time).getFullYear(),new Date(note.time).getMonth(),1);
   await render();
  }catch(error){console.error(error);alert("保存できませんでした。ブラウザの保存容量または画像形式を確認してください。")}
- finally{button.disabled=false;button.textContent="SS・メモを保存"}
+ finally{button.disabled=false;if(!editingId)button.textContent="SS・メモを保存"}
+}
+
+function resetForm(){
+ editingId="";["nmTitle","nmMemo","nmTags","nmFiles"].forEach(id=>byId(id).value="");byId("nmDate").value=localDateInput();byId("nmCategory").value="FF14";byId("nmSave").textContent="SS・メモを保存";byId("nmCancelEdit").classList.add("nm-hidden");byId("nmSave").closest("section")?.classList.remove("nm-editing");
+}
+function beginEdit(id){
+ const note=readNotes().find(x=>x.id===id);if(!note)return;editingId=id;byId("nmTitle").value=note.title||"";byId("nmMemo").value=note.memo||"";byId("nmCategory").value=note.category||"その他";byId("nmDate").value=localDateInput(note.time);byId("nmTags").value=(note.tags||[]).join(", ");byId("nmFiles").value="";byId("nmFileStatus").textContent=(note.images||[]).length?`保存済み画像 ${(note.images||[]).length}枚（新しく選ぶと追加されます）`:"画像なし。新しく追加できます。";byId("nmSave").textContent="変更を保存";byId("nmCancelEdit").classList.remove("nm-hidden");byId("nmSave").closest("section")?.classList.add("nm-editing");byId("nmTitle").focus();byId("nmTitle").scrollIntoView({behavior:"smooth",block:"center"});
 }
 
 async function imageHtml(image){
@@ -10302,16 +10317,27 @@ async function imageHtml(image){
 }
 async function noteCard(row){
  const images=row.existing?"":(await Promise.all((row.images||[]).map(imageHtml))).join("");
- return `<article class="card nm-card"><div class="row"><div><b>${safe(row.title||"無題")}</b><div class="time">${safe(formatDate(row.time))}</div></div><div><span class="badge ${row.category==="FF14"?"gold":row.category==="TRPG"?"purple":""}">${safe(row.category||"その他")}</span>${row.existing?`<span class="badge">${safe(row.kind)}</span>`:""}</div></div>${row.memo?`<p>${safe(row.memo).replace(/\n/g,"<br>")}</p>`:""}${images?`<div class="nm-gallery">${images}</div>`:""}<div>${(row.tags||[]).map(tag=>`<span class="badge">#${safe(tag)}</span>`).join("")}</div>${row.existing?"":`<div class="wrap nm-actions"><button class="danger nm-delete" type="button" data-id="${safe(row.id)}">削除</button></div>`}</article>`;
+ return `<article class="card nm-card"><div class="row"><div><b>${safe(row.title||"無題")}</b><div class="time">${safe(formatDate(row.time))}</div></div><div><span class="badge ${row.category==="FF14"?"gold":row.category==="TRPG"?"purple":""}">${safe(row.category||"その他")}</span>${row.existing?`<span class="badge">${safe(row.kind)}</span>`:""}</div></div>${row.memo?`<p>${safe(row.memo).replace(/\n/g,"<br>")}</p>`:""}${images?`<div class="nm-gallery">${images}</div>`:""}<div>${(row.tags||[]).map(tag=>`<span class="badge">#${safe(tag)}</span>`).join("")}</div>${row.existing?"":`<div class="wrap nm-actions"><button class="secondary nm-edit" type="button" data-id="${safe(row.id)}">編集</button><button class="danger nm-delete" type="button" data-id="${safe(row.id)}">削除</button></div>`}</article>`;
+}
+
+function baseRows(){
+ const query=byId("nmGlobalSearch").value.trim().toLocaleLowerCase("ja"),filter=byId("nmCategoryFilter").value,notes=readNotes().map(x=>({...x,kind:"SS・メモ",existing:false}));
+ const rows=byId("nmIncludeExisting").checked?[...notes,...existingRows()]:notes;
+ return {notes,query,rows:rows.filter(row=>(!filter||row.category===filter)&&(!query||searchable(row).includes(query))).sort((a,b)=>(b.time||0)-(a.time||0))};
+}
+function renderCalendar(rows){
+ const grid=byId("nmCalendarGrid"),year=calendarMonth.getFullYear(),month=calendarMonth.getMonth(),first=new Date(year,month,1),start=new Date(year,month,1-first.getDay()),today=dayKey(Date.now());
+ byId("nmCalendarTitle").textContent=`${year}年 ${month+1}月`;grid.innerHTML="";
+ for(let i=0;i<42;i++){const date=new Date(start);date.setDate(start.getDate()+i);const key=dayKey(date),items=rows.filter(row=>dayKey(row.time)===key),button=document.createElement("button");button.type="button";button.className=`nm-calendar-day${date.getMonth()!==month?" is-out":""}${key===today?" is-today":""}${key===selectedDay?" is-selected":""}`;button.dataset.day=key;button.innerHTML=`<b>${date.getDate()}</b>${items.slice(0,2).map(x=>`<small>${safe(x.title||"無題")}</small>`).join("")}${items.length?`<span class="badge">${items.length}件</span>`:""}`;button.onclick=()=>{selectedDay=key;render()};grid.appendChild(button)}
 }
 
 async function render(){
  const target=byId("nmResults");if(!target)return;
- const query=byId("nmGlobalSearch").value.trim().toLocaleLowerCase("ja"),filter=byId("nmCategoryFilter").value;
- const notes=readNotes().map(x=>({...x,kind:"SS・メモ",existing:false}));
- let rows=[...notes,...existingRows()].filter(row=>(!filter||(filter==="existing"?row.existing:row.category===filter))&&(!query||searchable(row).includes(query))).sort((a,b)=>(b.time||0)-(a.time||0));
- byId("nmCount").textContent=`${notes.length}件`;byId("nmResultSummary").textContent=`${rows.length}件${query?`：「${query}」の検索結果`:"：新しい順に表示"}`;
+ const {notes,query,rows:allRows}=baseRows();renderCalendar(allRows);byId("nmCalendarWrap").classList.toggle("nm-hidden",viewMode!=="calendar");
+ let rows=allRows;if(viewMode==="calendar"&&!query)rows=selectedDay?allRows.filter(row=>dayKey(row.time)===selectedDay):[];
+ byId("nmCount").textContent=`${notes.length}件`;byId("nmResultSummary").textContent=query?`${rows.length}件：「${query}」の検索結果`:viewMode==="calendar"?(selectedDay?`${selectedDay} の記録 ${rows.length}件`:"カレンダーの日付を選んでください"):`${rows.length}件：新しい順に表示`;
  target.innerHTML=rows.length?(await Promise.all(rows.slice(0,200).map(noteCard))).join(""):'<div class="empty">該当する記録はありません。</div>';
+ target.querySelectorAll(".nm-edit").forEach(button=>button.onclick=()=>beginEdit(button.dataset.id));
  target.querySelectorAll(".nm-delete").forEach(button=>button.onclick=async()=>{if(!confirm("このSS・メモを削除しますか？"))return;const id=button.dataset.id;writeNotes(readNotes().filter(x=>x.id!==id));await removeNoteImages(id);render()});
  target.querySelectorAll(".nm-thumb").forEach(button=>button.onclick=()=>openViewer(button.dataset.imageUrl));
 }
@@ -10324,6 +10350,10 @@ function init(){
  if(typeof pageTitles==="object")pageTitles.notesMedia="SS・メモ";
  byId("nmDate").value=localDateInput();
  byId("nmSave").onclick=saveNote;byId("nmSearchBtn").onclick=render;byId("nmGlobalSearch").oninput=render;byId("nmCategoryFilter").onchange=render;
+ byId("nmCancelEdit").onclick=resetForm;byId("nmIncludeExisting").onchange=render;
+ byId("nmCalendarMode").onclick=()=>{viewMode="calendar";byId("nmCalendarMode").classList.add("is-active");byId("nmListMode").classList.remove("is-active");render()};
+ byId("nmListMode").onclick=()=>{viewMode="list";byId("nmListMode").classList.add("is-active");byId("nmCalendarMode").classList.remove("is-active");render()};
+ byId("nmPrevMonth").onclick=()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1);selectedDay="";render()};byId("nmNextMonth").onclick=()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1);selectedDay="";render()};byId("nmToday").onclick=()=>{calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);selectedDay=dayKey(Date.now());render()};
  byId("nmFiles").onchange=()=>{const files=[...byId("nmFiles").files],bytes=files.reduce((sum,file)=>sum+file.size,0);byId("nmFileStatus").textContent=files.length?`${files.length}枚選択・${(bytes/1024/1024).toFixed(1)}MB（保存時に自動縮小）`:"画像なしでもメモだけ保存できます。"};
  document.querySelectorAll('[data-view="notesMedia"]').forEach(button=>button.addEventListener("click",()=>setTimeout(render,0)));
  render();
