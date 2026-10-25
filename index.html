@@ -1318,7 +1318,7 @@ body.hikachoku-theme{
 <section class="panel">
 <div class="row"><div><h2>🎯 GOALS</h2><div class="small">終わらせたい目標の「あといくつ・いつまで・優先度」を一か所で確認します。</div></div></div>
 <div class="goal-form card">
-<h3 id="goalFormTitle">＋ GOALを登録</h3>
+<h3 id="goalFormTitle" data-no-fold>＋ GOALを登録</h3>
 <div class="inline2"><div><label>目標名</label><input id="goalName" placeholder="例：モグモグ★コレクション"/></div><div><label>単位</label><input id="goalUnit" placeholder="個、回、枚など"/></div></div>
 <div class="inline2"><div><label>現在値</label><input id="goalCurrent" min="0" step="any" type="number" value="0"/></div><div><label>目標値</label><input id="goalTarget" min="0" step="any" type="number" value="1"/></div></div>
 <div class="inline3"><div><label>優先度</label><select id="goalPriority"><option value="5">★★★★★ 最優先</option><option value="4">★★★★☆ 優先</option><option value="3" selected>★★★☆☆ 普通</option><option value="2">★★☆☆☆ 低め</option><option value="1">★☆☆☆☆ そのうち</option></select></div><div><label>開始日（任意）</label><input id="goalStartDate" type="date"/></div><div><label>期限（任意）</label><input id="goalDeadline" type="date"/></div></div>
@@ -10375,7 +10375,7 @@ function textKey(heading){
  return `${view}:${heading.tagName.toLowerCase()}:${panel}:${heading.textContent.trim().replace(/\s+/g," ").slice(0,80)}`;
 }
 function eligible(heading){
- if(heading.dataset.foldReady||heading.closest("summary,dialog,.nm-viewer"))return false;
+ if(heading.dataset.foldReady||heading.hasAttribute("data-no-fold")||heading.closest("summary,dialog,.nm-viewer"))return false;
  const parent=heading.parentElement;
  if(!parent)return false;
  if(parent.classList.contains("row"))return !!parent.parentElement?.matches(".panel,.card");
