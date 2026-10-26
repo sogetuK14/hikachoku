@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261026-hikachoku-notion-pilot-v4" name="eorzea-archive-build"/><style data-bundled-from="assets/css/app.css">
+<meta content="20261027-hikachoku-notion-pilot-v5" name="eorzea-archive-build"/><style data-bundled-from="assets/css/app.css">
 
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -1330,7 +1330,7 @@ body.hikachoku-theme{
 <section class="view" id="knowledgeBase">
 <div class="kb-shell">
 <aside class="kb-pages card">
-<div class="row"><b>ヒカチョク Wiki</b><button class="primary" id="kbNewPage" type="button">＋</button></div>
+<div class="row"><b>ヒカチョク Wiki</b><button class="primary" id="kbNewPage" type="button">＋ ページ</button></div>
 <input id="kbSearch" type="search" placeholder="ページと本文を検索" aria-label="記事を検索"/>
 <div class="kb-filter-row"><button class="ghost active" data-kb-filter="all" type="button">すべて</button><button class="ghost" data-kb-filter="tasks" type="button">未完了</button><button class="ghost" data-kb-filter="favorites" type="button">★</button></div>
 <div id="kbPageTree"></div>
@@ -10305,7 +10305,7 @@ function bind(){if(!$k("knowledgeBase"))return;migrateVideos();$k("kbNewPage").o
 window.HikachokuWiki=Object.freeze({version:1,listPages:()=>structuredClone(pages()),getPage:id=>structuredClone(page(id)||null),createPage:seed=>structuredClone(createPage(seed)),updatePage:(id,patch)=>{const x=page(id);if(!x)throw new Error("Page not found");Object.assign(x,patch,{updatedAt:Date.now()});persist();renderAll();return structuredClone(x)},addBlock:(id,type,value={})=>{const x=page(id);if(!x)throw new Error("Page not found");const b=newBlock(type,value);x.blocks.push(b);persist();renderAll();return structuredClone(b)}});
 function bindProgressControls(){const update=()=>{const x=page();if(!x)return;normalizePage(x);x.progress={...x.progress,mode:$k("kbProgressMode").value,current:Number($k("kbProgressCurrent").value)||0,target:Number($k("kbProgressTarget").value)||0,unit:$k("kbProgressUnit").value.trim()};x.updatedAt=Date.now();persist();renderProgress();renderTree()};$k("kbProgressMode")?.addEventListener("change",update);["kbProgressCurrent","kbProgressTarget","kbProgressUnit"].forEach(id=>$k(id)?.addEventListener("input",update));$k("kbBlocks")?.addEventListener("change",event=>{if(event.target?.dataset?.kbField==="checked")setTimeout(renderProgress,0)});let titleTimer=0;const title=$k("kbTitle");if(title){title.oninput=()=>{const x=page();if(!x)return;x.title=title.value;x.updatedAt=Date.now();persist();clearTimeout(titleTimer);titleTimer=setTimeout(renderTree,250)};title.onblur=()=>{const x=page();if(!x)return;if(!title.value.trim()){title.value="無題";x.title="無題"}else x.title=title.value.trim();x.updatedAt=Date.now();persist();renderTree()};title.onkeydown=event=>{if(event.key==="Enter"){event.preventDefault();title.blur();$k("kbBlocks")?.querySelector("textarea,input[type='text']")?.focus()}}}}
 function bindDailyLogs(){if($k("kbLogDate"))$k("kbLogDate").value=new Date().toLocaleDateString("sv-SE");$k("kbLogAdd")?.addEventListener("click",()=>{const x=page();if(!x)return;normalizePage(x);const date=$k("kbLogDate").value,value=Number($k("kbLogValue").value),memo=$k("kbLogMemo").value.trim();if(!date||!Number.isFinite(value)||value<0){alert("日付と0以上の数量を入力してください。");return}x.progress.logs.push({id:uid(),date,value,memo,createdAt:Date.now()});x.updatedAt=Date.now();$k("kbLogMemo").value="";persist();renderProgress();renderTree()});$k("kbLogFormula")?.addEventListener("input",()=>{const x=page();if(!x)return;normalizePage(x);x.progress.formula=$k("kbLogFormula").value;x.updatedAt=Date.now();persist();try{const value=formulaValue(x.progress.formula,logMetrics(x));$k("kbLogFormulaResult").textContent=value===null?"計算式なし":`式の結果：${value.toLocaleString("ja-JP")}`}catch(error){$k("kbLogFormulaResult").textContent=`式エラー：${error.message}`}})}
-function startWiki(){bind();bindProgressControls();bindDailyLogs()}
+function startWiki(){bind();const existing=pages();if(!existing.length)createPage({title:"討伐・周回記録",icon:"⚔️",category:"攻略",status:"active",progress:{mode:"logs",current:0,target:100,unit:"体",logs:[],formula:"remaining / average"},blocks:[newBlock("heading",{text:"今日の記録"}),newBlock("paragraph",{text:"上の「日別実績」に日付・数量・メモを入力すると、累計・残数・達成率が自動計算されます。"})]});else if(!page())selectedId=String([...existing].sort((a,b)=>Number(b.updatedAt)-Number(a.updatedAt))[0].id);bindProgressControls();bindDailyLogs();renderAll()}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",startWiki,{once:true});else startWiki();
 })();
 </script>
