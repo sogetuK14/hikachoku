@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261027-hikachoku-notion-pilot-v7" name="eorzea-archive-build"/><style data-bundled-from="assets/css/app.css">
+<meta content="20261027-hikachoku-notion-pilot-v8" name="eorzea-archive-build"/><style data-bundled-from="assets/css/app.css">
 
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -10269,7 +10269,19 @@ initializePersistentData().then(()=>{renderPersistenceTest();
      if(String(m.name||"").toLowerCase().includes(q))add(`minion:${m.id}`,"ミニオン",m.name,"収集図鑑に登録済み",["#ミニオン"]);
    for(const m of (typeof MOUNT_DATA!=="undefined"?MOUNT_DATA:[]))
      if(String(m.name||"").toLowerCase().includes(q))add(`mount:${m.id}`,"マウント",m.name,"収集図鑑に登録済み",["#マウント"]);
-   const rank={"直接一致":0,"検索素材を使用":1,"関連制作物を納品":2};out.sort((a,b)=>(rank[a.reason]??9)-(rank[b.reason]??9)||a.name.localeCompare(b.name,"ja"));
+   const appState=state();
+   for(const a of (typeof ACHIEVEMENT_DB!=="undefined"?ACHIEVEMENT_DB:[])){
+     const hay=[a.name,a.kind,a.category,a.description,a.detail,a.condition].join(" ").toLowerCase();
+     if(hay.includes(q)){
+       const st=appState?.achievementProgress?.[String(a.id)]||{},done=st.done===true;
+       add(`achievement:${a.id}`,"アチーブメント",a.name,`${a.kind||""}${a.category?` ／ ${a.category}`:""} ／ ${done?"達成済み":"未達成"}`,["#アチーブメント",done?"#達成済み":"#未達成"],"アチーブメント一致");
+     }
+   }
+   for(const p of (Array.isArray(appState?.wikiPages)?appState.wikiPages:[])){
+     const blocks=Array.isArray(p.blocks)?p.blocks:[],hay=[p.title,p.category,...(p.tags||[]),...blocks.flatMap(b=>[b.text,b.url])].join(" ").toLowerCase();
+     if(hay.includes(q))add(`wiki:${p.id}`,"記事・ノート",p.title||"無題",`${p.category||"未分類"}${p.status?` ／ ${p.status}`:""}`,[...(p.tags||[]).slice(0,6).map(t=>`#${t}`)],"記事内に一致");
+   }
+   const rank={"直接一致":0,"アチーブメント一致":1,"記事内に一致":2,"検索素材を使用":3,"関連制作物を納品":4};out.sort((a,b)=>(rank[a.reason]??9)-(rank[b.reason]??9)||a.name.localeCompare(b.name,"ja"));
    box.innerHTML=out.length?`<div class="small" style="margin-bottom:8px">直接一致と関連データを合わせて ${out.length}件。</div>${out.slice(0,250).map(x=>`<div class="listitem"><div class="row"><b>${esc(x.name)}</b><span><span class="badge gold">${esc(x.reason)}</span> <span class="badge">${esc(x.type)}</span></span></div><div class="small">${esc(x.detail)}</div><div>${x.tags.map(t=>`<span class="badge">${esc(t)}</span>`).join(" ")}</div></div>`).join("")}`:'<div class="empty">該当する直接・関連データはありません。</div>';
  }
 
