@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261027-hikachoku-notion-pilot-v5" name="eorzea-archive-build"/><style data-bundled-from="assets/css/app.css">
+<meta content="20261027-hikachoku-notion-pilot-v7" name="eorzea-archive-build"/><style data-bundled-from="assets/css/app.css">
 
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -923,6 +923,9 @@ body.hikachoku-theme{
 <style data-feature="hikachoku-wiki-progress">
 .kb-progress{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;align-items:end;margin-top:10px}.kb-progress input,.kb-progress select{margin:3px 0 0}.kb-progress-summary{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center}.kb-progress-summary b{font-size:1.3rem;color:var(--gold)}.kb-progress-bar{grid-column:1/-1;height:9px;border-radius:99px;background:var(--line);overflow:hidden}.kb-progress-bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}@media(max-width:850px){.kb-progress{grid-template-columns:1fr 1fr}}@media(max-width:520px){.kb-progress{grid-template-columns:1fr}}
 </style>
+<style data-feature="hikachoku-title-contrast">
+.hikachoku-theme .kb-title-input{color:#263b46!important;background:rgba(255,255,255,.42)!important;border:1px solid transparent!important;border-radius:8px!important;padding:8px 12px!important;text-shadow:none!important;caret-color:#263b46!important}.hikachoku-theme .kb-title-input:hover{background:rgba(255,255,255,.65)!important}.hikachoku-theme .kb-title-input:focus{color:#172b35!important;background:#fff!important;border-color:#78a3b5!important;box-shadow:0 0 0 3px rgba(80,140,165,.14)!important;outline:none}.hikachoku-theme .kb-title-input::placeholder{color:#718690!important;opacity:1}.hikachoku-theme .kb-icon-input{color:#476877!important;background:rgba(255,255,255,.45)!important;text-shadow:none!important}.hikachoku-theme .kbFavorite{color:#476877!important;border-color:#aac2cc!important;background:rgba(255,255,255,.38)!important}
+</style>
 <style data-feature="hikachoku-daily-log">
 .kb-daily-log{margin-top:10px}.kb-log-form{display:grid;grid-template-columns:150px 130px minmax(180px,1fr) auto;gap:8px;align-items:end;margin:10px 0}.kb-log-form input{margin:3px 0 0}.kb-log-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin:10px 0}.kb-log-stat{padding:9px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)}.kb-log-stat b{display:block;font-size:1.05rem}.kb-log-row{display:grid;grid-template-columns:110px 100px minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}@media(max-width:720px){.kb-log-form{grid-template-columns:1fr 1fr}.kb-log-stats{grid-template-columns:1fr 1fr}.kb-log-row{grid-template-columns:90px 70px 1fr auto}}
 </style>
@@ -1331,7 +1334,7 @@ body.hikachoku-theme{
 <div class="kb-shell">
 <aside class="kb-pages card">
 <div class="row"><b>ヒカチョク Wiki</b><button class="primary" id="kbNewPage" type="button">＋ ページ</button></div>
-<input id="kbSearch" type="search" placeholder="ページと本文を検索" aria-label="記事を検索"/>
+<input id="kbSearch" type="search" placeholder="ページ検索／Enterで制作関連検索" aria-label="記事と関連データを検索"/>
 <div class="kb-filter-row"><button class="ghost active" data-kb-filter="all" type="button">すべて</button><button class="ghost" data-kb-filter="tasks" type="button">未完了</button><button class="ghost" data-kb-filter="favorites" type="button">★</button></div>
 <div id="kbPageTree"></div>
 <button class="secondary" id="kbImportGoals" type="button">旧GOALをページへ移行</button>
@@ -10232,13 +10235,33 @@ initializePersistentData().then(()=>{renderPersistenceTest();
    box.innerHTML=rows.length?`<div class="small" style="margin-bottom:8px">接続済みデータから ${rows.length}件。探検手帳・サブクエストは次の接続対象です。</div>${rows.map(x=>`<div class="listitem"><div class="row"><b>${esc(x.title)}</b><span class="badge">${esc(x.type)}</span></div><div class="small">${esc(x.detail)}</div><div>${x.tags.map(t=>`<span class="badge">${esc(t)}</span>`).join(" ")}</div></div>`).join("")}`:'<div class="empty">現在接続済みのデータには該当がありません。</div>';
  }
 
- function searchItem(){
+ async function searchItem(){
    const q=($("hubItemSearch")?.value||"").trim().toLowerCase(),box=$("hubItemResults");if(!box)return;
    if(!q){box.innerHTML='<div class="empty">アイテム名を入力してください。</div>';return}
+   box.innerHTML='<div class="empty">制作物・素材・リーヴの関連を検索しています…</div>';
    const out=[],seen=new Set();
-   const add=(key,type,name,detail,tags=[])=>{const k=`${key}:${name}`;if(seen.has(k))return;seen.add(k);out.push({type,name,detail,tags})};
+   const add=(key,type,name,detail,tags=[],reason="直接一致")=>{const k=`${key}:${name}`;if(seen.has(k))return;seen.add(k);out.push({type,name,detail,tags,reason})};
    for(const r of (typeof CRAFT_RECIPE_DATA!=="undefined"?CRAFT_RECIPE_DATA:[]))
      if(r.name.toLowerCase().includes(q))add(`craft:${r.itemId}`,"制作",r.name,`${r.craft} Lv${r.level}`,[`#${r.craft}Lv${r.level}`,"#制作手帳"]);
+   if(typeof ensureIndex==="function")await ensureIndex();
+   const matchedItemIds=new Set();
+   if(typeof craftReverseIndex!=="undefined"&&craftReverseIndex?.items){
+     for(const [id,name] of Object.entries(craftReverseIndex.items))if(String(name).toLowerCase().includes(q))matchedItemIds.add(String(id));
+     const recipes=typeof CRAFT_RECIPE_DATA!=="undefined"?CRAFT_RECIPE_DATA:[];
+     for(const r of recipes){
+       const materials=craftReverseIndex.recipes?.[String(r.id)]||[];
+       const hits=materials.filter(m=>matchedItemIds.has(String(m.itemId))||String(m.name||"").toLowerCase().includes(q));
+       if(hits.length)add(`uses:${r.id}`,"使用レシピ",r.name,`${r.craft} Lv${r.level} ／ ${hits.map(m=>`${m.name} ×${m.amount}`).join("、")}`,["#素材逆引き",`#${r.craft}`],"検索素材を使用");
+     }
+   }
+   const relatedProductNames=new Set(out.filter(x=>x.type==="制作"||x.type==="使用レシピ").map(x=>x.name));
+   if(typeof guildleveData!=="undefined"&&Array.isArray(guildleveData)){
+     for(const l of guildleveData){
+       const deliveries=Array.isArray(l.deliveryItems)?l.deliveryItems:[];
+       const hit=deliveries.find(i=>String(i.name||i.itemName||i).toLowerCase().includes(q)||relatedProductNames.has(String(i.name||i.itemName||i)));
+       if(hit)add(`leve:${l.id}`,"ギルドリーヴ",l.name,`${l.classJob||l.category||""}${l.level?` Lv${l.level}`:""} ／ 納品：${String(hit.name||hit.itemName||hit)}`,["#ギルドリーヴ",`#${l.classJob||"制作"}`],"関連制作物を納品");
+     }
+   }
    for(const a of (typeof FF_HUNT_ACQ_PRESET!=="undefined"?FF_HUNT_ACQ_PRESET:[]))
      if(`${a.name} ${a.method} ${a.source} ${a.area}`.toLowerCase().includes(q))
        add(`acq:${a.name}`,"入手・交換",a.name,`${a.method||""}${a.area?` ／ ${a.area}`:""}${a.cost?` ／ ${a.currency||""} ${a.cost}`:""}`,[`#${a.itemType||"入手品"}`]);
@@ -10246,7 +10269,8 @@ initializePersistentData().then(()=>{renderPersistenceTest();
      if(String(m.name||"").toLowerCase().includes(q))add(`minion:${m.id}`,"ミニオン",m.name,"収集図鑑に登録済み",["#ミニオン"]);
    for(const m of (typeof MOUNT_DATA!=="undefined"?MOUNT_DATA:[]))
      if(String(m.name||"").toLowerCase().includes(q))add(`mount:${m.id}`,"マウント",m.name,"収集図鑑に登録済み",["#マウント"]);
-   box.innerHTML=out.length?out.slice(0,200).map(x=>`<div class="listitem"><div class="row"><b>${esc(x.name)}</b><span class="badge">${esc(x.type)}</span></div><div class="small">${esc(x.detail)}</div><div>${x.tags.map(t=>`<span class="badge">${esc(t)}</span>`).join(" ")}</div></div>`).join(""):'<div class="empty">該当する接続済みデータはありません。</div>';
+   const rank={"直接一致":0,"検索素材を使用":1,"関連制作物を納品":2};out.sort((a,b)=>(rank[a.reason]??9)-(rank[b.reason]??9)||a.name.localeCompare(b.name,"ja"));
+   box.innerHTML=out.length?`<div class="small" style="margin-bottom:8px">直接一致と関連データを合わせて ${out.length}件。</div>${out.slice(0,250).map(x=>`<div class="listitem"><div class="row"><b>${esc(x.name)}</b><span><span class="badge gold">${esc(x.reason)}</span> <span class="badge">${esc(x.type)}</span></span></div><div class="small">${esc(x.detail)}</div><div>${x.tags.map(t=>`<span class="badge">${esc(t)}</span>`).join(" ")}</div></div>`).join("")}`:'<div class="empty">該当する直接・関連データはありません。</div>';
  }
 
  function bind(){
@@ -10305,7 +10329,8 @@ function bind(){if(!$k("knowledgeBase"))return;migrateVideos();$k("kbNewPage").o
 window.HikachokuWiki=Object.freeze({version:1,listPages:()=>structuredClone(pages()),getPage:id=>structuredClone(page(id)||null),createPage:seed=>structuredClone(createPage(seed)),updatePage:(id,patch)=>{const x=page(id);if(!x)throw new Error("Page not found");Object.assign(x,patch,{updatedAt:Date.now()});persist();renderAll();return structuredClone(x)},addBlock:(id,type,value={})=>{const x=page(id);if(!x)throw new Error("Page not found");const b=newBlock(type,value);x.blocks.push(b);persist();renderAll();return structuredClone(b)}});
 function bindProgressControls(){const update=()=>{const x=page();if(!x)return;normalizePage(x);x.progress={...x.progress,mode:$k("kbProgressMode").value,current:Number($k("kbProgressCurrent").value)||0,target:Number($k("kbProgressTarget").value)||0,unit:$k("kbProgressUnit").value.trim()};x.updatedAt=Date.now();persist();renderProgress();renderTree()};$k("kbProgressMode")?.addEventListener("change",update);["kbProgressCurrent","kbProgressTarget","kbProgressUnit"].forEach(id=>$k(id)?.addEventListener("input",update));$k("kbBlocks")?.addEventListener("change",event=>{if(event.target?.dataset?.kbField==="checked")setTimeout(renderProgress,0)});let titleTimer=0;const title=$k("kbTitle");if(title){title.oninput=()=>{const x=page();if(!x)return;x.title=title.value;x.updatedAt=Date.now();persist();clearTimeout(titleTimer);titleTimer=setTimeout(renderTree,250)};title.onblur=()=>{const x=page();if(!x)return;if(!title.value.trim()){title.value="無題";x.title="無題"}else x.title=title.value.trim();x.updatedAt=Date.now();persist();renderTree()};title.onkeydown=event=>{if(event.key==="Enter"){event.preventDefault();title.blur();$k("kbBlocks")?.querySelector("textarea,input[type='text']")?.focus()}}}}
 function bindDailyLogs(){if($k("kbLogDate"))$k("kbLogDate").value=new Date().toLocaleDateString("sv-SE");$k("kbLogAdd")?.addEventListener("click",()=>{const x=page();if(!x)return;normalizePage(x);const date=$k("kbLogDate").value,value=Number($k("kbLogValue").value),memo=$k("kbLogMemo").value.trim();if(!date||!Number.isFinite(value)||value<0){alert("日付と0以上の数量を入力してください。");return}x.progress.logs.push({id:uid(),date,value,memo,createdAt:Date.now()});x.updatedAt=Date.now();$k("kbLogMemo").value="";persist();renderProgress();renderTree()});$k("kbLogFormula")?.addEventListener("input",()=>{const x=page();if(!x)return;normalizePage(x);x.progress.formula=$k("kbLogFormula").value;x.updatedAt=Date.now();persist();try{const value=formulaValue(x.progress.formula,logMetrics(x));$k("kbLogFormulaResult").textContent=value===null?"計算式なし":`式の結果：${value.toLocaleString("ja-JP")}`}catch(error){$k("kbLogFormulaResult").textContent=`式エラー：${error.message}`}})}
-function startWiki(){bind();const existing=pages();if(!existing.length)createPage({title:"討伐・周回記録",icon:"⚔️",category:"攻略",status:"active",progress:{mode:"logs",current:0,target:100,unit:"体",logs:[],formula:"remaining / average"},blocks:[newBlock("heading",{text:"今日の記録"}),newBlock("paragraph",{text:"上の「日別実績」に日付・数量・メモを入力すると、累計・残数・達成率が自動計算されます。"})]});else if(!page())selectedId=String([...existing].sort((a,b)=>Number(b.updatedAt)-Number(a.updatedAt))[0].id);bindProgressControls();bindDailyLogs();renderAll()}
+function bindRelatedSearch(){$k("kbSearch")?.addEventListener("keydown",event=>{if(event.key!=="Enter")return;event.preventDefault();const q=$k("kbSearch").value.trim();if(!q)return;if(typeof switchView==="function")switchView("eorzeaHub");setTimeout(()=>{const input=document.getElementById("hubItemSearch");if(input)input.value=q;document.getElementById("hubItemRun")?.click()},0)})}
+function startWiki(){bind();const existing=pages();if(!existing.length)createPage({title:"討伐・周回記録",icon:"⚔️",category:"攻略",status:"active",progress:{mode:"logs",current:0,target:100,unit:"体",logs:[],formula:"remaining / average"},blocks:[newBlock("heading",{text:"今日の記録"}),newBlock("paragraph",{text:"上の「日別実績」に日付・数量・メモを入力すると、累計・残数・達成率が自動計算されます。"})]});else if(!page())selectedId=String([...existing].sort((a,b)=>Number(b.updatedAt)-Number(a.updatedAt))[0].id);bindProgressControls();bindDailyLogs();bindRelatedSearch();renderAll()}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",startWiki,{once:true});else startWiki();
 })();
 </script>
