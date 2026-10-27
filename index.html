@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261027-hikachoku-unified-pages-v32" name="eorzea-archive-build"/><style data-bundled-from="assets/css/app.css">
+<meta content="20261027-hikachoku-unified-pages-fix-v33" name="eorzea-archive-build"/><style data-bundled-from="assets/css/app.css">
 
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -1366,7 +1366,7 @@ body.hikachoku-theme{
 <section class="view" id="knowledgeBase">
 <div class="kb-shell">
 <aside class="kb-pages card">
-<div class="row"><b>ヒカチョク アチーブメントWiki</b><span class="small">分類内の「＋ページ」から作成</span></div>
+<div class="row"><b>ヒカチョク アチーブメントWiki</b><span class="small">分類内の「＋ページ」から作成</span><button id="kbNewPage" type="button" hidden aria-hidden="true"></button></div>
 <input id="kbSearch" type="search" placeholder="ページ検索／Enterで制作関連検索" aria-label="記事と関連データを検索"/>
 <select id="kbSort" aria-label="ページの並び順"><option value="updated">更新が新しい順</option><option value="created">作成が新しい順</option><option value="title">名前順</option></select>
 <div class="kb-filter-row"><button class="ghost active" data-kb-filter="all" type="button">すべて</button><button class="ghost" data-kb-filter="tasks" type="button">未完了</button><button class="ghost" data-kb-filter="favorites" type="button">★</button></div>
