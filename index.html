@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261031-hikachoku-diary-precise-filter-v98" name="eorzea-archive-build"/><style data-bundled-from="assets/css/app.css">
+<meta content="20261031-hikachoku-lodestone-achievement-lock-v99" name="eorzea-archive-build"/><style data-bundled-from="assets/css/app.css">
 
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -8345,7 +8345,7 @@ function normalizeLodestoneId(value){
 }
 function lodestoneUrls(id){
  const base=`https://jp.finalfantasyxiv.com/lodestone/character/${id}/`;
- return {profile:base,jobs:base+"class_job/"};
+ return {profile:base,jobs:base+"class_job/",achievements:base+"achievement/"};
 }
 const EORZEA_LODESTONE_PROXY_KEY="eorzea_lodestone_proxy_v1";
 function normalizeWorkerUrl(value){
@@ -8513,6 +8513,28 @@ function parseLodestoneJobsHtml(html){
  }
  return out;
 }
+function parseLodestoneAchievementHtml(html){
+ const doc=new DOMParser().parseFromString(html,"text/html"),rows=[];
+ for(const entry of doc.querySelectorAll("a.entry__achievement")){
+  const match=String(entry.getAttribute("href")||"").match(/\/achievement\/detail\/(\d+)\//),script=[...entry.querySelectorAll("script")].map(node=>node.textContent||"").join("\n"),stamp=script.match(/ldst_strftime\((\d+)\s*,\s*['\"]YMD['\"]\)/);
+  if(!match||!stamp)continue;
+  const epoch=Number(stamp[1]),date=new Date(epoch*1000).toLocaleDateString("sv-SE",{timeZone:"Asia/Tokyo"});
+  rows.push({id:String(match[1]),date,doneAt:epoch*1000});
+ }
+ const text=doc.body?.innerText||"",pages=text.match(/\d+ページ\s*\/\s*(\d+)ページ/);
+ return {rows,pageCount:Math.max(1,Number(pages?.[1])||1)};
+}
+async function fetchLodestoneAchievementHistory(url,status){
+ const first=await fetchTextWithFallback(url),parsed=parseLodestoneAchievementHtml(first.text),byId=new Map(parsed.rows.map(row=>[row.id,row]));
+ const total=Math.min(100,parsed.pageCount);
+ for(let start=2;start<=total;start+=5){
+  if(status)status.innerHTML=`<b>同期中…</b><div class='small'>Lodestoneのアチーブメント達成履歴 ${Math.min(total,start+4)} / ${total}ページを取得しています。</div>`;
+  const batch=[];
+  for(let page=start;page<=Math.min(total,start+4);page++)batch.push(fetchTextWithFallback(`${url}?page=${page}`).then(result=>parseLodestoneAchievementHtml(result.text).rows).catch(error=>{console.warn("Lodestone achievement page sync failed",page,error);return[]}));
+  for(const rows of await Promise.all(batch))for(const row of rows)byId.set(row.id,row);
+ }
+ return [...byId.values()];
+}
 function parseLegacyXivapiCharacter(j,id,url){
  const c=j?.Character||j?.character||j;
  if(!c||typeof c!=="object")return null;
@@ -8607,7 +8629,7 @@ async function syncLodestoneProfile(){
  if(!id){alert("Lodestone IDかキャラクターページURLを入力してください");return}
  const urls=lodestoneUrls(id);
  if(status)status.innerHTML="<b>同期中…</b><div class='small'>Lodestoneの公開プロフィールを取得しています。</div>";
- let character=null,jobs=[],source="",errors=[];
+ let character=null,jobs=[],achievementHistory=[],source="",errors=[];
  try{
   const p=await fetchTextWithFallback(urls.profile);
   const parsed=parseLodestoneProfileHtml(p.text,id,urls.profile);
@@ -8620,6 +8642,12 @@ async function syncLodestoneProfile(){
   }catch(e){
    errors.push("jobs");
    console.warn("Lodestone jobs sync failed",e);
+  }
+  try{
+   achievementHistory=await fetchLodestoneAchievementHistory(urls.achievements,status);
+  }catch(e){
+   errors.push("achievements");
+   console.warn("Lodestone achievement history sync failed",e);
   }
  }catch(e){
   errors.push("profile");
@@ -8639,12 +8667,22 @@ async function syncLodestoneProfile(){
  p.profileUrl=urls.profile;
  p.character=character;
  if(jobs.length)p.jobs=jobs;
+ d.achievementProgress=d.achievementProgress||{};
+ for(const completed of achievementHistory){
+  const state=d.achievementProgress[completed.id]||{done:false,date:"",note:"",checklist:[],tags:[]};
+  state.done=true;
+  state.date=completed.date;
+  state.doneAt=completed.doneAt;
+  state.lodestoneCompleted=true;
+  state.lodestoneSyncedAt=Date.now();
+  d.achievementProgress[completed.id]=state;
+ }
  p.lastFetchedAt=Date.now();
  p.source=source+(jobs.length?"":"（ジョブ情報は前回値を保持）");
  save(d);
  if(input)input.value=id;
  renderFFProfile();renderFF14();
- if(status)status.innerHTML=`<b>✓ Lodestone同期完了</b><div class="small">${esc(source)}${jobs.length?` ／ ジョブ ${jobs.length}件`:" ／ ジョブ情報は取得できなかったため前回値を保持"}</div>`;
+ if(status)status.innerHTML=`<b>✓ Lodestone同期完了</b><div class="small">${esc(source)}${jobs.length?` ／ ジョブ ${jobs.length}件`:" ／ ジョブ情報は取得できなかったため前回値を保持"}${achievementHistory.length?` ／ 達成アチーブ ${achievementHistory.length.toLocaleString("ja-JP")}件（日付反映・過去分ロック）`:" ／ アチーブ履歴は非公開または取得できないため前回値を保持"}</div>`;
 }
 function renderFFProfile(options={}){
  const box=$("ffProfileCard"),status=$("ffProfileSyncStatus");if(!box)return;
