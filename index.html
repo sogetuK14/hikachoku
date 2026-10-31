@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261031-hikachoku-lodestone-achievement-lock-v99" name="eorzea-archive-build"/><style data-bundled-from="assets/css/app.css">
+<meta content="20261031-hikachoku-lodestone-achievement-sync-v100" name="eorzea-archive-build"/><style data-bundled-from="assets/css/app.css">
 
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -8365,6 +8365,7 @@ function saveLodestoneProxyUrl(value){
 function buildLodestoneProxyRequest(url){
  const proxy=lodestoneProxyUrl();
  if(!proxy)return "";
+ if(/\/achievement\//i.test(String(url||"")))return "";
  const m=String(url||"").match(/\/lodestone\/character\/(\d+)\/(class_job\/)?/i);
  if(!m)return "";
  const id=m[1],page=m[2]?"class_job":"profile";
@@ -8380,8 +8381,10 @@ function looksLikeLodestoneHtml(text){
 }
 async function fetchTextWithFallback(url){
  const proxyRequest=buildLodestoneProxyRequest(url);
+ const readableMirror=/\/achievement\//i.test(String(url||""))?`https://r.jina.ai/http://${String(url).replace(/^https?:\/\//i,"")}`:"";
  const attempts=[
   ...(proxyRequest?[{name:"eorzea-worker",url:proxyRequest}]:[]),
+  ...(readableMirror?[{name:"lodestone-readable",url:readableMirror}]:[]),
   {name:"direct",url}
  ];
  let lastErr=null;
@@ -8521,17 +8524,27 @@ function parseLodestoneAchievementHtml(html){
   const epoch=Number(stamp[1]),date=new Date(epoch*1000).toLocaleDateString("sv-SE",{timeZone:"Asia/Tokyo"});
   rows.push({id:String(match[1]),date,doneAt:epoch*1000});
  }
- const text=doc.body?.innerText||"",pages=text.match(/\d+ページ\s*\/\s*(\d+)ページ/);
- return {rows,pageCount:Math.max(1,Number(pages?.[1])||1)};
+ const text=doc.body?.innerText||String(html||"");
+ for(const match of text.matchAll(/(\d{4})\/(\d{2})\/(\d{2})[^\n]*?\/achievement\/detail\/(\d+)\//g)){
+  const date=`${match[1]}-${match[2]}-${match[3]}`,doneAt=new Date(`${date}T00:00:00+09:00`).getTime();
+  if(!rows.some(row=>row.id===String(match[4])))rows.push({id:String(match[4]),date,doneAt});
+ }
+ const pages=text.match(/\d+ページ\s*\/\s*(\d+)ページ/),total=text.match(/(?:^|\n)([\d,]+)\s*件(?:\n|$)/);
+ return {rows,pageCount:Math.max(1,Number(pages?.[1])||Math.ceil(Number(String(total?.[1]||"0").replace(/,/g,""))/50)||1)};
+}
+function parseLodestoneAchievementDetail(text,id,name=""){
+ const source=String(text||""),escaped=String(name||"").replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),named=escaped?source.match(new RegExp(`(?:^|\\n)${escaped}\\s*\\n(\\d{4})\\/(\\d{2})\\/(\\d{2})(?:\\n|$)`)):null,generic=source.match(/(?:^|\n)(\d{4})\/(\d{2})\/(\d{2})(?:\n|$)/),match=named||generic;
+ if(!match)return null;
+ const date=`${match[1]}-${match[2]}-${match[3]}`;
+ return {id:String(id),date,doneAt:new Date(`${date}T00:00:00+09:00`).getTime()};
 }
 async function fetchLodestoneAchievementHistory(url,status){
  const first=await fetchTextWithFallback(url),parsed=parseLodestoneAchievementHtml(first.text),byId=new Map(parsed.rows.map(row=>[row.id,row]));
- const total=Math.min(100,parsed.pageCount);
- for(let start=2;start<=total;start+=5){
-  if(status)status.innerHTML=`<b>同期中…</b><div class='small'>Lodestoneのアチーブメント達成履歴 ${Math.min(total,start+4)} / ${total}ページを取得しています。</div>`;
-  const batch=[];
-  for(let page=start;page<=Math.min(total,start+4);page++)batch.push(fetchTextWithFallback(`${url}?page=${page}`).then(result=>parseLodestoneAchievementHtml(result.text).rows).catch(error=>{console.warn("Lodestone achievement page sync failed",page,error);return[]}));
-  for(const rows of await Promise.all(batch))for(const row of rows)byId.set(row.id,row);
+ const owner=typeof page==="function"?page():null,db=typeof ACHIEVEMENT_DB!=="undefined"?ACHIEVEMENT_DB:[],ids=[...new Set([...(owner?.sourceAchievementId?[String(owner.sourceAchievementId)]:[]),...(owner?.linkedAchievementIds||[]).map(String)])].filter(id=>!byId.has(id));
+ for(let start=0;start<ids.length;start+=5){
+  if(status)status.innerHTML=`<b>同期中…</b><div class='small'>開いている記事のアチーブメント達成日 ${Math.min(ids.length,start+5)} / ${ids.length}件を照合しています。</div>`;
+  const batch=ids.slice(start,start+5).map(id=>{const achievement=db.find(item=>String(item.id)===id),detailUrl=url+`detail/${encodeURIComponent(id)}/`;return fetchTextWithFallback(detailUrl).then(result=>parseLodestoneAchievementDetail(result.text,id,achievement?.name||"")).catch(error=>{console.warn("Lodestone achievement detail sync failed",id,error);return null})});
+  for(const row of await Promise.all(batch))if(row)byId.set(row.id,row);
  }
  return [...byId.values()];
 }
