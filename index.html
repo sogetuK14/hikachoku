@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261102-hikachoku-diary-indexeddb-v125" name="eorzea-archive-build"/>
+<meta content="20261102-hikachoku-lodestone-fallback-v126" name="eorzea-archive-build"/>
 <style data-feature="hikachoku-notion-canvas-compact">
 .hikachoku-theme .kb-blocks{min-height:0!important;padding:10px 4px!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .hikachoku-theme .kb-block{grid-template-columns:22px minmax(0,1fr) 26px!important;gap:3px!important;margin:0!important;padding:0 2px!important;min-height:32px!important;align-items:center!important}
@@ -8418,22 +8418,22 @@ function lodestoneUrls(id){
  return {profile:base,jobs:base+"class_job/",achievements:base+"achievement/"};
 }
 const EORZEA_LODESTONE_PROXY_KEY="eorzea_lodestone_proxy_v1";
+const EORZEA_LODESTONE_DEFAULT_PROXY="https://eorzea-lodestone-proxy.sakumeru.workers.dev";
 function normalizeWorkerUrl(value){
  let v=String(value||"").trim();
  if(v&&!/^https?:\/\//i.test(v))v="https://"+v;
  return v.replace(/\/+$/,"");
 }
 function lodestoneProxyUrl(){
- return normalizeWorkerUrl(localStorage.getItem(EORZEA_LODESTONE_PROXY_KEY)||"");
+ let saved="";try{saved=localStorage.getItem(EORZEA_LODESTONE_PROXY_KEY)||""}catch{}
+ return normalizeWorkerUrl(saved)||EORZEA_LODESTONE_DEFAULT_PROXY;
 }
 function saveLodestoneProxyUrl(value){
  const v=normalizeWorkerUrl(value);
- if(v)localStorage.setItem(EORZEA_LODESTONE_PROXY_KEY,v);
- else localStorage.removeItem(EORZEA_LODESTONE_PROXY_KEY);
+ try{if(v)localStorage.setItem(EORZEA_LODESTONE_PROXY_KEY,v);else localStorage.removeItem(EORZEA_LODESTONE_PROXY_KEY)}catch(error){console.warn("Worker URLを保存できないため標準接続先を使用します",error)}
  return v;
 }
-function buildLodestoneProxyRequest(url){
- const proxy=lodestoneProxyUrl();
+function buildLodestoneProxyRequest(url,proxy=lodestoneProxyUrl()){
  if(!proxy)return "";
  if(/\/achievement\//i.test(String(url||"")))return "";
  const m=String(url||"").match(/\/lodestone\/character\/(\d+)\/(class_job\/)?/i);
@@ -8451,9 +8451,11 @@ function looksLikeLodestoneHtml(text){
 }
 async function fetchTextWithFallback(url){
  const proxyRequest=buildLodestoneProxyRequest(url);
+ const defaultProxyRequest=buildLodestoneProxyRequest(url,EORZEA_LODESTONE_DEFAULT_PROXY);
  const readableMirror=/\/achievement\//i.test(String(url||""))?`https://r.jina.ai/http://${String(url).replace(/^https?:\/\//i,"")}`:"";
  const attempts=[
   ...(proxyRequest?[{name:"eorzea-worker",url:proxyRequest}]:[]),
+  ...(defaultProxyRequest&&defaultProxyRequest!==proxyRequest?[{name:"eorzea-default-worker",url:defaultProxyRequest}]:[]),
   ...(readableMirror?[{name:"lodestone-readable",url:readableMirror}]:[]),
   {name:"direct",url}
  ];
