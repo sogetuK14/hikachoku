@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261103-hikachoku-sync-retry-v136" name="eorzea-archive-build"/>
+<meta content="20261103-hikachoku-achievement-history-v137" name="eorzea-archive-build"/>
 <style data-feature="hikachoku-notion-canvas-compact">
 .hikachoku-theme .kb-blocks{min-height:0!important;padding:10px 4px!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .hikachoku-theme .kb-block{grid-template-columns:22px minmax(0,1fr) 26px!important;gap:3px!important;margin:0!important;padding:0 2px!important;min-height:32px!important;align-items:center!important}
@@ -8609,8 +8609,12 @@ function parseLodestoneAchievementHtml(html){
   const date=`${match[1]}-${match[2]}-${match[3]}`,doneAt=new Date(`${date}T00:00:00+09:00`).getTime();
   if(!rows.some(row=>row.id===String(match[4])))rows.push({id:String(match[4]),date,doneAt});
  }
+ // r.jina.ai returns Lodestone as Markdown.  Its list keeps detail links but
+ // removes the timestamp scripts, so retain those IDs and resolve their dates
+ // from the detail pages below.
+ const ids=[...new Set([...String(html||"").matchAll(/\/achievement\/detail\/(\d+)\//g)].map(match=>String(match[1])))];
  const pages=text.match(/\d+ページ\s*\/\s*(\d+)ページ/),total=text.match(/(?:^|\n)([\d,]+)\s*件(?:\n|$)/);
- return {rows,pageCount:Math.max(1,Number(pages?.[1])||Math.ceil(Number(String(total?.[1]||"0").replace(/,/g,""))/50)||1)};
+ return {rows,ids,pageCount:Math.max(1,Number(pages?.[1])||Math.ceil(Number(String(total?.[1]||"0").replace(/,/g,""))/50)||1)};
 }
 function parseLodestoneAchievementDetail(text,id,name=""){
  const source=String(text||""),escaped=String(name||"").replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),named=escaped?source.match(new RegExp(`(?:^|\\n)${escaped}\\s*\\n(\\d{4})\\/(\\d{2})\\/(\\d{2})(?:\\n|$)`)):null,generic=source.match(/(?:^|\n)(\d{4})\/(\d{2})\/(\d{2})(?:\n|$)/),match=named||generic;
@@ -8620,9 +8624,9 @@ function parseLodestoneAchievementDetail(text,id,name=""){
 }
 async function fetchLodestoneAchievementHistory(url,status){
  const first=await fetchTextWithFallback(url),parsed=parseLodestoneAchievementHtml(first.text),byId=new Map(parsed.rows.map(row=>[row.id,row]));
- const owner=typeof page==="function"?page():null,db=typeof ACHIEVEMENT_DB!=="undefined"?ACHIEVEMENT_DB:[],ids=[...new Set([...(owner?.sourceAchievementId?[String(owner.sourceAchievementId)]:[]),...(owner?.linkedAchievementIds||[]).map(String)])].filter(id=>!byId.has(id));
+ const owner=typeof page==="function"?page():null,db=typeof ACHIEVEMENT_DB!=="undefined"?ACHIEVEMENT_DB:[],ids=[...new Set([...(parsed.ids||[]).slice(0,50),...(owner?.sourceAchievementId?[String(owner.sourceAchievementId)]:[]),...(owner?.linkedAchievementIds||[]).map(String)])].filter(id=>!byId.has(id));
  for(let start=0;start<ids.length;start+=5){
-  if(status)status.innerHTML=`<b>同期中…</b><div class='small'>開いている記事のアチーブメント達成日 ${Math.min(ids.length,start+5)} / ${ids.length}件を照合しています。</div>`;
+  if(status)status.innerHTML=`<b>同期中…</b><div class='small'>最近のアチーブメント達成日 ${Math.min(ids.length,start+5)} / ${ids.length}件を照合しています。</div>`;
   const batch=ids.slice(start,start+5).map(id=>{const achievement=db.find(item=>String(item.id)===id),detailUrl=url+`detail/${encodeURIComponent(id)}/`;return fetchTextWithFallback(detailUrl).then(result=>parseLodestoneAchievementDetail(result.text,id,achievement?.name||"")).catch(error=>{console.warn("Lodestone achievement detail sync failed",id,error);return null})});
   for(const row of await Promise.all(batch))if(row)byId.set(row.id,row);
  }
@@ -8776,7 +8780,7 @@ async function syncLodestoneProfile(){
  save(d);
  if(input)input.value=id;
  renderFFProfile();renderFF14();
- if(status)status.innerHTML=`<b>✓ プロフィール同期完了</b><div class="small"><span>${esc(source)}</span><span>${jobs.length?`ジョブ：${jobs.length}件更新`:"ジョブ：取得できず前回値を保持"}</span>${achievementHistory.length?`<span>アチーブ履歴：${achievementHistory.length.toLocaleString("ja-JP")}件更新</span>`:'<span class="ff-sync-warning">アチーブ履歴：取得できず前回値を保持（Lodestoneの公開設定をご確認ください）</span>'}</div>`;
+ if(status)status.innerHTML=`<b>✓ プロフィール同期完了</b><div class="small"><span>${esc(source)}</span><span>${jobs.length?`ジョブ：${jobs.length}件更新`:"ジョブ：取得できず前回値を保持"}</span>${achievementHistory.length?`<span>最近のアチーブ履歴：${achievementHistory.length.toLocaleString("ja-JP")}件更新</span>`:'<span class="ff-sync-warning">アチーブ履歴：達成日の照合結果が0件のため前回値を保持</span>'}</div>`;
 }
 function renderFFProfile(options={}){
  const box=$("ffProfileCard"),status=$("ffProfileSyncStatus");if(!box)return;
