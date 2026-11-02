@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261103-hikachoku-quest-tree-v135" name="eorzea-archive-build"/>
+<meta content="20261103-hikachoku-sync-retry-v136" name="eorzea-archive-build"/>
 <style data-feature="hikachoku-notion-canvas-compact">
 .hikachoku-theme .kb-blocks{min-height:0!important;padding:10px 4px!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .hikachoku-theme .kb-block{grid-template-columns:22px minmax(0,1fr) 26px!important;gap:3px!important;margin:0!important;padding:0 2px!important;min-height:32px!important;align-items:center!important}
@@ -8465,15 +8465,19 @@ async function fetchTextWithFallback(url){
  ];
  let lastErr=null;
  for(const a of attempts){
-  try{
-   const r=await fetch(a.url,{cache:"no-store",headers:{Accept:"text/html,text/plain,*/*"}});
-   if(!r.ok)throw new Error(`${a.name}: HTTP ${r.status}`);
-   const txt=await r.text();
-   if(looksLikeLodestoneHtml(txt))return {text:txt,source:a.name};
-   throw new Error(`${a.name}: Lodestone HTML not found`);
-  }catch(e){
-   lastErr=e;
-   console.warn("Lodestone fetch failed:",a.name,e);
+  for(let retry=0;retry<2;retry++){
+   try{
+    if(retry)await new Promise(resolve=>setTimeout(resolve,450));
+    const requestUrl=retry?`${a.url}${a.url.includes("?")?"&":"?"}_retry=${Date.now()}`:a.url;
+    const r=await fetch(requestUrl,{cache:"no-store",headers:{Accept:"text/html,text/plain,*/*"}});
+    if(!r.ok)throw new Error(`${a.name}: HTTP ${r.status}`);
+    const txt=await r.text();
+    if(looksLikeLodestoneHtml(txt))return {text:txt,source:a.name};
+    throw new Error(`${a.name}: Lodestone HTML not found`);
+   }catch(e){
+    lastErr=e;
+    console.warn("Lodestone fetch failed:",a.name,`attempt ${retry+1}`,e);
+   }
   }
  }
  if(!proxyRequest)throw new Error("Lodestone proxy is not configured");
@@ -8716,6 +8720,7 @@ async function testLodestoneWorker(){
 async function syncLodestoneProfile(){
  const input=$("ffLodestoneId"),status=$("ffProfileSyncStatus"),id=normalizeLodestoneId(input?.value);
  if(!id){alert("Lodestone IDかキャラクターページURLを入力してください");return}
+ window.__eorzeaLastLodestoneError=null;
  const urls=lodestoneUrls(id);
  if(status)status.innerHTML="<b>同期中…</b><div class='small'>Lodestoneの公開プロフィールを取得しています。</div>";
  let character=null,jobs=[],achievementHistory=[],source="",errors=[];
