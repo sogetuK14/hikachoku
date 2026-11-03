@@ -30,7 +30,7 @@
 
  function aggregate(job,remainingOnly){
    const d=state(),map=new Map();
-   const recipes=CRAFT_RECIPE_DATA.filter(r=>r.craft===job&&Number(r.level)>=1&&Number(r.level)<=100);
+   const recipes=CRAFT_RECIPE_DATA.filter(r=>r.craft===job&&Number(r.level)>=1&&Number(r.level)<=100&&(typeof craftIsStandardLogRecipe!=="function"||craftIsStandardLogRecipe(r)));
    const target=remainingOnly?recipes.filter(r=>!recipeDone(d,r.id)):recipes;
    let indexed=0;
    for(const r of target){

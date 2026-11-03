@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261103-hikachoku-blue-magic-sync-v140" name="eorzea-archive-build"/>
+<meta content="20261103-hikachoku-crafting-sections-v141" name="eorzea-archive-build"/>
 <style data-feature="hikachoku-notion-canvas-compact">
 .hikachoku-theme .kb-blocks{min-height:0!important;padding:10px 4px!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .hikachoku-theme .kb-block{grid-template-columns:22px minmax(0,1fr) 26px!important;gap:3px!important;margin:0!important;padding:0 2px!important;min-height:32px!important;align-items:center!important}
@@ -1536,7 +1536,7 @@ body.knowledge-workspace .app-shell{grid-template-columns:minmax(0,1fr)}body.kno
 </select></div>
 </div>
 <div class="craft-filter-strip" aria-label="制作手帳の追加絞り込み">
-<div><label>分類</label><select id="craftClassification"><option value="">すべて</option><option value="normal">通常</option><option value="secret">秘伝書</option><option value="cosmo">コスモ</option></select></div>
+<div><label>分類</label><select id="craftClassification"><option value="normal" selected>通常制作手帳</option><option value="secret">秘伝書</option><option value="event">イベント制作</option><option value="cosmo">コスモ</option><option value="">すべて</option></select></div>
 <div><label>関連</label><select id="craftRelated"><option value="">すべて</option><option value="leve">リーヴあり</option><option value="leveTodo">リーヴ未完了</option></select></div>
 <div><label>用途</label><select id="craftUsage"><option value="">すべて</option><option value="equipment">装備</option><option value="medicine">薬品</option><option value="food">食事</option><option value="housing">ハウジング</option><option value="material">素材</option><option value="other">その他</option></select></div>
 <div><label>用途の内訳</label><select id="craftUsageDetail" disabled><option value="">すべて</option></select></div>
@@ -5933,10 +5933,14 @@ function craftIsCosmo(recipe){
  const id=craftRecipeMeta(recipe).notebookId;
  return id>0&&typeof CRAFT_COSMO_NOTEBOOK_IDS!=="undefined"&&CRAFT_COSMO_NOTEBOOK_IDS.includes(id);
 }
+const CRAFT_EVENT_RECIPE_NAMES=new Set(["ヴァレンティオンケーキ"]);
+function craftIsEvent(recipe){return CRAFT_EVENT_RECIPE_NAMES.has(String(recipe?.name||""))}
+function craftIsStandardLogRecipe(recipe){return Number(recipe?.secret||0)===0&&!craftIsCosmo(recipe)&&!craftIsEvent(recipe)}
 function craftSecretName(recipe){return recipe.secret>0&&typeof CRAFT_SECRET_BOOK_NAMES!=="undefined"?(CRAFT_SECRET_BOOK_NAMES[recipe.secret]||""):""}
 function craftDisplayTags(recipe,linked){
  const tags=[`<span class="badge">${esc(craftUsageLabel(recipe))}</span>`],secretName=craftSecretName(recipe),meta=craftRecipeMeta(recipe);
  if(secretName)tags.push(`<span class="badge gold">${esc(secretName)}</span>`);
+ if(craftIsEvent(recipe))tags.push('<span class="badge gold">イベント制作</span>');
  if(craftIsCosmo(recipe))tags.push('<span class="badge purple">コスモ</span>');
  if(recipe.expert)tags.push('<span class="badge craft-expert">高難易度</span>');
  if(recipe.specialist)tags.push('<span class="badge craft-specialist">マイスター</span>');
@@ -5974,10 +5978,11 @@ function filteredCraftRecipes(index=craftLeveIndex()){
    ||(special==="facility"&&craftRecipeMeta(r).statusRequiredId>0)
    ||(special==="noquick"&&!r.quick);
   const linked=craftLinkedLeves(r,index),itemMeta=craftItemMeta(r.itemId),usageInfo=craftUsage(r),secretName=craftSecretName(r);
-  const isSecret=Number(r.secret)>0,isCosmo=craftIsCosmo(r);
+  const isSecret=Number(r.secret)>0,isCosmo=craftIsCosmo(r),isEvent=craftIsEvent(r);
   const classificationOk=!classification
-   ||(classification==="normal"&&!isSecret&&!isCosmo)
+   ||(classification==="normal"&&craftIsStandardLogRecipe(r))
    ||(classification==="secret"&&isSecret)
+   ||(classification==="event"&&isEvent)
    ||(classification==="cosmo"&&isCosmo);
   const relatedOk=!related
    ||(related==="leve"&&linked.length>0)
@@ -10816,7 +10821,7 @@ const renderLinkedCraftingIndividualBase=renderLinkedCrafting;
 renderLinkedCrafting=function(){
  const x=page(),db=typeof ACHIEVEMENT_DB!=="undefined"?ACHIEVEMENT_DB:[],achievement=x?.sourceAchievementId?db.find(a=>String(a.id)===String(x.sourceAchievementId)):null,match=String(achievement?.description||"").match(/レベル\s*(\d+)\s*[-～〜]\s*(\d+).*?([\d,]+)回製作/);
  if(!x||!achievement||achievement.kind!=="製作・採集"||!match){const result=renderLinkedCraftingIndividualBase();enhanceWikiCraftMaterials();return result}
- const min=Number(match[1]),max=Number(match[2]),target=Number(match[3].replace(/,/g,"")),job=CRAFT_ACHIEVEMENT_JOBS[achievement.category]||"",recipes=(typeof CRAFT_RECIPE_DATA!=="undefined"?CRAFT_RECIPE_DATA:[]).filter(r=>r.craft===job&&Number(r.level)>=min&&Number(r.level)<=max),panel=$k("kbLinkedCrafting"),list=$k("kbCraftList"),picker=$k("kbCraftPicker"),d=load(),key=`${achievement.category}:${min}-${max}`;
+ const min=Number(match[1]),max=Number(match[2]),target=Number(match[3].replace(/,/g,"")),job=CRAFT_ACHIEVEMENT_JOBS[achievement.category]||"",recipes=(typeof CRAFT_RECIPE_DATA!=="undefined"?CRAFT_RECIPE_DATA:[]).filter(r=>r.craft===job&&Number(r.level)>=min&&Number(r.level)<=max&&craftIsStandardLogRecipe(r)),panel=$k("kbLinkedCrafting"),list=$k("kbCraftList"),picker=$k("kbCraftPicker"),d=load(),key=`${achievement.category}:${min}-${max}`;
  d.craftingAchievementCounts=d.craftingAchievementCounts||{};const current=Math.max(0,Number(d.craftingAchievementCounts[key])||0);panel.hidden=false;$k("kbCraftAdd").hidden=true;picker.hidden=false;panel.querySelector(".small").textContent=`達成条件に該当するLv.${min}～${max}の${achievement.category}レシピを自動表示します。登録は不要です。`;picker.innerHTML='<div class="kb-auto-craft-toolbar"><input id="kbAutoCraftSearch" type="search" placeholder="このレベル帯の制作物を検索"><select id="kbAutoCraftState"><option value="">すべて</option><option value="todo">未制作</option><option value="done">制作済み</option></select></div>';
  const draw=()=>{const root=load(),q=($k("kbAutoCraftSearch")?.value||"").trim().toLocaleLowerCase("ja"),state=$k("kbAutoCraftState")?.value||"",value=Math.max(0,Number(root.craftingAchievementCounts?.[key])||0),remaining=Math.max(0,target-value),done=recipes.filter(r=>craftRecipeState(root,r.id).done).length,filtered=recipes.filter(r=>(!q||r.name.toLocaleLowerCase("ja").includes(q))&&(!state||(state==="done")===craftRecipeState(root,r.id).done));$k("kbCraftCount").textContent=`${value.toLocaleString("ja-JP")} / ${target.toLocaleString("ja-JP")}回`;list.className="kb-auto-craft-list";list.innerHTML=`<section class="kb-craft-band" style="padding:12px"><div class="kb-craft-band-progress"><div><b>${safeK(achievement.name)}</b><div class="small">${safeK(achievement.description)}</div></div><label>現在の制作回数<input id="kbIndividualCraftCount" type="number" min="0" step="1" value="${value}"></label><div class="stat">${value>=target?"達成済み":"残り"}<b>${value>=target?"✓":remaining.toLocaleString("ja-JP")+"回"}</b></div></div><div class="small" style="margin-bottom:8px">制作手帳の印：${done.toLocaleString("ja-JP")} / ${recipes.length.toLocaleString("ja-JP")}種</div><div class="kb-craft-band-recipes">${filtered.map(r=>{const st=craftRecipeState(root,r.id);return `<div class="kb-craft-row ${st.done?"is-done":""}"><input type="checkbox" data-kb-craft-done="${safeK(r.id)}" ${st.done?"checked":""}><span><b>${safeK(r.name)}</b><small>Lv.${Number(r.level||0)}${r.stars?` ★${r.stars}`:""}</small></span><span class="kb-craft-edit"><input data-kb-craft-note="${safeK(r.id)}" value="${safeK(st.note||"")}" placeholder="制作メモ"></span></div>`}).join("")||'<div class="small">該当する制作物はありません。</div>'}</div></section>`;enhanceWikiCraftMaterials(list);const count=$k("kbIndividualCraftCount");if(count)count.onchange=()=>{const data=load(),next=Math.max(0,Math.floor(Number(count.value)||0));data.craftingAchievementCounts=data.craftingAchievementCounts||{};data.craftingAchievementCounts[key]=next;data.achievementProgress=data.achievementProgress||{};const st=data.achievementProgress[String(achievement.id)]||{done:false,date:"",note:"",checklist:[],tags:[]},completed=next>=target;st.done=completed;if(completed){st.date=st.date||new Date().toLocaleDateString("sv-SE");st.doneAt=st.doneAt||Date.now()}else{st.date="";st.doneAt=0}data.achievementProgress[String(achievement.id)]=st;x.status=completed?"complete":"active";x.updatedAt=Date.now();recordWikiEdit(data,x,"craft-count");save(data);renderEditor();renderTree()}};
  draw();$k("kbAutoCraftSearch").oninput=draw;$k("kbAutoCraftState").onchange=draw;
