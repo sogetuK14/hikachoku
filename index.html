@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261103-hikachoku-quest-history-import-v139" name="eorzea-archive-build"/>
+<meta content="20261103-hikachoku-blue-magic-sync-v140" name="eorzea-archive-build"/>
 <style data-feature="hikachoku-notion-canvas-compact">
 .hikachoku-theme .kb-blocks{min-height:0!important;padding:10px 4px!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .hikachoku-theme .kb-block{grid-template-columns:22px minmax(0,1fr) 26px!important;gap:3px!important;margin:0!important;padding:0 2px!important;min-height:32px!important;align-items:center!important}
@@ -6702,7 +6702,8 @@ async function syncFFXIVCollectOwnership(){
   ["emotes","エモート"],
   ["facewear","フェイスアクセ"],
   ["cards","トリプルトライアドカード"],
-  ["orchestrions","オーケストリオン譜"]
+  ["orchestrions","オーケストリオン譜"],
+  ["spells","青魔法"]
  ];
 
  let total=0;
@@ -6744,7 +6745,7 @@ async function syncFFXIVCollectOwnership(){
  renderFFXIVCollectHub();
  renderFFSummary();
 
- const manual=["クエスト","ヘアカタログ","ポートレート","青魔法"];
+ const manual=["クエスト","ヘアカタログ","ポートレート"];
  const result=`<b>✓ 所持状況を同期</b>　${total}件<div class="small">${rows.map(esc).join(" ／ ")}</div><div class="small">HTML読込または手動管理：${manual.join("・")}</div>`;
  if(st)st.innerHTML=result;
  if(overviewStatus)overviewStatus.innerHTML=result;
