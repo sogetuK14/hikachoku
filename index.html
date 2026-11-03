@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261103-hikachoku-collection-sync-v138" name="eorzea-archive-build"/>
+<meta content="20261103-hikachoku-quest-history-import-v139" name="eorzea-archive-build"/>
 <style data-feature="hikachoku-notion-canvas-compact">
 .hikachoku-theme .kb-blocks{min-height:0!important;padding:10px 4px!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .hikachoku-theme .kb-block{grid-template-columns:22px minmax(0,1fr) 26px!important;gap:3px!important;margin:0!important;padding:0 2px!important;min-height:32px!important;align-items:center!important}
@@ -1211,7 +1211,7 @@ body.knowledge-workspace .app-shell{grid-template-columns:minmax(0,1fr)}body.kno
 <div class="section-kicker">OFFICIAL PROFILE SYNC</div>
 <div class="row">
 <div><h2>🪪 Lodestoneプロフィール</h2></div>
-<div class="wrap"><button class="primary" id="ffProfileSync">公開プロフィールを同期</button><button class="secondary" id="ffOverviewCollectionSync">収集状況を同期</button><button class="secondary" id="ffProfileOpen">Lodestoneを開く</button></div>
+<div class="wrap"><button class="primary" id="ffProfileSync">公開プロフィールを同期</button><button class="secondary" id="ffOverviewCollectionSync">収集状況を同期</button><button class="secondary" id="ffQuestHistoryImportButton">クエスト履歴HTMLを読み込む</button><input id="ffQuestHistoryImport" type="file" accept=".html,.htm,text/html" multiple hidden><button class="secondary" id="ffProfileOpen">Lodestoneを開く</button></div>
 </div>
 <div class="ff-profile-controls">
 <div><label>Lodestone ID / キャラクターURL</label><input id="ffLodestoneId" placeholder="例：12345678 または https://jp.finalfantasyxiv.com/lodestone/character/12345678/"/></div>
@@ -6641,6 +6641,48 @@ document.querySelectorAll(".fcTriadJump").forEach(btn=>btn.onclick=()=>{
  const el=$("triadCollectionHome");if(el)el.scrollIntoView({behavior:"smooth",block:"start"});
 });
 
+function questImportName(value){return String(value||"").normalize("NFKC").replace(/[\s\u3000]+/g," ").trim()}
+function questImportDate(value){
+ const text=String(value||""),match=text.match(/(20\d{2})[\/年.-](\d{1,2})[\/月.-](\d{1,2})(?:日)?/);
+ return match?`${match[1]}-${String(match[2]).padStart(2,"0")}-${String(match[3]).padStart(2,"0")}`:"";
+}
+function parseQuestHistoryHtml(html){
+ const doc=new DOMParser().parseFromString(String(html||""),"text/html"),db=typeof QUEST_DB!=="undefined"?QUEST_DB:[],byName=new Map();
+ db.forEach(quest=>{const key=questImportName(quest.name);if(key&&!byName.has(key))byName.set(key,[]);if(key)byName.get(key).push(quest)});
+ const found=new Map(),nodes=doc.querySelectorAll("a,dt,dd,li,h1,h2,h3,h4,strong,b,span,p,td");
+ for(const node of nodes){
+  const key=questImportName(node.textContent);
+  if(!byName.has(key))continue;
+  let date="",scope=node;
+  for(let depth=0;scope&&depth<6;depth++,scope=scope.parentElement){date=questImportDate(scope.textContent);if(date)break}
+  for(const quest of byName.get(key))if(!found.has(String(quest.id))||date)found.set(String(quest.id),{id:String(quest.id),name:quest.name,date});
+ }
+ // Saved pages occasionally flatten each record into a text line. Use exact
+ // quest-name matching there as a fallback without guessing partial names.
+ for(const line of String(doc.body?.innerText||"").split(/\r?\n/).map(value=>value.trim()).filter(Boolean)){
+  const date=questImportDate(line);
+  for(const [name,quests] of byName){
+   if(line===name||line.endsWith(name)||line.includes(`「${name}」`))for(const quest of quests)if(!found.has(String(quest.id)))found.set(String(quest.id),{id:String(quest.id),name:quest.name,date});
+  }
+ }
+ return [...found.values()];
+}
+async function importQuestHistoryFiles(files){
+ const status=$("ffOverviewCollectionStatus"),list=[...(files||[])];if(!list.length)return;
+ if(status)status.innerHTML="<b>クエスト履歴を照合中…</b>";
+ const merged=new Map();
+ for(const file of list){const rows=parseQuestHistoryHtml(await file.text());for(const row of rows){const old=merged.get(row.id);if(!old||row.date)merged.set(row.id,row)}}
+ const d=load();d.questProgress=d.questProgress&&typeof d.questProgress==="object"?d.questProgress:{};let added=0,updated=0;
+ for(const row of merged.values()){
+  const state=d.questProgress[row.id]||{done:false,date:"",memo:""},wasDone=state.done===true;
+  state.done=true;if(row.date)state.date=row.date;state.lodestoneImported=true;state.lodestoneImportedAt=Date.now();state.syncSource="Lodestone HTML";d.questProgress[row.id]=state;
+  if(wasDone)updated++;else added++;
+  for(const record of (d.wikiPages||[]).filter(page=>String(page.questRecordId||"")===row.id)){record.status="complete";record.updatedAt=Date.now()}
+ }
+ save(d);renderFF14();if(typeof renderQuestLedger==="function")renderQuestLedger();if(typeof renderTree==="function")renderTree();
+ if(status)status.innerHTML=merged.size?`<b>✓ クエスト履歴を読み込みました</b><div class="small">照合 ${merged.size.toLocaleString("ja-JP")}件 ／ 新規完了 ${added.toLocaleString("ja-JP")}件 ／ 既存更新 ${updated.toLocaleString("ja-JP")}件</div>`:'<b>⚠ クエストを照合できませんでした</b><div class="small">Lodestoneでクエストコンプリート一覧を表示した状態のHTMLを選択してください。</div>';
+}
+
 async function syncFFXIVCollectOwnership(){
  const btn=$("ffxivCollectOwnershipSync"),overviewBtn=$("ffOverviewCollectionSync"),st=$("ffxivCollectOwnershipStatus"),overviewStatus=$("ffOverviewCollectionStatus");
  const d=load(),p=ffProfileData(d);
@@ -10265,6 +10307,8 @@ if($("ffxivCollectCatalogSync"))$("ffxivCollectCatalogSync").onclick=syncFFXIVCo
 if($("ffxivCollectJapaneseSync"))$("ffxivCollectJapaneseSync").onclick=syncFFXIVCollectJapaneseDescriptions;
 if($("ffxivCollectOwnershipSync"))$("ffxivCollectOwnershipSync").onclick=syncFFXIVCollectOwnership;
 if($("ffOverviewCollectionSync"))$("ffOverviewCollectionSync").onclick=syncFFXIVCollectOwnership;
+if($("ffQuestHistoryImportButton"))$("ffQuestHistoryImportButton").onclick=()=>$("ffQuestHistoryImport")?.click();
+if($("ffQuestHistoryImport"))$("ffQuestHistoryImport").onchange=async event=>{await importQuestHistoryFiles(event.target.files);event.target.value=""};
 if($("fcExplorerKind"))$("fcExplorerKind").onchange=renderFCExplorer;$("fcExplorerSort").onchange=renderFCExplorer;
 if($("fcExplorerSearch"))$("fcExplorerSearch").oninput=renderFCExplorer;
 if($("fcExplorerStatus"))$("fcExplorerStatus").onchange=renderFCExplorer;
