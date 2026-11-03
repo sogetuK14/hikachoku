@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261103-hikachoku-separate-quest-view-v144" name="eorzea-archive-build"/>
+<meta content="20261103-hikachoku-diary-completed-quests-v146" name="eorzea-archive-build"/>
 <style data-feature="hikachoku-notion-canvas-compact">
 .hikachoku-theme .kb-blocks{min-height:0!important;padding:10px 4px!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .hikachoku-theme .kb-block{grid-template-columns:22px minmax(0,1fr) 26px!important;gap:3px!important;margin:0!important;padding:0 2px!important;min-height:32px!important;align-items:center!important}
@@ -1188,8 +1188,8 @@ body.knowledge-workspace .app-shell{grid-template-columns:minmax(0,1fr)}body.kno
 <section class="panel">
 <h2>＋ すぐ記録する</h2>
 <label>タイトル</label><input id="nmTitle" maxlength="100" placeholder="例：黄金の夕暮れ／零式3層クリア"/>
-<label>メモ</label><textarea id="nmMemo" rows="5" placeholder="何があったか、次にすること、感想など"></textarea>
-<div><label>日時</label><input id="nmDate" type="datetime-local"/></div>
+<label>その日の出来事</label><textarea id="nmMemo" rows="7" placeholder="今日あったこと、進めたクエスト、気づいたこと、次にすることなど"></textarea>
+<div><label>日付</label><input id="nmDate" type="date"/></div>
 <label>タグ</label><input id="nmTags" placeholder="カンマ区切り：風景, 零式, 思い出"/>
 <label>スクリーンショット（複数可）</label><input id="nmFiles" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple/>
 <div class="small" id="nmFileStatus">画像なしでもメモだけ保存できます。</div>
@@ -10677,6 +10677,8 @@ function accurateEditResultsHtml(date){const edited=editedPagesOn(date),events=m
 const accurateDiaryHtmlCache=new Map();let accurateDiaryCacheQueued=false;
 function cachedAccurateEditResultsHtml(date){const key=String(date||"");if(accurateDiaryHtmlCache.has(key))return accurateDiaryHtmlCache.get(key);const html=accurateEditResultsHtml(key);accurateDiaryHtmlCache.set(key,html);if(!accurateDiaryCacheQueued){accurateDiaryCacheQueued=true;queueMicrotask(()=>{accurateDiaryHtmlCache.clear();accurateDiaryCacheQueued=false})}return html}
 editResultsHtml=cachedAccurateEditResultsHtml;
+function completedQuestsOn(date){const root=load(),progress=root.questProgress&&typeof root.questProgress==="object"?root.questProgress:{},db=typeof QUEST_DB!=="undefined"?QUEST_DB:[];return db.filter(quest=>{const state=progress[String(quest.id)]||{};return state.done===true&&String(state.date||"")===String(date||"")}).sort((a,b)=>questOfficialSection(a).localeCompare(questOfficialSection(b),"ja",{numeric:true})||String(a.category||"").localeCompare(String(b.category||""),"ja",{numeric:true})||Number(a.id)-Number(b.id))}
+const editResultsWithCompletedQuestsBase=editResultsHtml;editResultsHtml=function(date){const base=editResultsWithCompletedQuestsBase(date),quests=completedQuestsOn(date);if(!quests.length)return base;const rows=quests.map(quest=>{const state=load().questProgress?.[String(quest.id)]||{};return `<div class="kb-diary-achievement is-done"><div><b>✓ ${safeK(quest.name)}</b><small>📜 ${safeK(questOfficialSection(quest))} → ${safeK(quest.category||"その他")}</small></div><b>${safeK(state.date||date)}</b></div>`}).join("");return `${base}<div class="kb-diary-achievements kb-diary-completed-quests"><strong>📜 この日に達成したクエスト ${quests.length.toLocaleString("ja-JP")}件</strong>${rows}</div>`};
 window.HikachokuRollups=Object.freeze({dailyHtml:date=>editResultsHtml(String(date||"")),openPage:id=>{const x=page(id);if(!x)return false;selectedId=String(x.id);if(typeof switchView==="function")switchView("knowledgeBase");renderAll();return true}});
 function renderDailyJournal(){return}
 function bindActivityDiary(){const date=$k("kbDiaryDate");if(!date)return;date.value=new Date().toLocaleDateString("sv-SE");const refresh=()=>{if(wikiMode==="diary")renderDiary()};window.addEventListener("hikachoku:notes-ready",refresh);window.addEventListener("hikachoku:notes-changed",refresh);$k("kbDiarySave").onclick=async()=>{const files=[...($k("kbDiaryImages").files||[])],title=$k("kbDiaryTitle").value.trim(),text=$k("kbDiaryText").value.trim(),tags=$k("kbDiaryTags").value.trim();if(!date.value){alert("日付を入力してください。");return}if(!title&&!text&&!files.length){alert("日記かスクリーンショットを入力してください。");return}if(!window.HikachokuNotesMedia?.save){alert("SS・メモを読み込み中です。少し待ってからもう一度保存してください。");return}$k("kbDiarySave").disabled=true;$k("kbDiarySave").textContent="保存中…";try{await window.HikachokuNotesMedia.save({date:date.value,title,text,tags,files});$k("kbDiaryTitle").value="";$k("kbDiaryText").value="";$k("kbDiaryTags").value="";$k("kbDiaryImages").value="";renderDiary()}catch(error){alert(`保存できませんでした：${error.message}`)}finally{$k("kbDiarySave").disabled=false;$k("kbDiarySave").textContent="日記とSSを保存"}}}
@@ -10973,9 +10975,9 @@ async function removeNoteImages(noteId){const db=await openDb();return new Promi
 
 function localDateInput(time=Date.now()){
  const source=new Date(time),d=new Date(time-source.getTimezoneOffset()*60000);
- return d.toISOString().slice(0,16);
+ return d.toISOString().slice(0,10);
 }
-function formatDate(time){return new Date(time||Date.now()).toLocaleString("ja-JP",{year:"numeric",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}
+function formatDate(time){return new Date(time||Date.now()).toLocaleDateString("ja-JP",{year:"numeric",month:"short",day:"numeric"})}
 function tagsOf(value){return [...new Set(String(value||"").split(/[,、]/).map(v=>v.trim()).filter(Boolean))]}
 function dayKey(time){const d=new Date(time||Date.now());return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 
@@ -11003,7 +11005,7 @@ async function saveNote(){
  if(!title&&!memo&&!files.length){alert("タイトル、メモ、またはSSを入力してください。");return}
  const button=byId("nmSave");button.disabled=true;button.textContent="保存中…";
  const notes=readNotes(),old=editingId?notes.find(x=>x.id===editingId):null;
- const note={id:old?.id||newId(),title:title||memo.split(/\r?\n/)[0].slice(0,80)||"SS記録",memo,category:"FF14",tags:tagsOf(byId("nmTags").value),time:new Date(byId("nmDate").value||Date.now()).getTime(),createdAt:old?.createdAt||Date.now(),updatedAt:Date.now(),images:[...(old?.images||[])]};
+ const selectedDate=byId("nmDate").value,time=selectedDate?new Date(`${selectedDate}T12:00:00`).getTime():Date.now(),note={id:old?.id||newId(),title:title||memo.split(/\r?\n/)[0].slice(0,80)||"日々の記録",memo,category:"FF14",tags:tagsOf(byId("nmTags").value),time,createdAt:old?.createdAt||Date.now(),updatedAt:Date.now(),images:[...(old?.images||[])]};
  try{
   for(const file of files){
    const blob=await shrinkImage(file),imageId=newId();
