@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>ヒカチョク</title>
-<meta content="20261103-hikachoku-achievement-history-v137" name="eorzea-archive-build"/>
+<meta content="20261103-hikachoku-collection-sync-v138" name="eorzea-archive-build"/>
 <style data-feature="hikachoku-notion-canvas-compact">
 .hikachoku-theme .kb-blocks{min-height:0!important;padding:10px 4px!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .hikachoku-theme .kb-block{grid-template-columns:22px minmax(0,1fr) 26px!important;gap:3px!important;margin:0!important;padding:0 2px!important;min-height:32px!important;align-items:center!important}
@@ -1211,12 +1211,13 @@ body.knowledge-workspace .app-shell{grid-template-columns:minmax(0,1fr)}body.kno
 <div class="section-kicker">OFFICIAL PROFILE SYNC</div>
 <div class="row">
 <div><h2>🪪 Lodestoneプロフィール</h2></div>
-<div class="wrap"><button class="primary" id="ffProfileSync">公開プロフィールを同期</button><button class="secondary" id="ffProfileOpen">Lodestoneを開く</button></div>
+<div class="wrap"><button class="primary" id="ffProfileSync">公開プロフィールを同期</button><button class="secondary" id="ffOverviewCollectionSync">収集状況を同期</button><button class="secondary" id="ffProfileOpen">Lodestoneを開く</button></div>
 </div>
 <div class="ff-profile-controls">
 <div><label>Lodestone ID / キャラクターURL</label><input id="ffLodestoneId" placeholder="例：12345678 または https://jp.finalfantasyxiv.com/lodestone/character/12345678/"/></div>
 <div><label>同期状態</label><div class="card ff-profile-sync-state" id="ffProfileSyncStatus" style="margin:0">未登録</div></div>
 </div>
+<div class="small" id="ffOverviewCollectionStatus" style="margin-top:6px">収集状況：未同期</div>
 <div id="ffProfileCard" style="margin-top:12px"></div>
 </section>
 </section>
@@ -6641,13 +6642,15 @@ document.querySelectorAll(".fcTriadJump").forEach(btn=>btn.onclick=()=>{
 });
 
 async function syncFFXIVCollectOwnership(){
- const btn=$("ffxivCollectOwnershipSync"),st=$("ffxivCollectOwnershipStatus");
+ const btn=$("ffxivCollectOwnershipSync"),overviewBtn=$("ffOverviewCollectionSync"),st=$("ffxivCollectOwnershipStatus"),overviewStatus=$("ffOverviewCollectionStatus");
  const d=load(),p=ffProfileData(d);
  const cid=String(p.lodestoneId||p.characterId||"").trim();
  if(!cid){alert("先にLodestone IDを登録してください。");return}
 
  if(btn)btn.disabled=true;
+ if(overviewBtn)overviewBtn.disabled=true;
  if(st)st.innerHTML="<b>同期中…</b> 所持状況を確認しています。";
+ if(overviewStatus)overviewStatus.innerHTML="<b>収集状況を同期中…</b>";
 
  // Lodestone公開情報からFFXIV Collectが自動更新できるカテゴリだけを対象にする。
  const supported=[
@@ -6655,7 +6658,9 @@ async function syncFFXIVCollectOwnership(){
   ["mounts","マウント"],
   ["achievements","アチーブメント"],
   ["emotes","エモート"],
-  ["facewear","フェイスアクセ"]
+  ["facewear","フェイスアクセ"],
+  ["cards","トリプルトライアドカード"],
+  ["orchestrions","オーケストリオン譜"]
  ];
 
  let total=0;
@@ -6697,9 +6702,12 @@ async function syncFFXIVCollectOwnership(){
  renderFFXIVCollectHub();
  renderFFSummary();
 
- const manual=["ヘアカタログ","オーケストリオン","ポートレート","青魔法","カード"];
- if(st)st.innerHTML=`<b>✓ 所持状況を同期</b>　${total}件<div class="small">${rows.map(esc).join(" ／ ")}</div><div class="small">手動管理：${manual.join("・")}</div>`;
+ const manual=["クエスト","ヘアカタログ","ポートレート","青魔法"];
+ const result=`<b>✓ 所持状況を同期</b>　${total}件<div class="small">${rows.map(esc).join(" ／ ")}</div><div class="small">HTML読込または手動管理：${manual.join("・")}</div>`;
+ if(st)st.innerHTML=result;
+ if(overviewStatus)overviewStatus.innerHTML=result;
  if(btn)btn.disabled=false;
+ if(overviewBtn)overviewBtn.disabled=false;
 }
 
 async function syncFFXIVCollectCatalogs(){
@@ -10256,6 +10264,7 @@ if($("minionCollectOpen"))$("minionCollectOpen").onclick=()=>{
 if($("ffxivCollectCatalogSync"))$("ffxivCollectCatalogSync").onclick=syncFFXIVCollectCatalogs;
 if($("ffxivCollectJapaneseSync"))$("ffxivCollectJapaneseSync").onclick=syncFFXIVCollectJapaneseDescriptions;
 if($("ffxivCollectOwnershipSync"))$("ffxivCollectOwnershipSync").onclick=syncFFXIVCollectOwnership;
+if($("ffOverviewCollectionSync"))$("ffOverviewCollectionSync").onclick=syncFFXIVCollectOwnership;
 if($("fcExplorerKind"))$("fcExplorerKind").onchange=renderFCExplorer;$("fcExplorerSort").onchange=renderFCExplorer;
 if($("fcExplorerSearch"))$("fcExplorerSearch").oninput=renderFCExplorer;
 if($("fcExplorerStatus"))$("fcExplorerStatus").onchange=renderFCExplorer;
