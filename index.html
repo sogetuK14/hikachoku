@@ -11364,7 +11364,11 @@ function init(){
  document.querySelectorAll('[data-view="notesMedia"]').forEach(button=>button.addEventListener("click",()=>setTimeout(render,0)));
  render();
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+/* v181: restore the original article editor as the primary interface.
+   The newer HDB shell is intentionally kept in this file for data compatibility,
+   but it must not cover or replace the established article screen. */
+document.body.classList.remove("hdb-active");
+document.getElementById("hdbApp")?.remove();
 })();
 
 </script>
@@ -11422,7 +11426,11 @@ function init(){
  const observer=new MutationObserver(records=>{if(applying)return;for(const record of records){for(const node of record.addedNodes){if(node.nodeType===1){if(node.matches?.("h2,h3"))applyFold(node);applyAll(node)}}}});
  observer.observe(document.querySelector("main")||document.body,{childList:true,subtree:true});
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+/* v181: restore the established article editor as the primary interface.
+   Keep the newer database implementation in this file for data compatibility,
+   but do not let its shell cover or replace the article screen. */
+document.body.classList.remove("hdb-active");
+document.getElementById("hdbApp")?.remove();
 })();
 
 </script>
