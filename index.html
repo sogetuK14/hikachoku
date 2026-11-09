@@ -11385,6 +11385,14 @@ renderAchievementPage=function(){
 <button class="primary" id="fullBackupExport" type="button">完全バックアップを書き出す</button>
 <p class="small" id="fullBackupStatus" role="status" aria-live="polite">生成後にZIPの内容を検証します。端末へのダウンロード完了は自動確認できません。今回のZIPを既存のJSON復元へ読み込まないでください。</p>
 </section>
+<section class="card" id="capacityDiagnosticCard"><h3 data-no-fold>バックアップ容量の診断</h3>
+<p class="small">保存領域を読み取り、元データとバックアップ変換後の容量を調べます。本文・画像・個人情報は表示・送信せず、保存・整理・修復は行いません。診断中は他タブも含め編集を控えてください。</p>
+<div class="wrap"><button class="secondary" id="capacityDiagnose" type="button">容量を診断する</button><button class="secondary" id="capacityDiagnosticCancel" type="button" disabled>診断を中止</button><button class="secondary" id="capacityDiagnosticCopy" type="button" disabled>診断結果をコピー</button></div>
+<p class="small" id="capacityDiagnosticCopyStatus" role="status"></p>
+<div class="small" id="capacityDiagnosticSummary" role="status" aria-live="polite">件数・Blob容量は読取値、JSON容量は計算値、変換後容量と制限判定は現在のデータからの推定です。実ディスク占有量とは異なります。</div>
+<div id="capacityDiagnosticTable" style="overflow:auto"></div>
+<pre id="capacityDiagnosticResult" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:55vh;overflow:auto" aria-label="容量診断結果"></pre>
+</section>
 <section class="card"><h3 data-no-fold>通常のJSONバックアップ</h3><p class="small">既存のJSON書き出しを利用します。別保存のSS・メモや画像本体は含まれません。</p><button class="secondary" id="fullBackupOrdinaryJSON" type="button">通常JSONを書き出す</button></section>
 </dialog>
 </body>
@@ -11644,5 +11652,6 @@ scheduleCraftLogRefresh(50);
 })();
 </script>
 <script src="assets/js/full-backup.js"></script>
+<script src="assets/js/capacity-diagnostic.js"></script>
 </html>
 
