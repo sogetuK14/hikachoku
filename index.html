@@ -11589,7 +11589,9 @@ const JOBS={"木工師":"木工","鍛冶師":"鍛冶","甲冑師":"甲冑","彫�
 let craftPageNo=1;
 function currentCraftPage(){
  const p=typeof page==="function"?page():null;
- const title=String(p?.title||document.querySelector("#kbTitle")?.value||document.querySelector(".kb-editor-title")?.textContent||document.querySelector("h1")?.textContent||"").trim();
+ const visible=[...document.querySelectorAll("#kbTitle,.kb-editor-title,h1")].find(el=>el.offsetParent!==null);
+ const visibleTitle=visible?("value" in visible?visible.value:visible.textContent):"";
+ const title=String(visibleTitle||p?.title||"").trim();
  const m=title.match(/(木工師|鍛冶師|甲冑師|彫金師|革細工師|裁縫師|錬金術師|調理師)\s*制作手帳/);
  return m?{job:m[1],craft:JOBS[m[1]],title}:null;
 }
@@ -11608,9 +11610,10 @@ function renderCraftLogRows(){
  document.getElementById("craftLogPrev").disabled=craftPageNo<=1;document.getElementById("craftLogNext").disabled=craftPageNo>=pages;
 }
 function renderCraftLogPanel(){
- const info=currentCraftPage(),old=document.getElementById("craftLogPanel");if(!info){old?.remove();return}if(old){renderCraftLogRows();return}
+ const info=currentCraftPage(),old=document.getElementById("craftLogPanel");if(!info){old?.remove();return}if(old&&old.dataset.craftJob===info.job)return;if(old)old.remove();
  const host=document.getElementById("kbEditor")||document.querySelector("main")||document.body;
  const panel=document.createElement("section");panel.id="craftLogPanel";panel.className="craft-log-panel";
+ panel.dataset.craftJob=info.job;
  panel.innerHTML=`<div class="craft-log-head"><h2>🧰 ${info.job} 制作手帳</h2><span id="craftLogCount"></span></div><div class="craft-log-tools"><input id="craftLogSearch" placeholder="制作物名を検索"><select id="craftLogLevel"><option value="all">すべてのレベル</option>${[1,11,21,31,41,51,61,71,81,91].map(n=>`<option value="${n}">Lv.${n}～${n===91?100:n+9}</option>`).join("")}</select><select id="craftLogSpecial"><option value="all">すべて</option><option value="normal">通常レシピ</option><option value="secret">秘伝書</option><option value="expert">高難易度</option><option value="specialist">専門</option></select></div><div id="craftLogList" class="craft-log-list"></div><div class="craft-log-pager"><button id="craftLogPrev" type="button">前へ</button><span id="craftLogPage"></span><button id="craftLogNext" type="button">次へ</button></div>`;
  const ach=document.getElementById("kbLinkedAchievements")||document.querySelector(".linked-achievements,.achievement-panel");const toolbar=document.getElementById("kbToolbar");host.insertBefore(panel,ach||toolbar||host.firstChild);
  panel.querySelectorAll("input,select").forEach(el=>el.addEventListener(el.tagName==="INPUT"?"input":"change",()=>{craftPageNo=1;renderCraftLogRows()}));
@@ -11619,7 +11622,13 @@ function renderCraftLogPanel(){
  renderCraftLogRows();
 }
 if(typeof renderEditor==="function"){const base=renderEditor;renderEditor=function(){const out=base.apply(this,arguments);queueMicrotask(renderCraftLogPanel);return out}}
-document.addEventListener("DOMContentLoaded",()=>setTimeout(renderCraftLogPanel,0));
+let craftRefreshQueued=false;
+function scheduleCraftLogRefresh(delay=0){setTimeout(()=>{if(craftRefreshQueued)return;craftRefreshQueued=true;requestAnimationFrame(()=>{craftRefreshQueued=false;renderCraftLogPanel()})},delay)}
+new MutationObserver(()=>scheduleCraftLogRefresh()).observe(document.documentElement,{childList:true,subtree:true});
+document.addEventListener("click",()=>{scheduleCraftLogRefresh();scheduleCraftLogRefresh(80)},true);
+document.addEventListener("input",e=>{if(e.target?.matches?.("#kbTitle,.kb-editor-title"))scheduleCraftLogRefresh()},true);
+document.addEventListener("DOMContentLoaded",()=>scheduleCraftLogRefresh());
+scheduleCraftLogRefresh(50);
 })();
 </script>
 </html>
