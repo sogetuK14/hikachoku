@@ -11580,5 +11580,47 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 })();
 
 </script>
+<style id="craft-log-page-style">
+.craft-log-panel{margin:14px 0;padding:16px;border:1px solid #bfd3dd;border-radius:12px;background:#f7fbfd}.craft-log-head,.craft-log-tools,.craft-log-row{display:flex;align-items:center;gap:10px}.craft-log-head{justify-content:space-between;margin-bottom:12px}.craft-log-head h2{margin:0;font-size:1.35rem}.craft-log-tools{display:grid;grid-template-columns:minmax(220px,1fr) 170px 170px;gap:8px;margin-bottom:10px}.craft-log-tools input,.craft-log-tools select{width:100%;min-width:0}.craft-log-list{border-top:1px solid #d3e1e7}.craft-log-row{padding:9px 6px;border-bottom:1px solid #d3e1e7;flex-wrap:wrap}.craft-log-name{flex:1 1 360px;font-weight:700}.craft-log-meta{color:#607986;font-size:.88rem}.craft-log-materials{flex-basis:100%;display:none;padding:8px 0 2px 28px}.craft-log-pager{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding-top:10px}.craft-log-empty{padding:18px;text-align:center;color:#607986}.craft-related-label{margin:18px 0 8px;font-size:1.15rem}@media(max-width:760px){.craft-log-tools{grid-template-columns:1fr}.craft-log-row{align-items:flex-start}.craft-log-materials{padding-left:0}}
+</style>
+<script id="craft-log-page-patch">
+(()=>{
+const JOBS={"木工師":"木工","鍛冶師":"鍛冶","甲冑師":"甲冑","彫金師":"彫金","革細工師":"革細工","裁縫師":"裁縫","錬金術師":"錬金","調理師":"調理"};
+let craftPageNo=1;
+function currentCraftPage(){
+ const p=typeof page==="function"?page():null;
+ const title=String(p?.title||document.querySelector("#kbTitle")?.value||document.querySelector(".kb-editor-title")?.textContent||document.querySelector("h1")?.textContent||"").trim();
+ const m=title.match(/(木工師|鍛冶師|甲冑師|彫金師|革細工師|裁縫師|錬金術師|調理師)\s*制作手帳/);
+ return m?{job:m[1],craft:JOBS[m[1]],title}:null;
+}
+function levelBand(v){if(v==="all")return null;const a=Number(v),b=a===91?100:a+9;return [a,b]}
+function recipeSpecial(r,v){if(v==="all")return true;if(v==="secret")return Number(r.secret||0)>0;if(v==="expert")return !!r.expert;if(v==="specialist")return !!r.specialist;return !Number(r.secret||0)&&!r.expert&&!r.specialist}
+function renderCraftLogRows(){
+ const info=currentCraftPage(),panel=document.getElementById("craftLogPanel"); if(!info||!panel)return;
+ const q=(document.getElementById("craftLogSearch")?.value||"").trim().toLowerCase(),band=levelBand(document.getElementById("craftLogLevel")?.value||"all"),special=document.getElementById("craftLogSpecial")?.value||"all";
+ const all=(typeof CRAFT_RECIPE_DATA!=="undefined"?CRAFT_RECIPE_DATA:[]).filter(r=>r.craft===info.craft&&(!q||String(r.name||"").toLowerCase().includes(q))&&(!band||(Number(r.level)>=band[0]&&Number(r.level)<=band[1]))&&recipeSpecial(r,special));
+ const size=80,pages=Math.max(1,Math.ceil(all.length/size)); craftPageNo=Math.min(craftPageNo,pages); const rows=all.slice((craftPageNo-1)*size,craftPageNo*size);
+ const list=document.getElementById("craftLogList");
+ list.innerHTML=rows.length?rows.map(r=>`<div class="craft-log-row"><div class="craft-log-name">${typeof esc==="function"?esc(r.name):r.name}<div class="craft-log-meta">Lv.${Number(r.level)||0}${r.stars?` ／ ★${r.stars}`:""}${r.secret?` ／ 秘伝書${r.secret}`:""}${r.expert?" ／ 高難易度":""}${r.specialist?" ／ 専門":""}</div></div><button type="button" class="btn small craft-material-btn" data-id="${r.id}" data-name="${typeof esc==="function"?esc(r.name):r.name}">必要素材</button><div class="craft-log-materials" id="craftMaterialBox_${r.id}"></div></div>`).join(""):`<div class="craft-log-empty">該当するレシピはありません。</div>`;
+ list.querySelectorAll(".craft-material-btn").forEach(b=>b.onclick=()=>{const box=document.getElementById(`craftMaterialBox_${b.dataset.id}`);if(box&&!box.style.display)box.style.display="none";if(typeof openCraftMaterials==="function")openCraftMaterials(b)});
+ document.getElementById("craftLogCount").textContent=`${all.length.toLocaleString()}件`;
+ document.getElementById("craftLogPage").textContent=`${craftPageNo} / ${pages}`;
+ document.getElementById("craftLogPrev").disabled=craftPageNo<=1;document.getElementById("craftLogNext").disabled=craftPageNo>=pages;
+}
+function renderCraftLogPanel(){
+ const info=currentCraftPage(),old=document.getElementById("craftLogPanel");if(!info){old?.remove();return}if(old){renderCraftLogRows();return}
+ const host=document.getElementById("kbEditor")||document.querySelector("main")||document.body;
+ const panel=document.createElement("section");panel.id="craftLogPanel";panel.className="craft-log-panel";
+ panel.innerHTML=`<div class="craft-log-head"><h2>🧰 ${info.job} 制作手帳</h2><span id="craftLogCount"></span></div><div class="craft-log-tools"><input id="craftLogSearch" placeholder="制作物名を検索"><select id="craftLogLevel"><option value="all">すべてのレベル</option>${[1,11,21,31,41,51,61,71,81,91].map(n=>`<option value="${n}">Lv.${n}～${n===91?100:n+9}</option>`).join("")}</select><select id="craftLogSpecial"><option value="all">すべて</option><option value="normal">通常レシピ</option><option value="secret">秘伝書</option><option value="expert">高難易度</option><option value="specialist">専門</option></select></div><div id="craftLogList" class="craft-log-list"></div><div class="craft-log-pager"><button id="craftLogPrev" type="button">前へ</button><span id="craftLogPage"></span><button id="craftLogNext" type="button">次へ</button></div>`;
+ const ach=document.getElementById("kbLinkedAchievements")||document.querySelector(".linked-achievements,.achievement-panel");const toolbar=document.getElementById("kbToolbar");host.insertBefore(panel,ach||toolbar||host.firstChild);
+ panel.querySelectorAll("input,select").forEach(el=>el.addEventListener(el.tagName==="INPUT"?"input":"change",()=>{craftPageNo=1;renderCraftLogRows()}));
+ panel.querySelector("#craftLogPrev").onclick=()=>{craftPageNo--;renderCraftLogRows()};panel.querySelector("#craftLogNext").onclick=()=>{craftPageNo++;renderCraftLogRows()};
+ if(ach&&!document.getElementById("craftRelatedLabel")){const h=document.createElement("h2");h.id="craftRelatedLabel";h.className="craft-related-label";h.textContent="🏆 関連アチーブメント";ach.parentNode.insertBefore(h,ach)}
+ renderCraftLogRows();
+}
+if(typeof renderEditor==="function"){const base=renderEditor;renderEditor=function(){const out=base.apply(this,arguments);queueMicrotask(renderCraftLogPanel);return out}}
+document.addEventListener("DOMContentLoaded",()=>setTimeout(renderCraftLogPanel,0));
+})();
+</script>
 </html>
 
