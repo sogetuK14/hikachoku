@@ -1150,6 +1150,7 @@ body.knowledge-workspace .app-shell{grid-template-columns:minmax(0,1fr)}body.kno
 <button class="secondary" id="kbTreeToggleTop" type="button">ページ一覧を表示</button>
 <strong id="currentPageTitle">記事・ノート</strong>
 <div class="kb-view-tabs kb-header-tabs"><button class="active" data-kb-view-mode="overview" type="button">🪪 概要</button><button data-kb-view-mode="progress" type="button">📊 進捗一覧</button><button data-kb-view-mode="quests" type="button">📜 クエスト</button><button data-kb-view-mode="achievements" type="button">🏆 アチーブ・記事</button><button data-kb-view-mode="collections" type="button">📚 収集図鑑</button><button data-kb-view-mode="diary" type="button">📷 SS・メモ</button></div>
+<button class="secondary" id="fullBackupOpen" type="button" aria-haspopup="dialog" aria-controls="fullBackupDialog">データ管理・バックアップ</button>
 <span class="small" id="saveStatus" style="margin-left:auto">保存準備中…</span>
 </header>
 <main>
@@ -11375,6 +11376,17 @@ renderAchievementPage=function(){
   try{kbRenderAchievementPageOriginal();}finally{x.achievementId=oldId;x.achievementName=oldName;}
 };
 </script>
+<dialog id="fullBackupDialog" aria-labelledby="fullBackupDialogTitle" style="width:min(760px,94vw);max-height:85vh;overflow:auto;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px">
+<form method="dialog" class="row"><h2 id="fullBackupDialogTitle" data-no-fold>データ管理・バックアップ</h2><button class="secondary" type="submit" aria-label="バックアップ画面を閉じる">閉じる</button></form>
+<section class="card" id="fullBackupCard" style="margin-top:14px">
+<h3 data-no-fold>完全バックアップ</h3>
+<p class="small">本体、記事、進捗、SS・メモ、画像、下書き、画面設定を、保存元ごとに単一ZIPへ書き出します。既存データの変更や復元は行いません。処理中は他の画面・タブでの編集を控えてください。</p>
+<p class="small">単一ファイル64MiB・合計256MiBまで。容量超過や読取失敗の場合は、一部だけを完全バックアップとして出力しません。ZIPには個人データと接続設定が含まれるため、安全な場所に保管してください。</p>
+<button class="primary" id="fullBackupExport" type="button">完全バックアップを書き出す</button>
+<p class="small" id="fullBackupStatus" role="status" aria-live="polite">生成後にZIPの内容を検証します。端末へのダウンロード完了は自動確認できません。今回のZIPを既存のJSON復元へ読み込まないでください。</p>
+</section>
+<section class="card"><h3 data-no-fold>通常のJSONバックアップ</h3><p class="small">既存のJSON書き出しを利用します。別保存のSS・メモや画像本体は含まれません。</p><button class="secondary" id="fullBackupOrdinaryJSON" type="button">通常JSONを書き出す</button></section>
+</dialog>
 </body>
 <script data-bundled-from="assets/js/hikachoku-notes.js">
 (function(){
@@ -11631,5 +11643,6 @@ document.addEventListener("DOMContentLoaded",()=>scheduleCraftLogRefresh());
 scheduleCraftLogRefresh(50);
 })();
 </script>
+<script src="assets/js/full-backup.js"></script>
 </html>
 
