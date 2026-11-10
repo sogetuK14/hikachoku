@@ -11317,6 +11317,45 @@ const notionRenderEditorBefore=renderEditor;
 renderEditor=function(){const result=notionRenderEditorBefore();$k("kbEditor")?.classList.toggle("kb-notion-workspace",Number(page()?.workspaceVersion)>=2);return result};
 const notionStartWikiBefore=startWiki;
 startWiki=function(){notionStartWikiBefore();notionInstallActions()};
+// Own-achievement display lives with the private wiki renderer. It never saves data.
+function kbOwnAchievementOfPage(x){
+ if(!x)return null;
+ const db=typeof ACHIEVEMENT_DB!=="undefined"?ACHIEVEMENT_DB:[],id=x.sourceAchievementId||x.achievementId;
+ return db.find(a=>String(a.id)===String(id))||db.find(a=>a.name===(x.achievementName||x.title))||null;
+}
+function kbOwnAchievementHtml(x){
+ const a=kbOwnAchievementOfPage(x);if(!a)return "";
+ const id=String(a.id),st=load().achievementProgress?.[id]||{},local=x.achievementPageProgress?.[id];
+ const rewards=achievementRewardLabels(a),done=st.done===true,completed=st.date||st.completedAt||"";
+ const numeric=achievementNumericProgress(local&&typeof local==="object"&&!Array.isArray(local)?local:st);
+ const p=numeric.current!==null&&numeric.target!==null?numeric:progressOf(x);
+ const progress=p.percent!==null?`<div class="kb-achievement-progress"><b>${p.current.toLocaleString("ja-JP")} / ${p.target.toLocaleString("ja-JP")} ${safeK(p.unit||"")}</b><span>残り ${p.remaining.toLocaleString("ja-JP")} ／ ${p.percent.toFixed(1)}%</span></div>`:"";
+ return `<details class="kb-own-achievement" data-own-achievement-id="${safeK(id)}" open><summary><span>🏆 アチーブメント詳細</span><span class="badge ${done?"success":"gold"}">${done?"達成済み":"未達成"}</span></summary><div class="kb-own-achievement-body"><div class="kb-own-achievement-title">${safeK(a.name)}</div><div class="kb-own-achievement-meta">📂 ${safeK(achievementBreadcrumb(a))} ／ ${Number(a.points||0)}pt</div>${a.description?`<div class="kb-own-achievement-condition"><b>達成条件</b><p>${safeK(a.description)}</p></div>`:""}${rewards.length?`<div class="kb-own-achievement-facts">${rewards.map(r=>`<span>🎁 ${safeK(r)}</span>`).join("")}</div>`:""}${completed?`<div class="kb-own-achievement-meta">達成日：${safeK(completed)}</div>`:""}${progress}</div></details>`;
+}
+function kbRefreshOwnAchievementDisplay(){
+ const x=page(),target=$k("kbBlocks");if(!target)return;
+ const existing=[...target.querySelectorAll(":scope > .kb-own-achievement")];
+ const html=x?kbOwnAchievementHtml(x):"";
+ if(!html){existing.forEach(node=>node.remove());return}
+ const wrap=document.createElement("div");wrap.innerHTML=html;const next=wrap.firstElementChild;
+ if(existing[0]){next.open=existing[0].open;existing[0].replaceWith(next);existing.slice(1).forEach(node=>node.remove())}else target.prepend(next);
+}
+const kbOwnDisplayBlocksBase=renderBlocks;
+renderBlocks=function(){const result=kbOwnDisplayBlocksBase.apply(this,arguments);kbRefreshOwnAchievementDisplay();return result};
+const kbOwnDisplayLinkedBase=renderLinkedAchievements;
+renderLinkedAchievements=function(){
+ const result=kbOwnDisplayLinkedBase.apply(this,arguments),own=kbOwnAchievementOfPage(page()),panel=$k("kbLinkedAchievements");
+ if(own&&panel)panel.querySelectorAll("[data-linked-add]").forEach(input=>{if(String(input.dataset.linkedAdd)===String(own.id))input.closest(".kb-linked-row")?.remove()});
+ kbRefreshOwnAchievementDisplay();return result;
+};
+const kbOwnDisplayProgressBase=renderProgress;
+renderProgress=function(){const result=kbOwnDisplayProgressBase.apply(this,arguments);kbRefreshOwnAchievementDisplay();return result};
+// One read-only refresh listener; existing handlers continue to own all editing and saving.
+const kbOwnDisplayRoot=$k("kbBlocks");
+if(kbOwnDisplayRoot&&!kbOwnDisplayRoot.dataset.ownAchievementDisplayBound){
+ kbOwnDisplayRoot.dataset.ownAchievementDisplayBound="1";
+ kbOwnDisplayRoot.addEventListener("change",()=>queueMicrotask(kbRefreshOwnAchievementDisplay));
+}
 // Guard the fully assembled editor before any rendering extension runs.
 const kbRenderAllSafetyBase=renderAll;
 renderAll=function(){try{kbCheckDocument(load())}catch(error){kbSafetyWarning(error);const editor=$k("kbEditor");if(editor)editor.hidden=true;return;}return kbRenderAllSafetyBase.apply(this,arguments)};
@@ -11432,44 +11471,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 .kb-own-achievement-condition p{margin:4px 0}.kb-own-achievement-facts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
 .kb-own-achievement-facts span{padding:4px 8px;border-radius:999px;background:#edf4f7}
 </style>
-<script>
-function kbOwnAchievementOfPage(x){
-  if(!x)return null;
-  const db=typeof ACHIEVEMENT_DB!=="undefined"?ACHIEVEMENT_DB:[];
-  const id=x.sourceAchievementId||x.achievementId;
-  return db.find(a=>String(a.id)===String(id))||db.find(a=>a.name===(x.achievementName||x.title))||null;
-}
-function kbOwnAchievementHtml(x){
-  const a=kbOwnAchievementOfPage(x);if(!a)return "";
-  const st=load().achievementProgress?.[String(a.id)]||{};
-  const rewards=achievementRewardLabels(a),done=st.done===true||x.status==="complete";
-  const completed=st.completedAt||x.completedAt||"";
-  const p=progressOf(x),progress=p.percent!==null?`<div class="kb-achievement-progress"><b>${p.current.toLocaleString("ja-JP")} / ${p.target.toLocaleString("ja-JP")} ${safeK(p.unit||"")}</b><span>残り ${p.remaining.toLocaleString("ja-JP")} ／ ${p.percent.toFixed(1)}%</span></div>`:"";
-  return `<details class="kb-own-achievement" open><summary><span>🏆 アチーブメント詳細</span><span class="badge ${done?"success":"gold"}">${done?"達成済み":"未達成"}</span></summary><div class="kb-own-achievement-body"><div class="kb-own-achievement-title">${safeK(a.name)}</div><div class="kb-own-achievement-meta">📂 ${safeK(achievementBreadcrumb(a))} ／ ${Number(a.points||0)}pt</div>${a.description?`<div class="kb-own-achievement-condition"><b>達成条件</b><p>${safeK(a.description)}</p></div>`:""}${rewards.length?`<div class="kb-own-achievement-facts">${rewards.map(r=>`<span>🎁 ${safeK(r)}</span>`).join("")}</div>`:""}${completed?`<div class="kb-own-achievement-meta">達成日：${safeK(completed)}</div>`:""}${progress}</div></details>`;
-}
-const kbRenderBlocksOriginal=renderBlocks;
-renderBlocks=function(){
-  kbRenderBlocksOriginal();
-  const x=page(),target=$k("kbBlocks");if(!x||!target)return;
-  const html=kbOwnAchievementHtml(x);if(!html)return;
-  const wrap=document.createElement("div");wrap.innerHTML=html;target.prepend(wrap.firstElementChild);
-};
-const kbRenderLinkedOriginal=renderLinkedAchievements;
-renderLinkedAchievements=function(){
-  const x=page();if(!x)return kbRenderLinkedOriginal();
-  const source=x.sourceAchievementId;x.sourceAchievementId="";
-  try{kbRenderLinkedOriginal();}finally{x.sourceAchievementId=source;}
-  const own=kbOwnAchievementOfPage(x);if(!own)return;
-  document.querySelectorAll(`[data-linked-add="${CSS.escape(String(own.id))}"]`).forEach(el=>el.closest(".kb-linked-row")?.remove());
-};
-const kbRenderAchievementPageOriginal=renderAchievementPage;
-renderAchievementPage=function(){
-  const x=page();if(!x)return kbRenderAchievementPageOriginal();
-  const a=kbOwnAchievementOfPage(x),oldId=x.achievementId,oldName=x.achievementName;
-  if(a){x.achievementId=a.id;x.achievementName=a.name;}
-  try{kbRenderAchievementPageOriginal();}finally{x.achievementId=oldId;x.achievementName=oldName;}
-};
-</script>
+
 <dialog id="fullBackupDialog" aria-labelledby="fullBackupDialogTitle" style="width:min(760px,94vw);max-height:85vh;overflow:auto;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px">
 <form method="dialog" class="row"><h2 id="fullBackupDialogTitle" data-no-fold>データ管理・バックアップ</h2><button class="secondary" type="submit" aria-label="バックアップ画面を閉じる">閉じる</button></form>
 <section class="card" id="fullBackupCard" style="margin-top:14px">
