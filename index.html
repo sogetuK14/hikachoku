@@ -11381,10 +11381,11 @@ renderAchievementPage=function(){
 <section class="card" id="fullBackupCard" style="margin-top:14px">
 <h3 data-no-fold>完全バックアップ</h3>
 <p class="small">本体、記事、進捗、SS・メモ、画像、下書き、画面設定を、保存元ごとに単一ZIPへ書き出します。既存データの変更や復元は行いません。処理中は他の画面・タブでの編集を控えてください。</p>
-<p class="small">単一ファイル64MiB・合計256MiBまで。容量超過や読取失敗の場合は、一部だけを完全バックアップとして出力しません。ZIPには個人データと接続設定が含まれるため、安全な場所に保管してください。</p>
+<p class="small">形式v2：データを約1MiBずつ分割し、単一ZIPにまとめます。単一ファイル64MiB・合計256MiBの安全上限は維持し、単一ソースの読取メモリー見積は192MiBまでです。容量超過や読取失敗の場合は、一部だけを完全バックアップとして出力しません。ZIPには個人データと接続設定が含まれるため、安全な場所に保管してください。</p>
 <button class="primary" id="fullBackupExport" type="button">完全バックアップを書き出す</button>
 <p class="small" id="fullBackupStatus" role="status" aria-live="polite">生成後にZIPの内容を検証します。端末へのダウンロード完了は自動確認できません。今回のZIPを既存のJSON復元へ読み込まないでください。</p>
 </section>
+<p class="small">容量診断は旧形式v1への換算値です。新しいv2 ZIPの実容量は、生成後のファイルで確認してください。復元機能は未実装です。</p>
 <section class="card" id="capacityDiagnosticCard"><h3 data-no-fold>バックアップ容量の診断</h3>
 <p class="small">保存領域を読み取り、元データとバックアップ変換後の容量を調べます。本文・画像・個人情報は表示・送信せず、保存・整理・修復は行いません。診断中は他タブも含め編集を控えてください。</p>
 <div class="wrap"><button class="secondary" id="capacityDiagnose" type="button">容量を診断する</button><button class="secondary" id="capacityDiagnosticCancel" type="button" disabled>診断を中止</button><button class="secondary" id="capacityDiagnosticCopy" type="button" disabled>診断結果をコピー</button></div>
