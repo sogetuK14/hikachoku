@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src https://ffxivcollect.com; img-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>保存しないアチーブメント同期プレビュー — ヒカチョク</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;background:#f4f8fa;color:#243b48;line-height:1.65}main{max-width:1000px;margin:24px auto;padding:24px;background:white;border:1px solid #c6d5dd;border-radius:10px}h1{font-size:1.5rem}label{display:block;font-weight:bold}input,button{font:inherit;padding:9px 12px;border:1px solid #839da9;border-radius:5px}input{max-width:100%;box-sizing:border-box;width:340px}button{background:#eff6fa;cursor:pointer}button:disabled{cursor:default;opacity:.6}button:focus-visible,input:focus-visible{outline:3px solid #1680b8;outline-offset:3px}.wrap{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0}.notice{background:#fff8dd;border-left:4px solid #dba522;padding:12px}.small{font-size:.9rem}#achievementPreviewStatus{font-weight:bold}#achievementPreviewResult{overflow:auto}table{border-collapse:collapse}th,td{text-align:left;vertical-align:top;border:1px solid #c6d5dd;padding:8px;overflow-wrap:anywhere}th{background:#edf5f9}[hidden]{display:none!important}@media(max-width:700px){main{margin:0;padding:16px;border-radius:0}table{font-size:.85rem}}
+</style>
+</head>
+<body>
+<main id="achievementPreviewDialog" data-standalone="true" data-catalog-version="2026-11-08">
+<h1 id="achievementPreviewTitle">保存しないアチーブメント同期プレビュー</h1>
+<p class="notice">このページは専用URLから直接開いてください。本体のエディタ・自動保存処理は読み込みません。本体で編集中・保存待ち・保存失敗中の場合は、先に本体側の状態を確認してください。このページは編集内容の保存・復元・終了を代行しません。</p>
+<p>FFXIV Collectの公開情報をゲームIDで照合します。比較対象は保存済みのキャラクター未割当レガシー記録です。編集中の内容は読み取りません。localStorageとIndexedDBが一致しない場合は比較を保留します。</p>
+<p class="small">入力したLodestone IDと通信元IP等はFFXIV Collectに伝わります。本文・メモ・既存記録は送信しません。強制更新や自動再試行は行いません。入力ID・結果・表示設定は保存せず、ページを離れると破棄します。</p>
+<label for="achievementPreviewCharacterId">対象のLodestoneキャラクターID（数字）</label>
+<input id="achievementPreviewCharacterId" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="Lodestoneの数字IDを入力">
+<div class="wrap"><button id="achievementPreviewStart" type="button">保存せずプレビュー</button><button id="achievementPreviewCancel" type="button" disabled>取得を中止</button><button id="achievementPreviewClear" type="button">結果を破棄</button><button id="achievementPreviewClose" type="button">入力IDと結果を破棄</button></div>
+<p id="achievementPreviewStatus" role="status" aria-live="polite">取得結果はこの画面内だけで扱います。30秒以内の連続取得は行えません。</p>
+<div id="achievementPreviewResult"></div>
+<div class="wrap" id="achievementPreviewPagination" hidden><button id="achievementPreviewPrevious" type="button">前へ</button><span id="achievementPreviewPage"></span><button id="achievementPreviewNext" type="button">次へ</button></div>
+<p class="small">非公式サービス経由の観測結果です。取得できない情報を未達成と判定せず、既存記録を変更しません。© SQUARE ENIX</p>
+</main>
+<script src="assets/js/data/achievement_db.js"></script>
+<script src="assets/js/achievement-preview-reader.js"></script>
+<script src="assets/js/achievement-sync-preview.js"></script>
+</body>
+</html>
