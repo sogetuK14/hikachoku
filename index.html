@@ -11450,6 +11450,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 </style>
 <script id="kb-craft-journal-block-script">
 (()=>{
+  if(typeof blockHtml==="undefined"||typeof renderBlocks==="undefined")return;
   const type="craftJournal";
   const jobs=["すべて","木工師","鍛冶師","甲冑師","彫金師","革細工師","裁縫師","錬金術師","調理師"];
   const bands=["すべて","1-10","11-20","21-30","31-40","41-50","51-60","61-70","71-80","81-90","91-100","秘伝書"];
