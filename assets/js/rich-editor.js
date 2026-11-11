@@ -3,7 +3,7 @@
 
 const ALLOWED_TAGS=new Set("A B BLOCKQUOTE BR CODE DEL DETAILS DIV EM FIGCAPTION FIGURE H2 H3 HR I IMG LI MARK OL P S SECTION SMALL SPAN STRONG SUMMARY U UL".split(" "));
 const DROP_TAGS=new Set(["SCRIPT","STYLE","IFRAME","OBJECT","EMBED","FORM","INPUT","BUTTON","SELECT","TEXTAREA","META","LINK"]);
-const ALLOWED_ATTRS=new Set(["class","href","target","rel","src","alt","title","style","open","data-kind","data-block-id","data-x-hidden","data-rich-role","data-checkable-toggle","data-auto-toggle-depth","data-check-depth","data-media-id","data-media-size","data-rich-video-url"]);
+const ALLOWED_ATTRS=new Set(["class","href","target","rel","src","alt","title","style","open","data-kind","data-block-id","data-x-hidden","data-rich-role","data-checkable-toggle","data-auto-toggle-depth","data-check-depth","data-media-id","data-media-size","data-rich-video-url","data-achievement-id","data-progress-current","data-progress-target","data-progress-unit"]);
 const SAFE_CLASSES=/^(?:(?:sm-rich-[\w-]+|sm-special|kp-special|kp-special-(?:head|title|body)|kind-chip|image-grid|cols-[1-4]|kp-marker|kb-rich-(?:official-link|video))(?:\s|$))+$/;
 
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
